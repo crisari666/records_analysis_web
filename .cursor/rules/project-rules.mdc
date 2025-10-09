@@ -1,0 +1,113 @@
+---
+alwaysApply: true
+---
+
+# 🧭 Project Architecture & Rules
+
+## 🧱 1. Overview
+
+This project uses **React + TypeScript + Vite + Material UI + Redux Toolkit + React Router DOM**.
+
+Architecture is based on a **Feature-First Layered Structure**.  
+Each feature is self-contained and manages its own components, pages, services, types, and store slice.
+
+Key principle:  
+- **Keep files small and focused.**  
+- **Pages never connect directly to Redux.**
+
+---
+
+## 📁 2. Folder Structure
+
+src/
+│
+├── app/
+│ ├── store.ts
+│ ├── hooks.ts
+│ └── router.tsx
+│
+├── features/
+│ ├── feature-name/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ ├── services/
+│ │ ├── store/
+│ │ └── types/
+│
+├── shared/
+│ ├── components/
+│ ├── hooks/
+│ ├── utils/
+│ └── constants/
+│
+├── theme/
+│ └── index.ts
+│
+├── main.tsx
+└── index.html
+
+## ⚙️ 3. Layer Responsibilities
+
+### Pages
+- Contain **only UI and local state**.
+- Never connect to Redux directly.
+- Use small, composable components.
+- Handle layout, rendering, and user interactions.
+
+### Components
+- Contain **only UI logic**.
+- No Redux or API logic.
+- Must be **small, reusable, and focused**.
+- Each component should live in its own folder.
+
+### Services
+- Handle **HTTP requests** and backend communication.
+- Contain only **data-fetching logic**.
+- Must return **typed data**.
+- No UI or state management inside services.
+
+### Store (Redux Slice)
+- One slice per feature.
+- Manage **global state** relevant to that feature.
+- Keep reducers pure and predictable.
+- Export **actions and selectors** only.
+
+### Router
+- All routes defined in `app/router.tsx`.
+- Pages are imported from their feature folders.
+- No logic should exist inside route definitions.
+
+---
+
+## 🧩 4. Coding Guidelines
+
+| Category | Rule |
+|-----------|------|
+| **Architecture** | Follow feature-first structure. |
+| **Components** | Use `PascalCase` naming. |
+| **Hooks / Utils** | Use `camelCase` naming. |
+| **Exports** | Prefer named exports; only slices or store may use default. |
+| **Imports** | Use aliases (`@/features/...`) for cleaner imports. |
+| **Redux** | Avoid direct connections in pages; use hooks instead. |
+| **File Size** | Split files exceeding ~150 lines. |
+| **Responsibility** | One component = one purpose. |
+| **Styling** | Use Material UI theme consistently. |
+| **Cross-Feature Imports** | Only via re-export from index files. |
+| **Testing** | Focus on logic (hooks, reducers, services), not styling. |
+
+---
+
+## 🧰 5. Summary
+
+✅ Feature-based architecture  
+✅ Small, modular components  
+✅ Pages → local state only  
+✅ Services → API logic only  
+✅ Store → global state only  
+✅ Centralized router  
+✅ Consistent Material UI usage  
+✅ No large, mixed-responsibility files  
+
+---
+
+> 🏗️ Following these conventions ensures scalability, readability, and minimal re-renders in large React applications.
