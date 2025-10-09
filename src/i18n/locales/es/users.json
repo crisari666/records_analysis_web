@@ -1,0 +1,19 @@
+{
+  "title": "Gestión de Usuarios",
+  "subtitle": "Gestiona los usuarios de tu aplicación y sus permisos",
+  "addUser": "Agregar Usuario",
+  "confirmDelete": "¿Estás seguro de que quieres eliminar este usuario?",
+  "table": {
+    "name": "Nombre",
+    "email": "Correo",
+    "role": "Rol",
+    "status": "Estado",
+    "createdAt": "Fecha de Creación",
+    "actions": "Acciones"
+  },
+  "status": {
+    "active": "Activo",
+    "inactive": "Inactivo"
+  },
+  "noUsers": "No se encontraron usuarios"
+}

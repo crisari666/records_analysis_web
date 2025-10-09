@@ -83,6 +83,7 @@ src/
 - Never connect to Redux directly.
 - Use small, composable components.
 - Handle layout, rendering, and user interactions.
+- Dont use state in page files, create small component and connect there to state or redux stat
 
 ### Components
 - Contain **only UI logic**.

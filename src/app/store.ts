@@ -3,11 +3,12 @@ import { setupListeners } from "@reduxjs/toolkit/query"
 import { counterSlice } from "../features/counter/counterSlice"
 import { quotesApiSlice } from "../features/quotes/quotesApiSlice"
 import { authSlice } from "../features/auth/store/authSlice"
+import { usersSlice } from "../features/users/store/usersSlice"
 import { setUnauthorizedCallback } from "./http"
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
-export const rootReducer = combineSlices(counterSlice, quotesApiSlice, authSlice)
+export const rootReducer = combineSlices(counterSlice, quotesApiSlice, authSlice, usersSlice)
 
 export type RootState = ReturnType<typeof rootReducer>
 
