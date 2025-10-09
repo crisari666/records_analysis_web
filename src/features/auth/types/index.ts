@@ -1,12 +1,19 @@
 export type User = {
   id: string;
-  email: string;
   name: string;
+  lastName: string;
+  user: string;
+  email: string;
 };
 
 export type LoginCredentials = {
   identifier: string;
   password: string;
+};
+
+export type LoginResponse = {
+  access_token: string;
+  user: User;
 };
 
 export type LoginIdentifierType = 'email' | 'username' | 'phone';

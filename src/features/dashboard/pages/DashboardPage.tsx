@@ -10,7 +10,7 @@ import {
   Toolbar,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { logoutAsync, getCurrentUserAsync } from '../../auth/store/authSlice';
+// import { logoutAsync, getCurrentUserAsync } from '../../auth/store/authSlice';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 
 export const DashboardPage = () => {
@@ -21,12 +21,12 @@ export const DashboardPage = () => {
 
   useEffect(() => {
     if (!user) {
-      dispatch(getCurrentUserAsync());
+      // dispatch(getCurrentUserAsync());
     }
   }, [dispatch, user]);
 
   const handleLogout = async () => {
-    await dispatch(logoutAsync());
+    // await dispatch(logoutAsync());
     await navigate('/');
   };
 

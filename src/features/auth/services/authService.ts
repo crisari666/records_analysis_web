@@ -1,4 +1,4 @@
-import { LoginCredentials, User } from '../types';
+import { LoginCredentials, LoginResponse, User } from '../types';
 import Api from '../../../app/http';
 
 const api = Api.getInstance();
@@ -7,10 +7,19 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<{ user: User; token: string }> {
     // The identifier can be email, username, or phone number
     // The backend should handle determining the type and authenticating accordingly
-    return await api.post({
+    const response: LoginResponse = await api.post({
       path: '/auth/login',
       data: credentials,
     });
+    
+    // Store token in localStorage
+    localStorage.setItem('auth_token', response.access_token);
+    localStorage.setItem('user', JSON.stringify(response.user));
+    
+    return {
+      user: response.user,
+      token: response.access_token,
+    };
   },
 
   async logout(): Promise<void> {

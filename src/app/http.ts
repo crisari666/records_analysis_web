@@ -3,7 +3,7 @@ import axios from 'axios'
 import { store } from './store'
 //import { logout } from '../features/auth/redux/auth-slice'
 
-const urlApi = process.env.REACT_APP_API_URL
+const urlApi = import.meta.env.VITE_BASE_URL_USERS_MS
 console.log({urlApi})
 
 const apiAxios = axios.create({
@@ -117,15 +117,16 @@ export default class Api {
   private handleUnauthorizedError(error: AxiosError): void {
     if (error.response?.status === 401) {
       const data: any = error.response?.data
-      if (data?.error === 'Unauthorized' || data?.message === 'No token provided') {
-        // Clear token from localStorage
+      if (data?.error === 'Unauthorized' || data?.message === 'No token provided' || data?.message === 'Invalid credentials') {
+        // Clear token and user from localStorage
         localStorage.removeItem('auth_token')
+        localStorage.removeItem('user')
         
         // Dispatch logout action
-        //store.dispatch(logout())
+        store.dispatch({ type: 'auth/logout' })
         
-        // Redirect to signin page
-        //window.location.href = '/'
+        // Redirect to login page
+        window.location.href = '/'
       }
     }
   }
