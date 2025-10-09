@@ -12,9 +12,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import {
-  // loginAsync, 
-  clearError } from '../store/authSlice';
+import {loginAsync, clearError } from '../store/authSlice';
 import { LanguageSwitcher } from '../../../shared/components/LanguageSwitcher';
 
 export const LoginPage = () => {
@@ -29,10 +27,10 @@ export const LoginPage = () => {
     e.preventDefault();
     dispatch(clearError());
     
-    // const result = await dispatch(loginAsync({ identifier, password }));
-    // if (loginAsync.fulfilled.match(result)) {
-    //   navigate('/dashboard');
-    // }
+    const result = await dispatch(loginAsync({ identifier, password }));
+    if (loginAsync.fulfilled.match(result)) {
+      navigate('/dashboard');
+    }
   };
 
   return (
