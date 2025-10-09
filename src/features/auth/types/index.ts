@@ -23,5 +23,5 @@ export type AuthState = {
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  error: string | null;
+  error: string | null | boolean;
 };

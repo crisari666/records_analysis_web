@@ -1,7 +1,5 @@
 import type { AxiosError, AxiosResponse } from 'axios'
 import axios from 'axios'
-import { store } from './store'
-//import { logout } from '../features/auth/redux/auth-slice'
 
 const urlApi = import.meta.env.VITE_BASE_URL_USERS_MS
 console.log({urlApi})
@@ -12,6 +10,13 @@ const apiAxios = axios.create({
     'Content-type': 'application/json',
   },
 })
+
+// Callback to handle unauthorized errors without circular dependency
+let unauthorizedCallback: (() => void) | null = null
+
+export const setUnauthorizedCallback = (callback: () => void) => {
+  unauthorizedCallback = callback
+}
 
 export default class Api {
   private static instance: Api
@@ -122,8 +127,10 @@ export default class Api {
         localStorage.removeItem('auth_token')
         localStorage.removeItem('user')
         
-        // Dispatch logout action
-        store.dispatch({ type: 'auth/logout' })
+        // Use callback to handle logout if available
+        if (unauthorizedCallback) {
+          unauthorizedCallback()
+        }
         
         // Redirect to login page
         window.location.href = '/'

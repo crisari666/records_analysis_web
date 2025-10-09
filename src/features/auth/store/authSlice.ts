@@ -1,8 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAppSlice } from '../../../app/createAppSlice';
-import type { AppThunk } from '../../../app/types';
 import { AuthState, LoginCredentials, User } from '../types';
-import { authService } from '../services/authService';
+import { login, logout as logoutService, getCurrentUser } from '../services/authService';
 
 const initialState: AuthState = {
   user: null,
@@ -32,19 +31,7 @@ export const authSlice = createAppSlice({
       localStorage.removeItem('user');
     }),
     loginAsync: create.asyncThunk(
-      async (credentials: LoginCredentials, { rejectWithValue }) => {
-        try {
-          const response = await authService.login(credentials);
-          return response;
-        } catch (error: any) {
-          // Handle API error responses
-          const errorMessage = error?.response?.data?.message || 
-                              error?.response?.data?.error || 
-                              error?.message || 
-                              'Login failed';
-          return rejectWithValue(errorMessage);
-        }
-      },
+      async (credentials: LoginCredentials) => await login(credentials),
       {
         pending: state => {
           state.isLoading = true;
@@ -57,71 +44,58 @@ export const authSlice = createAppSlice({
           state.isAuthenticated = true;
           state.error = null;
         },
-        rejected: (state, action) => {
+        rejected: (state) => {
           state.isLoading = false;
-          state.error = action.payload as string;
+          state.error = true;
           state.isAuthenticated = false;
           state.user = null;
           state.token = null;
         },
       }
     ),
-    // logoutAsync: create.asyncThunk(
-    //   async (_, { rejectWithValue }) => {
-    //     try {
-    //       await authService.logout();
-    //     } catch (error) {
-    //       return rejectWithValue(error instanceof Error ? error.message : 'Logout failed');
-    //     }
-    //   },
-    //   {
-    //     pending: state => {
-    //       state.isLoading = true;
-    //     },
-    //     fulfilled: state => {
-    //       state.isLoading = false;
-    //       state.user = null;
-    //       state.token = null;
-    //       state.isAuthenticated = false;
-    //       state.error = null;
-    //     },
-    //     rejected: (state, action) => {
-    //       state.isLoading = false;
-    //       state.error = action.payload as string;
-    //     },
-    //   }
-    // ),
-    // getCurrentUserAsync: create.asyncThunk(
-    //   async (_, { rejectWithValue }) => {
-    //     try {
-    //       const user = await authService.getCurrentUser();
-    //       if (!user) {
-    //         throw new Error('No user found');
-    //       }
-    //       return user;
-    //     } catch (error) {
-    //       return rejectWithValue(error instanceof Error ? error.message : 'Failed to get current user');
-    //     }
-    //   },
-    //   {
-    //     pending: state => {
-    //       state.isLoading = true;
-    //     },
-    //     fulfilled: (state, action) => {
-    //       state.isLoading = false;
-    //       state.user = action.payload;
-    //       state.isAuthenticated = true;
-    //       state.error = null;
-    //     },
-    //     rejected: (state, action) => {
-    //       state.isLoading = false;
-    //       state.error = action.payload as string;
-    //       state.isAuthenticated = false;
-    //       state.user = null;
-    //       state.token = null;
-    //     },
-    //   }
-    // ),
+    logoutAsync: create.asyncThunk(
+      async () => await logoutService(),
+      {
+        pending: state => {
+          state.isLoading = true;
+        },
+        fulfilled: state => {
+          state.isLoading = false;
+          state.user = null;
+          state.token = null;
+          state.isAuthenticated = false;
+          state.error = null;
+        },
+        rejected: state => {
+          state.isLoading = false;
+          state.error = true;
+          state.isAuthenticated = false;
+          state.user = null;
+          state.token = null;
+        },
+      }
+    ),
+    getCurrentUserAsync: create.asyncThunk(
+      async () => await getCurrentUser(),
+      {
+        pending: state => {
+          state.isLoading = true;
+        },
+        fulfilled: (state, action) => {
+          state.isLoading = false;
+          state.user = action.payload;
+          state.isAuthenticated = true;
+          state.error = null;
+        },
+        rejected: state => {
+          state.isLoading = false;
+          state.error = true;
+          state.isAuthenticated = false;
+          state.user = null;
+          state.token = null;
+        },
+      }
+    ),
   }),
   selectors: {
     selectUser: auth => auth.user,
@@ -133,20 +107,10 @@ export const authSlice = createAppSlice({
 });
 
 // Action creators are generated for each case reducer function.
-export const { clearError, setUser, logout, loginAsync } = authSlice.actions;
+export const { clearError, setUser, logout, loginAsync, logoutAsync, getCurrentUserAsync } = authSlice.actions;
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.
 export const { selectUser, selectToken, selectIsAuthenticated, selectIsLoading, selectError } = authSlice.selectors;
 
 // We can also write thunks by hand, which may contain both sync and async logic.
 // Here's an example of conditionally dispatching actions based on current state.
-// export const loginIfNotAuthenticated =
-//   (credentials: LoginCredentials): AppThunk =>
-//   (dispatch, getState) => {
-//     const isAuthenticated = selectIsAuthenticated(getState());
-
-//     if (!isAuthenticated) {
-//       dispatch(loginAsync(credentials));
-//     }
-//   };
-
