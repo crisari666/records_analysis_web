@@ -15,7 +15,37 @@ Key principle:
 - **Keep files small and focused.**  
 - **Pages never connect directly to Redux.**
 
----
+### Core Principles
+- Keep each file **small and focused**.  
+- **Pages never connect directly to Redux.**  
+- Use **custom hooks** for business logic.  
+- **Services** handle backend requests.  
+- Maintain **separation of concerns** between UI, state, and data layers.
+- **Use Material UI exclusively** for all styling, layout, and design.
+- ❌ **Do not create custom CSS, SCSS, or styled-components.**
+
+## 🌐 Internationalization (i18n)
+
+- **All user-facing text must come from i18n** — never hardcode strings in components.
+- Store translations under `/src/i18n/locales/`.
+- Use translation keys such as `t('feature_name.key')`.
+- Every new feature must include its own localized translation keys under its scope.
+- Ensure that every visible text element supports multiple languages.
+
+## ⚙️ Services & API Layer
+
+- All backend communication must go through the centralized `http.ts` file.
+- The `http.ts` file defines the main HTTP methods: **GET**, **POST**, **PATCH**, and **DELETE**.
+- This file is preconfigured with:
+  - The **base URL** of the backend.
+  - Common **middleware** such as authentication headers, interceptors, and error handling.
+  - Support for dynamic **request parameters** and **main params**.
+
+- **Never** use Axios or Fetch directly inside components or services.
+- Each feature must define its own `service.ts` file (e.g. `featureService.ts`) that imports and uses the `http.ts` methods.
+- The UI components must **never call the backend directly**.
+- Keep any environment variables, tokens, and constants in `/src/config/`.
+- Centralize all API endpoints in a dedicated constants file (e.g. `apiEndpoints.ts`) to avoid duplication and inconsistencies.
 
 ## 📁 2. Folder Structure
 
@@ -70,6 +100,7 @@ src/
 - One slice per feature.
 - Manage **global state** relevant to that feature.
 - Keep reducers pure and predictable.
+- Create the redux state type in their own files for avoid large redux files
 - Export **actions and selectors** only.
 
 ### Router
@@ -91,9 +122,10 @@ src/
 | **Redux** | Avoid direct connections in pages; use hooks instead. |
 | **File Size** | Split files exceeding ~150 lines. |
 | **Responsibility** | One component = one purpose. |
-| **Styling** | Use Material UI theme consistently. |
+| **Styling** | Use Material UI theme consistently. dont create new css use alwas the component from material UI |
 | **Cross-Feature Imports** | Only via re-export from index files. |
 | **Testing** | Focus on logic (hooks, reducers, services), not styling. |
+| **Interface, Types** | create types instead interface when is possible. |
 
 ---
 

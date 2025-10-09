@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "title": "Panel de Control",
+    "welcome": "¡Bienvenido al Panel de Control!",
+    "hello": "¡Hola, {{name}}!",
+    "logout": "Cerrar Sesión",
+    "loading": "Cargando..."
+  }
+}

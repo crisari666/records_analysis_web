@@ -1,7 +1,7 @@
-import { AxiosError, AxiosResponse } from 'axios'
+import type { AxiosError, AxiosResponse } from 'axios'
 import axios from 'axios'
 import { store } from './store'
-import { logout } from '../features/auth/redux/auth-slice'
+//import { logout } from '../features/auth/redux/auth-slice'
 
 const urlApi = process.env.REACT_APP_API_URL
 console.log({urlApi})
@@ -122,7 +122,7 @@ export default class Api {
         localStorage.removeItem('auth_token')
         
         // Dispatch logout action
-        store.dispatch(logout())
+        //store.dispatch(logout())
         
         // Redirect to signin page
         //window.location.href = '/'

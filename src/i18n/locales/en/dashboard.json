@@ -1,0 +1,9 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to the Dashboard!",
+    "hello": "Hello, {{name}}!",
+    "logout": "Logout",
+    "loading": "Loading..."
+  }
+}
