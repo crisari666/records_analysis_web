@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { styled, useTheme, Theme, CSSObject } from '@mui/material/styles'
 import {
   Box,
-  Drawer,
-  AppBar,
+  Drawer as MuiDrawer,
+  AppBar as MuiAppBar,
+  AppBarProps as MuiAppBarProps,
   Toolbar,
   List,
   Typography,
@@ -15,19 +17,104 @@ import {
   ListItemIcon,
   ListItemText,
   Button,
+  CssBaseline,
 } from '@mui/material'
 import {
   Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
   Home as HomeIcon,
   Group as GroupIcon,
+  PhoneAndroid as PhoneAndroidIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { authSlice } from '../../features/auth/store/authSlice'
 import { LanguageSwitcher } from './LanguageSwitcher'
 
-const DRAWER_WIDTH = 240
+const drawerWidth = 240
+
+const openedMixin = (theme: Theme): CSSObject => ({
+  width: drawerWidth,
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.enteringScreen,
+  }),
+  overflowX: 'hidden',
+})
+
+const closedMixin = (theme: Theme): CSSObject => ({
+  transition: theme.transitions.create('width', {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  overflowX: 'hidden',
+  width: `calc(${theme.spacing(7)} + 1px)`,
+  [theme.breakpoints.up('sm')]: {
+    width: `calc(${theme.spacing(8)} + 1px)`,
+  },
+})
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  padding: theme.spacing(0, 1),
+  // necessary for content to be below app bar
+  ...theme.mixins.toolbar,
+}))
+
+interface AppBarProps extends MuiAppBarProps {
+  open?: boolean
+}
+
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})<AppBarProps>(({ theme }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(['width', 'margin'], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  variants: [
+    {
+      props: ({ open }) => open,
+      style: {
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        transition: theme.transitions.create(['width', 'margin'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
+      },
+    },
+  ],
+}))
+
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
+  ({ theme }) => ({
+    width: drawerWidth,
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+    boxSizing: 'border-box',
+    variants: [
+      {
+        props: ({ open }) => open,
+        style: {
+          ...openedMixin(theme),
+          '& .MuiDrawer-paper': openedMixin(theme),
+        },
+      },
+      {
+        props: ({ open }) => !open,
+        style: {
+          ...closedMixin(theme),
+          '& .MuiDrawer-paper': closedMixin(theme),
+        },
+      },
+    ],
+  }),
+)
 
 type NavigationItem = {
   text: string
@@ -41,12 +128,13 @@ type AppDrawerProps = {
 }
 
 export const AppDrawer = ({ children }: AppDrawerProps) => {
+  const theme = useTheme()
   const { t } = useTranslation('dashboard')
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
-  const [isOpen, setIsOpen] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const navigationItems: NavigationItem[] = [
     { 
@@ -61,14 +149,20 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
       path: '/dashboard/users',
       translationKey: 'navigation.users'
     },
+    { 
+      text: t('navigation.devices'), 
+      icon: <PhoneAndroidIcon />, 
+      path: '/dashboard/devices',
+      translationKey: 'navigation.devices'
+    },
   ]
 
   const handleDrawerOpen = () => {
-    setIsOpen(true)
+    setOpen(true)
   }
 
   const handleDrawerClose = () => {
-    setIsOpen(false)
+    setOpen(false)
   }
 
   const handleNavigate = (path: string) => {
@@ -89,28 +183,52 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
 
   const renderNavigationItems = () => {
     return navigationItems.map((item) => (
-      <ListItem key={item.path} disablePadding>
+      <ListItem key={item.path} disablePadding sx={{ display: 'block' }}>
         <ListItemButton
           selected={isActiveRoute(item.path)}
           onClick={() => handleNavigate(item.path)}
-          sx={{
-            minHeight: 48,
-            justifyContent: isOpen ? 'initial' : 'center',
-            px: 2.5,
-          }}
+          sx={[
+            {
+              minHeight: 48,
+              px: 2.5,
+            },
+            open
+              ? {
+                  justifyContent: 'initial',
+                }
+              : {
+                  justifyContent: 'center',
+                },
+          ]}
         >
           <ListItemIcon
-            sx={{
-              minWidth: 0,
-              mr: isOpen ? 3 : 'auto',
-              justifyContent: 'center',
-            }}
+            sx={[
+              {
+                minWidth: 0,
+                justifyContent: 'center',
+              },
+              open
+                ? {
+                    mr: 3,
+                  }
+                : {
+                    mr: 'auto',
+                  },
+            ]}
           >
             {item.icon}
           </ListItemIcon>
           <ListItemText
             primary={item.text}
-            sx={{ opacity: isOpen ? 1 : 0 }}
+            sx={[
+              open
+                ? {
+                    opacity: 1,
+                  }
+                : {
+                    opacity: 0,
+                  },
+            ]}
           />
         </ListItemButton>
       </ListItem>
@@ -119,28 +237,20 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar 
-        position="fixed" 
-        sx={{ 
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-          marginLeft: isOpen ? DRAWER_WIDTH : 0,
-          width: isOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
-          transition: (theme) => theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-        }}
-      >
+      <CssBaseline />
+      <AppBar position="fixed" open={open}>
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
-            sx={{
-              marginRight: 5,
-              ...(isOpen && { display: 'none' }),
-            }}
+            sx={[
+              {
+                marginRight: 5,
+              },
+              open && { display: 'none' },
+            ]}
           >
             <MenuIcon />
           </IconButton>
@@ -159,62 +269,17 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
           </Button>
         </Toolbar>
       </AppBar>
-      
-      <Drawer
-        variant="permanent"
-        open={isOpen}
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          whiteSpace: 'nowrap',
-          boxSizing: 'border-box',
-          '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
-            transition: (theme) => theme.transitions.create('width', {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-            overflowX: 'hidden',
-            ...(!isOpen && {
-              width: `calc(${DRAWER_WIDTH}px - 200px)`,
-              transition: (theme) => theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.leavingScreen,
-              }),
-            }),
-          },
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            padding: (theme) => theme.spacing(0, 1),
-            ...(isOpen && { minHeight: 64 }),
-          }}
-        >
+      <Drawer variant="permanent" open={open}>
+        <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
-            <ChevronLeftIcon />
+            {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
           </IconButton>
-        </Box>
+        </DrawerHeader>
         <Divider />
         <List>{renderNavigationItems()}</List>
       </Drawer>
-      
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: isOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
-          transition: (theme) => theme.transitions.create(['width', 'margin'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-        }}
-      >
-        <Toolbar />
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <DrawerHeader />
         {children}
       </Box>
     </Box>
