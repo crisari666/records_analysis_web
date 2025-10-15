@@ -5,6 +5,7 @@ const API_ENDPOINTS = {
   CALLER_DEVICES: '/caller-devices',
   CALLER_DEVICE_BY_ID: (id: string) => `/caller-devices/${id}`,
   CALLER_DEVICE_BY_IMEI: (imei: string) => `/caller-devices/imei/${imei}`,
+  CALLER_DEVICE_PROJECT: (id: string) => `/caller-devices/${id}/project`,
 } as const;
 
 const api = new Api();
@@ -43,5 +44,23 @@ export const devicesService = {
   // Soft delete a caller device
   async deleteDevice(id: string): Promise<void> {
     await api.delete({ path: API_ENDPOINTS.CALLER_DEVICE_BY_ID(id) });
+  },
+
+  // Set project for a caller device
+  async setDeviceProject(id: string, projectId: string): Promise<CallerDevice> {
+    const response = await api.patch({ 
+      path: API_ENDPOINTS.CALLER_DEVICE_PROJECT(id), 
+      data: { project: projectId } 
+    });
+    return response;
+  },
+
+  // Remove project from a caller device
+  async removeDeviceProject(id: string): Promise<CallerDevice> {
+    const response = await api.patch({ 
+      path: API_ENDPOINTS.CALLER_DEVICE_PROJECT(id), 
+      data: { project: null } 
+    });
+    return response;
   },
 };

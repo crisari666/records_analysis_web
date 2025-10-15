@@ -123,6 +123,55 @@ export const devicesSlice = createAppSlice({
         },
       }
     ),
+    setDeviceProjectAsync: create.asyncThunk(
+      async ({ id, projectId }: { id: string; projectId: string }) => 
+        await devicesService.setDeviceProject(id, projectId),
+      {
+        pending: state => {
+          state.loading = true;
+          state.error = null;
+        },
+        fulfilled: (state, action) => {
+          state.loading = false;
+          const index = state.devices.findIndex(device => device._id === action.payload._id);
+          if (index !== -1) {
+            state.devices[index] = action.payload;
+          }
+          if (state.selectedDevice?._id === action.payload._id) {
+            state.selectedDevice = action.payload;
+          }
+          state.error = null;
+        },
+        rejected: (state, action) => {
+          state.loading = false;
+          state.error = action.error.message || 'Failed to set device project';
+        },
+      }
+    ),
+    removeDeviceProjectAsync: create.asyncThunk(
+      async (id: string) => await devicesService.removeDeviceProject(id),
+      {
+        pending: state => {
+          state.loading = true;
+          state.error = null;
+        },
+        fulfilled: (state, action) => {
+          state.loading = false;
+          const index = state.devices.findIndex(device => device._id === action.payload._id);
+          if (index !== -1) {
+            state.devices[index] = action.payload;
+          }
+          if (state.selectedDevice?._id === action.payload._id) {
+            state.selectedDevice = action.payload;
+          }
+          state.error = null;
+        },
+        rejected: (state, action) => {
+          state.loading = false;
+          state.error = action.error.message || 'Failed to remove device project';
+        },
+      }
+    ),
   }),
   selectors: {
     selectDevices: devices => devices.devices,
@@ -140,7 +189,9 @@ export const {
   createDeviceAsync, 
   updateDeviceAsync, 
   deleteDeviceAsync, 
-  fetchDeviceByIdAsync 
+  fetchDeviceByIdAsync,
+  setDeviceProjectAsync,
+  removeDeviceProjectAsync
 } = devicesSlice.actions;
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.

@@ -18,6 +18,7 @@ import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../../../app/hooks';
 import { selectDevices, selectLoading, selectError } from '../store/devicesSlice';
+import { ProjectSelector } from './ProjectSelector';
 import type { CallerDevice } from '../types';
 
 type DevicesListProps = {
@@ -69,6 +70,7 @@ export const DevicesList: React.FC<DevicesListProps> = ({ onEditDevice, onDelete
             <TableCell>{t('brand')}</TableCell>
             <TableCell>{t('model')}</TableCell>
             <TableCell>{t('deviceTitle')}</TableCell>
+            <TableCell>{t('project')}</TableCell>
             <TableCell>{t('createdAt')}</TableCell>
             <TableCell align="center">{t('actions')}</TableCell>
           </TableRow>
@@ -86,6 +88,9 @@ export const DevicesList: React.FC<DevicesListProps> = ({ onEditDevice, onDelete
               </TableCell>
               <TableCell>{device.model}</TableCell>
               <TableCell>{device.title}</TableCell>
+              <TableCell>
+                <ProjectSelector device={device} />
+              </TableCell>
               <TableCell>
                 <Typography variant="body2" color="text.secondary">
                   {new Date(device.createdAt).toLocaleDateString()}
