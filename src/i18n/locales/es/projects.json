@@ -22,5 +22,13 @@
   "confirm_delete": "¿Estás seguro de que quieres eliminar este proyecto?",
   "devices_count": "Dispositivos: {{count}}",
   "created_at": "Creado: {{date}}",
-  "updated_at": "Actualizado: {{date}}"
+  "updated_at": "Actualizado: {{date}}",
+  "manage_devices": "Gestionar Dispositivos",
+  "select_devices": "Seleccionar Dispositivos",
+  "search_devices": "Buscar dispositivos...",
+  "select_devices_description": "Selecciona dispositivos para asignar a este proyecto. Solo están disponibles los dispositivos sin proyecto.",
+  "no_available_devices": "No hay dispositivos disponibles",
+  "no_available_devices_info": "Todos los dispositivos ya están asignados a proyectos.",
+  "save_devices": "Guardar Dispositivos",
+  "devices_updated": "Dispositivos del proyecto actualizados exitosamente"
 }

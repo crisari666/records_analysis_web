@@ -16,17 +16,16 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Settings as SettingsIcon,
+  Devices as DevicesIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { 
   fetchProjects, 
-  deleteProject, 
-  selectProjects, 
-  selectStatus, 
-  selectError 
+  deleteProject
 } from '../store/projectsSlice';
 import { ProjectFormModal } from './ProjectFormModal';
+import { ProjectDevicesModal } from './ProjectDevicesModal';
 import { Project } from '../types';
 
 export const ListProjects: React.FC = () => {
@@ -38,6 +37,8 @@ export const ListProjects: React.FC = () => {
 
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [devicesModalOpen, setDevicesModalOpen] = useState(false);
+  const [selectedProjectForDevices, setSelectedProjectForDevices] = useState<Project | null>(null);
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -57,6 +58,16 @@ export const ListProjects: React.FC = () => {
   const handleCloseModal = () => {
     setModalOpen(false);
     setEditingProject(null);
+  };
+
+  const handleManageDevices = (project: Project) => {
+    setSelectedProjectForDevices(project);
+    setDevicesModalOpen(true);
+  };
+
+  const handleCloseDevicesModal = () => {
+    setDevicesModalOpen(false);
+    setSelectedProjectForDevices(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -142,6 +153,14 @@ export const ListProjects: React.FC = () => {
                 </Button>
                 <Button
                   size="small"
+                  startIcon={<DevicesIcon />}
+                  onClick={() => handleManageDevices(project)}
+                  color="primary"
+                >
+                  {t('manage_devices')}
+                </Button>
+                <Button
+                  size="small"
                   color="error"
                   startIcon={<DeleteIcon />}
                   onClick={() => handleDeleteProject(project._id)}
@@ -158,6 +177,12 @@ export const ListProjects: React.FC = () => {
         open={modalOpen}
         onClose={handleCloseModal}
         project={editingProject}
+      />
+
+      <ProjectDevicesModal
+        open={devicesModalOpen}
+        onClose={handleCloseDevicesModal}
+        project={selectedProjectForDevices}
       />
     </Box>
   );

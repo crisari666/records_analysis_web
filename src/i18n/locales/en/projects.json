@@ -22,5 +22,13 @@
   "confirm_delete": "Are you sure you want to delete this project?",
   "devices_count": "Devices: {{count}}",
   "created_at": "Created: {{date}}",
-  "updated_at": "Updated: {{date}}"
+  "updated_at": "Updated: {{date}}",
+  "manage_devices": "Manage Devices",
+  "select_devices": "Select Devices",
+  "search_devices": "Search devices...",
+  "select_devices_description": "Select devices to assign to this project. Only devices without projects are available.",
+  "no_available_devices": "No available devices",
+  "no_available_devices_info": "All devices are already assigned to projects.",
+  "save_devices": "Save Devices",
+  "devices_updated": "Project devices updated successfully"
 }

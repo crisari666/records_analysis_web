@@ -4,6 +4,7 @@ export type CallerDevice = {
   brand: string;
   model: string;
   title: string;
+  project?: string
   createdAt: string;
   updatedAt: string;
   deleted?: boolean;
