@@ -206,15 +206,6 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ device, onProj
                   ...params.InputProps,
                 },
               }}
-              // InputProps={{
-              //   ...params.InputProps,
-              //   endAdornment: (
-              //     <>
-              //       {updating && <CircularProgress color="inherit" size={20} />}
-              //       {params.InputProps.endAdornment}
-              //     </>
-              //   ),
-              // }}
             />
           )}
           renderOption={(props, option) => (
