@@ -1,0 +1,37 @@
+{
+  "title": "Transcription Records",
+  "description": "Manage and analyze call transcriptions",
+  "callerId": "Caller ID",
+  "type": "Type",
+  "transcription": "Transcription",
+  "analysisStatus": "Analysis Status",
+  "amount": "Amount",
+  "reason": "Reason",
+  "createdAt": "Created At",
+  "actions": "Actions",
+  "callType": {
+    "incoming": "Incoming",
+    "outgoing": "Outgoing"
+  },
+  "analysisStatusOptions": {
+    "pending": "Pending",
+    "analyzed": "Analyzed",
+    "success": "Success",
+    "failed": "Failed"
+  },
+  "noRecords": "No records found",
+  "analyzeRecord": "Analyze Record",
+  "playRecord": "Play Record",
+  "allTypes": "All Types",
+  "allStatuses": "All Statuses",
+  "limit": "Limit",
+  "searchTranscription": "Search Transcription",
+  "searchPlaceholder": "Search in transcriptions...",
+  "search": "Search",
+  "applyFilters": "Apply Filters",
+  "clearFilters": "Clear Filters",
+  "analyzeLatest": "Analyze Latest",
+  "navigation": {
+    "records": "Records"
+  }
+}

@@ -4,6 +4,8 @@ import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { DashboardContent } from '../features/dashboard/components/DashboardContent';
 import { UsersListPage } from '../features/users/pages/UsersListPage';
 import { DevicesPage } from '../features/devices/pages/DevicesPage';
+import { RecordsPage } from '../features/records/pages/RecordsPage';
+import { ProjectsPage } from '../features/projects/pages/ProjectsPage';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -30,6 +32,14 @@ export const router = createBrowserRouter([
       {
         path: 'devices',
         element: <DevicesPage />,
+      },
+      {
+        path: 'records',
+        element: <RecordsPage />,
+      },
+      {
+        path: 'projects',
+        element: <ProjectsPage />,
       },
     ],
   },

@@ -1,0 +1,37 @@
+{
+  "title": "Registros de Transcripción",
+  "description": "Gestionar y analizar transcripciones de llamadas",
+  "callerId": "ID del Llamador",
+  "type": "Tipo",
+  "transcription": "Transcripción",
+  "analysisStatus": "Estado del Análisis",
+  "amount": "Cantidad",
+  "reason": "Razón",
+  "createdAt": "Fecha de Creación",
+  "actions": "Acciones",
+  "callType": {
+    "incoming": "Entrante",
+    "outgoing": "Saliente"
+  },
+  "analysisStatusOptions": {
+    "pending": "Pendiente",
+    "analyzed": "Analizado",
+    "success": "Éxito",
+    "failed": "Fallido"
+  },
+  "noRecords": "No se encontraron registros",
+  "analyzeRecord": "Analizar Registro",
+  "playRecord": "Reproducir Registro",
+  "allTypes": "Todos los Tipos",
+  "allStatuses": "Todos los Estados",
+  "limit": "Límite",
+  "searchTranscription": "Buscar Transcripción",
+  "searchPlaceholder": "Buscar en transcripciones...",
+  "search": "Buscar",
+  "applyFilters": "Aplicar Filtros",
+  "clearFilters": "Limpiar Filtros",
+  "analyzeLatest": "Analizar Últimos",
+  "navigation": {
+    "records": "Registros"
+  }
+}

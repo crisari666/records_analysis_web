@@ -44,7 +44,7 @@ export default class Api {
     }
   }
 
-  async post({ path, data, isFormData = false }: { path: string; data: any, isFormData?: boolean}) {
+  async post({ path, data, isFormData = false }: { path: string; data?: any, isFormData?: boolean}) {
     try {
       const token = await this.getToken()
       const headers = this.buildHeaders(token, isFormData)

@@ -16,7 +16,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Button,
   CssBaseline,
 } from '@mui/material'
 import {
@@ -26,6 +25,8 @@ import {
   Home as HomeIcon,
   Group as GroupIcon,
   PhoneAndroid as PhoneAndroidIcon,
+  RecordVoiceOver as RecordVoiceOverIcon,
+  Folder as FolderIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
@@ -155,6 +156,18 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
       path: '/dashboard/devices',
       translationKey: 'navigation.devices'
     },
+    { 
+      text: t('navigation.records'), 
+      icon: <RecordVoiceOverIcon />, 
+      path: '/dashboard/records',
+      translationKey: 'navigation.records'
+    },
+    { 
+      text: t('navigation.projects'), 
+      icon: <FolderIcon />, 
+      path: '/dashboard/projects',
+      translationKey: 'navigation.projects'
+    },
   ]
 
   const handleDrawerOpen = () => {
@@ -263,10 +276,6 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
               {t('welcome', { name: user.name })}
             </Typography>
           )}
-          <Button color="inherit" onClick={handleLogout}>
-            <LogoutIcon sx={{ mr: 1 }} />
-            {t('logout')}
-          </Button>
         </Toolbar>
       </AppBar>
       <Drawer variant="permanent" open={open}>
@@ -277,6 +286,57 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
         </DrawerHeader>
         <Divider />
         <List>{renderNavigationItems()}</List>
+        <Divider />
+        <List>
+          <ListItem disablePadding sx={{ display: 'block' }}>
+            <ListItemButton
+              onClick={handleLogout}
+              sx={[
+                {
+                  minHeight: 48,
+                  px: 2.5,
+                },
+                open
+                  ? {
+                      justifyContent: 'initial',
+                    }
+                  : {
+                      justifyContent: 'center',
+                    },
+              ]}
+            >
+              <ListItemIcon
+                sx={[
+                  {
+                    minWidth: 0,
+                    justifyContent: 'center',
+                  },
+                  open
+                    ? {
+                        mr: 3,
+                      }
+                    : {
+                        mr: 'auto',
+                      },
+                ]}
+              >
+                <LogoutIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={t('logout')}
+                sx={[
+                  open
+                    ? {
+                        opacity: 1,
+                      }
+                    : {
+                        opacity: 0,
+                      },
+                ]}
+              />
+            </ListItemButton>
+          </ListItem>
+        </List>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <DrawerHeader />
