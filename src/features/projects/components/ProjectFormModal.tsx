@@ -15,8 +15,6 @@ import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { 
   createProject, 
   updateProject, 
-  selectStatus, 
-  selectError,
   clearError 
 } from '../store/projectsSlice';
 import { Project, CreateProjectRequest, UpdateProjectRequest } from '../types';

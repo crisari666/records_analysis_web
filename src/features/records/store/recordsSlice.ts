@@ -177,7 +177,7 @@ const recordsSlice = createAppSlice({
         state.isLoading = true
         state.error = null
       })
-      .addCase(analyzeLatestAsync.fulfilled, (state, action: PayloadAction<AnalysisResult[]>) => {
+      .addCase(analyzeLatestAsync.fulfilled, (state) => {
         state.isLoading = false
         // Note: This would need to be handled differently in a real app
         // as we don't know which specific records were updated

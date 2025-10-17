@@ -1,6 +1,5 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
-import type { AppThunk } from "../../../app/types"
 import { projectsService } from "../services/projectsService"
 import { Project, CreateProjectRequest, UpdateProjectRequest, UpdateProjectDevicesRequest } from "../types"
 
