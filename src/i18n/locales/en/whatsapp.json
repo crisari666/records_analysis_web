@@ -25,6 +25,8 @@
   ,
   "sessionChatsTitle": "Session Chats",
   "noChats": "No chats found",
+  "noMessages": "No messages yet",
+  "selectChatPrompt": "Select a chat to view messages",
   "breadcrumbs": {
     "sessions": "Sessions",
     "chats": "Chats"

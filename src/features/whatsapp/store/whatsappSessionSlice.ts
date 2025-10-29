@@ -14,7 +14,8 @@ type WhatsappSessionState = {
   messages: Message[]
   currentChat: Chat | null
   currentMessage: StoredMessage | null
-  isLoading: boolean
+  isChatsLoading: boolean
+  isMessagesLoading: boolean
   error: string | null
   status: "idle" | "loading" | "failed"
 }
@@ -25,7 +26,8 @@ const initialState: WhatsappSessionState = {
   messages: [],
   currentChat: null,
   currentMessage: null,
-  isLoading: false,
+  isChatsLoading: false,
+  isMessagesLoading: false,
   error: null,
   status: "idle",
 }
@@ -60,15 +62,15 @@ export const whatsappSessionSlice = createAppSlice({
       },
       {
         pending: (state) => {
-          state.isLoading = true
+          state.isChatsLoading = true
           state.error = null
         },
         fulfilled: (state, action: PayloadAction<Chat[]>) => {
-          state.isLoading = false
+          state.isChatsLoading = false
           state.chats = action.payload
         },
         rejected: (state, action) => {
-          state.isLoading = false
+          state.isChatsLoading = false
           state.error = action.error.message || "Failed to fetch chats"
         },
       },
@@ -80,15 +82,15 @@ export const whatsappSessionSlice = createAppSlice({
       },
       {
         pending: (state) => {
-          state.isLoading = true
+          state.isMessagesLoading = true
           state.error = null
         },
         fulfilled: (state, action: PayloadAction<Message[]>) => {
-          state.isLoading = false
+          state.isMessagesLoading = false
           state.messages = action.payload
         },
         rejected: (state, action) => {
-          state.isLoading = false
+          state.isMessagesLoading = false
           state.error = action.error.message || "Failed to fetch chat messages"
         },
       },
@@ -100,15 +102,15 @@ export const whatsappSessionSlice = createAppSlice({
       },
       {
         pending: (state) => {
-          state.isLoading = true
+          state.isMessagesLoading = true
           state.error = null
         },
         fulfilled: (state, action: PayloadAction<StoredMessage>) => {
-          state.isLoading = false
+          state.isMessagesLoading = false
           state.currentMessage = action.payload
         },
         rejected: (state, action) => {
-          state.isLoading = false
+          state.isMessagesLoading = false
           state.error = action.error.message || "Failed to fetch message"
         },
       },
@@ -120,14 +122,14 @@ export const whatsappSessionSlice = createAppSlice({
       },
       {
         pending: (state) => {
-          state.isLoading = true
+          state.isMessagesLoading = true
           state.error = null
         },
         fulfilled: (state) => {
-          state.isLoading = false
+          state.isMessagesLoading = false
         },
         rejected: (state, action) => {
-          state.isLoading = false
+          state.isMessagesLoading = false
           state.error = action.error.message || "Failed to fetch message edit history"
         },
       },
@@ -139,7 +141,8 @@ export const whatsappSessionSlice = createAppSlice({
     selectMessages: (state) => state.messages,
     selectCurrentChat: (state) => state.currentChat,
     selectCurrentMessage: (state) => state.currentMessage,
-    selectIsLoading: (state) => state.isLoading,
+    selectIsChatsLoading: (state) => state.isChatsLoading,
+    selectIsMessagesLoading: (state) => state.isMessagesLoading,
     selectError: (state) => state.error,
     selectStatus: (state) => state.status,
   },
@@ -164,7 +167,8 @@ export const {
   selectMessages,
   selectCurrentChat,
   selectCurrentMessage,
-  selectIsLoading,
+  selectIsChatsLoading,
+  selectIsMessagesLoading,
   selectError,
   selectStatus,
 } = whatsappSessionSlice.selectors
