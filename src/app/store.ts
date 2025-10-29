@@ -7,11 +7,12 @@ import { usersSlice } from "../features/users/store/usersSlice"
 import { devicesSlice } from "../features/devices/store/devicesSlice"
 import { recordsSlice } from "../features/records/store/recordsSlice"
 import { projectsSlice } from "../features/projects/store/projectsSlice"
+import { whatsappSlice } from "../features/whatsapp/store/whatsappSlice"
 import { setUnauthorizedCallback } from "./http"
 
 // `combineSlices` automatically combines the reducers using
 // their `reducerPath`s, therefore we no longer need to call `combineReducers`.
-export const rootReducer = combineSlices(counterSlice, quotesApiSlice, authSlice, usersSlice, devicesSlice, recordsSlice, projectsSlice)
+export const rootReducer = combineSlices(counterSlice, quotesApiSlice, authSlice, usersSlice, devicesSlice, recordsSlice, projectsSlice, whatsappSlice)
 
 export type RootState = ReturnType<typeof rootReducer>
 

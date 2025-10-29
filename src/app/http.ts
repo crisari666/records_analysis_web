@@ -104,7 +104,7 @@ export default class Api {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token')
+    return localStorage.getItem('auth_token_records')
   }
 
   private buildHeaders(token: string | null, isFormData: boolean = false): Record<string, string> {
@@ -124,7 +124,7 @@ export default class Api {
       const data: any = error.response?.data
       if (data?.error === 'Unauthorized' || data?.message === 'No token provided' || data?.message === 'Invalid credentials') {
         // Clear token and user from localStorage
-        localStorage.removeItem('auth_token')
+        localStorage.removeItem('auth_token_records')
         localStorage.removeItem('user')
         
         // Use callback to handle logout if available

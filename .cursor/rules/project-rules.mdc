@@ -83,7 +83,7 @@ src/
 - Never connect to Redux directly.
 - Use small, composable components.
 - Handle layout, rendering, and user interactions.
-- Dont use state in page files, create small component and connect there to state or redux stat
+- Dont use state or redux connections in *Page.ts files, create small component and connect there to state or redux stat
 
 ### Components
 - Contain **only UI logic**.
@@ -134,7 +134,7 @@ src/
 
 ✅ Feature-based architecture  
 ✅ Small, modular components  
-✅ Pages → local state only  
+✅ Pages → Without state  
 ✅ Services → API logic only  
 ✅ Store → global state only  
 ✅ Centralized router  

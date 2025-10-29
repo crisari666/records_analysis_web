@@ -27,6 +27,7 @@ import {
   PhoneAndroid as PhoneAndroidIcon,
   RecordVoiceOver as RecordVoiceOverIcon,
   Folder as FolderIcon,
+  Chat as ChatIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material'
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
@@ -167,6 +168,12 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
       icon: <FolderIcon />, 
       path: '/dashboard/projects',
       translationKey: 'navigation.projects'
+    },
+    { 
+      text: t('navigation.whatsapp'), 
+      icon: <ChatIcon />, 
+      path: '/dashboard/whatsapp',
+      translationKey: 'navigation.whatsapp'
     },
   ]
 
