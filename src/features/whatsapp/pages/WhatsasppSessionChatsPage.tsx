@@ -16,9 +16,6 @@ export const WhatsasppSessionChatsPage = () => {
         </Link>
         <Typography color="text.primary">{t("breadcrumbs.chats")}</Typography>
       </Breadcrumbs>
-
-      <Typography variant="h5">{t("sessionChatsTitle")}</Typography>
-
       <Grid container spacing={2} sx={{ alignItems: "stretch" }}>
         <Grid size={{ xs: 12, md: 4 }} sx={{ maxHeight: "calc(100vh - 200px)" }}>
           {id && <WhatsappSessionChatsList sessionId={id} />}

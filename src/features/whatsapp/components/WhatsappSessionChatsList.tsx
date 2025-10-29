@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { Card, CardContent, List, ListItem, ListItemText, ListItemButton, CircularProgress, Box, Typography } from "@mui/material"
+import { Card, CardContent, List, ListItem, ListItemText, ListItemButton, CircularProgress, Box, Typography, Chip } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { getChatsAsync, selectChats, selectIsChatsLoading, setCurrentSessionId, setCurrentChat, getChatMessagesAsync } from "../store/whatsappSessionSlice"
@@ -35,12 +35,37 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
                 <ListItemButton
                   onClick={() => {
                     dispatch(setCurrentChat(chat))
-                    dispatch(getChatMessagesAsync({ id: sessionId, chatId: chat.id }))
+                    dispatch(getChatMessagesAsync({ id: sessionId, chatId: chat.id, params: { includeDeleted: true } }))
                   }}
                 >
                   <ListItemText
-                    primary={chat.name || chat.id}
-                    secondary={chat.timestamp ? new Date(chat.timestamp).toLocaleString() : undefined}
+                    primary={
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Typography variant="body1">{chat.name || chat.id}</Typography>
+                        {chat.archive && (
+                          <Chip 
+                            label={t("archived")} 
+                            size="small" 
+                            color="default"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        {chat.lastMessage?.body && (
+                          <Typography variant="body2" color="text.secondary" noWrap sx={{ mb: 0.5, maxWidth: "200px" }}>
+                            {chat.lastMessage.body.substring(0, 15)}
+                          </Typography>
+                        )}
+                        {chat.timestamp && (
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(chat.timestamp * 1000).toLocaleString()}
+                          </Typography>
+                        )}
+                      </Box>
+                    }
                   />
                 </ListItemButton>
               </ListItem>

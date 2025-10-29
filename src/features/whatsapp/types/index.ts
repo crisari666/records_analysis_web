@@ -44,6 +44,22 @@ export type SendMessageResponse = {
                                    timestamp: number
                                  }
 
+// Message Types
+export type Message = {
+                        id: string
+                        body: string
+                        from: string
+                        to: string
+                        fromMe: boolean
+                        timestamp: number
+                        hasMedia: boolean
+                        mediaType: string | null
+                        hasQuotedMsg: boolean
+                        isForwarded: boolean
+                        isStarred: boolean
+                        isDeleted: boolean
+                      }
+
 // Chat Types
 export type Chat = {
                      id: string
@@ -53,6 +69,7 @@ export type Chat = {
                      timestamp: number
                      archive: boolean
                      pinned: boolean
+                     lastMessage: Message | null
                    }
 
 export type StoredChat = {
@@ -74,22 +91,6 @@ export type StoredChat = {
                            createdAt: string
                            updatedAt: string
                          }
-
-// Message Types
-export type Message = {
-                        id: string
-                        body: string
-                        from: string
-                        to: string
-                        fromMe: boolean
-                        timestamp: number
-                        hasMedia: boolean
-                        mediaType: string | null
-                        hasQuotedMsg: boolean
-                        isForwarded: boolean
-                        isStarred: boolean
-                        isDeleted: boolean
-                      }
 
 export type StoredMessage = {
                               messageId: string

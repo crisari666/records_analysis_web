@@ -3,15 +3,14 @@ import { createAppSlice } from "../../../app/createAppSlice"
 import { whatsappService } from "../services/whatsappService"
 import type {
   Chat,
-  Message,
-  GetChatMessagesParams,
   StoredMessage,
+  GetStoredMessagesParams,
 } from "../types"
 
 type WhatsappSessionState = {
   currentSessionId: string | null
   chats: Chat[]
-  messages: Message[]
+  messages: StoredMessage[]
   currentChat: Chat | null
   currentMessage: StoredMessage | null
   isChatsLoading: boolean
@@ -76,8 +75,8 @@ export const whatsappSessionSlice = createAppSlice({
       },
     ),
     getChatMessagesAsync: create.asyncThunk(
-      async ({ id, chatId, params }: { id: string; chatId: string; params?: GetChatMessagesParams }) => {
-        const messages = await whatsappService.getChatMessages(id, chatId, params)
+      async ({ id, chatId, params }: { id: string; chatId: string; params?: GetStoredMessagesParams }) => {
+        const messages = await whatsappService.getStoredMessages(id, { chatId, ...params })
         return messages
       },
       {
@@ -85,7 +84,7 @@ export const whatsappSessionSlice = createAppSlice({
           state.isMessagesLoading = true
           state.error = null
         },
-        fulfilled: (state, action: PayloadAction<Message[]>) => {
+        fulfilled: (state, action: PayloadAction<StoredMessage[]>) => {
           state.isMessagesLoading = false
           state.messages = action.payload
         },

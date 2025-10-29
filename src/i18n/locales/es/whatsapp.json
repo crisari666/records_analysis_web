@@ -27,9 +27,13 @@
   "noChats": "No se encontraron chats",
   "noMessages": "Sin mensajes",
   "selectChatPrompt": "Selecciona un chat para ver los mensajes",
+  "archived": "Archivado",
   "breadcrumbs": {
     "sessions": "Sesiones",
     "chats": "Chats"
-  }
+  },
+  "messageDeleted": "Mensaje eliminado",
+  "messageEdited": "Editado",
+  "messageEditions": "Ediciones del mensaje"
 }
 
