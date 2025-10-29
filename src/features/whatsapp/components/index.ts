@@ -1,1 +1,4 @@
 export { WhatsappControls } from "./WhatsappControls"
+export { SyncWhatsappDialog } from "./SyncWhatsappDialog"
+export { StoredSessionsList } from "./StoredSessionsList"
+export { WhatsappSessionChatsList } from "./WhatsappSessionChatsList"

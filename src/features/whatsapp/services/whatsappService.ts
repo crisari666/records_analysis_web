@@ -6,7 +6,7 @@ import type {
   CreateSessionResponse,
   DestroySessionResponse,
   SendMessageRequest,
-  SendMessageResponse,
+  
   Chat,
   StoredChat,
   Message,
@@ -19,7 +19,7 @@ import type {
   GetStoredChatsParams,
 } from '../types'
 
-const API_BASE = '/rest/whatsapp-web'
+const API_BASE = 'whatsapp-web'
 
 const API_ENDPOINTS = {
   SESSIONS: `${API_BASE}/sessions`,
@@ -37,7 +37,9 @@ const API_ENDPOINTS = {
   SESSION_MESSAGE_EDITS: (id: string, messageId: string) => `${API_BASE}/session/${id}/messages/${messageId}/edits`,
 } as const
 
-const api = new Api()
+// Create a new Api instance with WhatsApp-specific base URL if available, otherwise use default
+const whatsappBaseUrl = import.meta.env.VITE_WEBSOCKET_MS_URL
+const api = new Api(whatsappBaseUrl)
 
 export const whatsappService = {
   // Session Management

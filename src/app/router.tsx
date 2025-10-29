@@ -7,6 +7,7 @@ import { DevicesPage } from '../features/devices/pages/DevicesPage';
 import { RecordsPage } from '../features/records/pages/RecordsPage';
 import { ProjectsPage } from '../features/projects/pages/ProjectsPage';
 import { WhatsAppPage } from '../features/whatsapp/pages/WhatsAppPage';
+import { WhatsasppSessionChatsPage } from '../features/whatsapp/pages/WhatsasppSessionChatsPage';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
 
 export const router = createBrowserRouter([
@@ -45,6 +46,10 @@ export const router = createBrowserRouter([
       {
         path: 'whatsapp',
         element: <WhatsAppPage />,
+      },
+      {
+        path: 'whatsapp/sessions/:id/chats',
+        element: <WhatsasppSessionChatsPage />,
       },
     ],
   },

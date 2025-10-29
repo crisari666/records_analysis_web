@@ -5,6 +5,29 @@
   "sessionId": "ID de Sesión",
   "sessionIdPlaceholder": "Ingrese el ID de sesión de WhatsApp",
   "sync": "Sincronizar",
-  "cancel": "Cancelar"
+  "cancel": "Cancelar",
+  "creatingSession": "Creando sesión y esperando código QR...",
+  "scanQrCode": "Escanea este código QR con WhatsApp",
+  "qrCodeInstructions": "Abre WhatsApp en tu teléfono, ve a Configuración > Dispositivos vinculados y escanea este código QR",
+  "errorCreatingSession": "Error al crear la sesión",
+  "errorReceivingQr": "Error al recibir el código QR",
+  "errorParsingQr": "Error al analizar el código QR",
+  "websocketUrlNotConfigured": "La URL de WebSocket no está configurada",
+  "websocketConnectionTimeout": "Tiempo de espera de conexión agotado. Por favor, inténtelo de nuevo.",
+  "websocketNotConnected": "WebSocket no está conectado. Por favor, espere un momento e inténtelo de nuevo.",
+  "loading": "Cargando...",
+  "error": "Error",
+  "noSessions": "No se encontraron sesiones almacenadas",
+  "status": "Estado",
+  "lastSeen": "Última Vez",
+  "createdAt": "Fecha de Creación",
+  "updatedAt": "Última Actualización"
+  ,
+  "sessionChatsTitle": "Chats de la Sesión",
+  "noChats": "No se encontraron chats",
+  "breadcrumbs": {
+    "sessions": "Sesiones",
+    "chats": "Chats"
+  }
 }
 

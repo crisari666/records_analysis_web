@@ -8,12 +8,9 @@ import type {
   SessionStatusResponse,
   DestroySessionResponse,
   SendMessageRequest,
-  Chat,
   StoredChat,
-  Message,
   StoredMessage,
   DeletedMessage,
-  GetChatMessagesParams,
   GetStoredMessagesParams,
   GetDeletedMessagesParams,
   GetStoredChatsParams,
@@ -23,13 +20,12 @@ const initialState: WhatsappState = {
   sessions: [],
   storedSessions: [],
   currentSession: null,
-  chats: [],
+  // moved to whatsappSessionSlice
   storedChats: [],
-  messages: [],
+  // moved to whatsappSessionSlice
   storedMessages: [],
   deletedMessages: [],
-  currentChat: null,
-  currentMessage: null,
+  // moved to whatsappSessionSlice
   qrCode: null,
   isLoading: false,
   error: null,
@@ -46,24 +42,14 @@ export const whatsappSlice = createAppSlice({
     setCurrentSession: create.reducer((state, action: PayloadAction<ActiveSession | null>) => {
       state.currentSession = action.payload
     }),
-    setCurrentChat: create.reducer((state, action: PayloadAction<Chat | null>) => {
-      state.currentChat = action.payload
-    }),
-    setCurrentMessage: create.reducer((state, action: PayloadAction<StoredMessage | null>) => {
-      state.currentMessage = action.payload
-    }),
+    // moved to whatsappSessionSlice: setCurrentChat, setCurrentMessage
     clearError: create.reducer((state) => {
       state.error = null
     }),
     clearSessions: create.reducer((state) => {
       state.sessions = []
     }),
-    clearChats: create.reducer((state) => {
-      state.chats = []
-    }),
-    clearMessages: create.reducer((state) => {
-      state.messages = []
-    }),
+    // moved to whatsappSessionSlice: clearChats, clearMessages
     // Async Thunks - Session Management
     createSessionAsync: create.asyncThunk(
       async (id: string) => {
@@ -193,27 +179,7 @@ export const whatsappSlice = createAppSlice({
         },
       },
     ),
-    // Async Thunks - Chats
-    getChatsAsync: create.asyncThunk(
-      async (id: string) => {
-        const chats = await whatsappService.getChats(id)
-        return chats
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state, action: PayloadAction<Chat[]>) => {
-          state.isLoading = false
-          state.chats = action.payload
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch chats"
-        },
-      },
-    ),
+    // Async Thunks - Stored Chats
     getStoredChatsAsync: create.asyncThunk(
       async ({ id, params }: { id: string; params?: GetStoredChatsParams }) => {
         const chats = await whatsappService.getStoredChats(id, params)
@@ -261,27 +227,7 @@ export const whatsappSlice = createAppSlice({
         },
       },
     ),
-    // Async Thunks - Messages
-    getChatMessagesAsync: create.asyncThunk(
-      async ({ id, chatId, params }: { id: string; chatId: string; params?: GetChatMessagesParams }) => {
-        const messages = await whatsappService.getChatMessages(id, chatId, params)
-        return messages
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state, action: PayloadAction<Message[]>) => {
-          state.isLoading = false
-          state.messages = action.payload
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch chat messages"
-        },
-      },
-    ),
+    // Async Thunks - Stored Messages
     getStoredMessagesAsync: create.asyncThunk(
       async ({ id, params }: { id: string; params?: GetStoredMessagesParams }) => {
         const messages = await whatsappService.getStoredMessages(id, params)
@@ -322,63 +268,17 @@ export const whatsappSlice = createAppSlice({
         },
       },
     ),
-    getMessageByIdAsync: create.asyncThunk(
-      async ({ id, messageId }: { id: string; messageId: string }) => {
-        const message = await whatsappService.getMessageById(id, messageId)
-        return message
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state, action: PayloadAction<StoredMessage>) => {
-          state.isLoading = false
-          state.currentMessage = action.payload
-          const index = state.storedMessages.findIndex((m) => m.messageId === action.payload.messageId)
-          if (index !== -1) {
-            state.storedMessages[index] = action.payload
-          } else {
-            state.storedMessages.push(action.payload)
-          }
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch message"
-        },
-      },
-    ),
-    getMessageEditHistoryAsync: create.asyncThunk(
-      async ({ id, messageId }: { id: string; messageId: string }) => {
-        const history = await whatsappService.getMessageEditHistory(id, messageId)
-        return history
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state) => {
-          state.isLoading = false
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch message edit history"
-        },
-      },
-    ),
+    // moved to whatsappSessionSlice: getMessageByIdAsync, getMessageEditHistoryAsync
   }),
   selectors: {
     selectSessions: (whatsapp) => whatsapp.sessions,
     selectStoredSessions: (whatsapp) => whatsapp.storedSessions,
     selectCurrentSession: (whatsapp) => whatsapp.currentSession,
-    selectChats: (whatsapp) => whatsapp.chats,
     selectStoredChats: (whatsapp) => whatsapp.storedChats,
-    selectMessages: (whatsapp) => whatsapp.messages,
+    // moved to whatsappSessionSlice: selectChats, selectMessages
     selectStoredMessages: (whatsapp) => whatsapp.storedMessages,
     selectDeletedMessages: (whatsapp) => whatsapp.deletedMessages,
-    selectCurrentChat: (whatsapp) => whatsapp.currentChat,
-    selectCurrentMessage: (whatsapp) => whatsapp.currentMessage,
+    // moved to whatsappSessionSlice: selectCurrentChat, selectCurrentMessage
     selectQrCode: (whatsapp) => whatsapp.qrCode,
     selectIsLoading: (whatsapp) => whatsapp.isLoading,
     selectError: (whatsapp) => whatsapp.error,
@@ -389,39 +289,27 @@ export const whatsappSlice = createAppSlice({
 export const {
   setQrCode,
   setCurrentSession,
-  setCurrentChat,
-  setCurrentMessage,
   clearError,
   clearSessions,
-  clearChats,
-  clearMessages,
   createSessionAsync,
   getActiveSessionsAsync,
   getStoredSessionsAsync,
   getSessionStatusAsync,
   destroySessionAsync,
   sendMessageAsync,
-  getChatsAsync,
   getStoredChatsAsync,
   getStoredChatByIdAsync,
-  getChatMessagesAsync,
   getStoredMessagesAsync,
   getDeletedMessagesAsync,
-  getMessageByIdAsync,
-  getMessageEditHistoryAsync,
 } = whatsappSlice.actions
 
 export const {
   selectSessions,
   selectStoredSessions,
   selectCurrentSession,
-  selectChats,
   selectStoredChats,
-  selectMessages,
   selectStoredMessages,
   selectDeletedMessages,
-  selectCurrentChat,
-  selectCurrentMessage,
   selectQrCode,
   selectIsLoading,
   selectError,

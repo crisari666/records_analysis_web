@@ -1,16 +1,6 @@
 import type { AxiosError, AxiosResponse } from 'axios'
 import axios from 'axios'
 
-const urlApi = import.meta.env.VITE_BASE_URL_USERS_MS
-console.log({urlApi})
-
-const apiAxios = axios.create({
-  baseURL: urlApi,
-  headers: {
-    'Content-type': 'application/json',
-  },
-})
-
 // Callback to handle unauthorized errors without circular dependency
 let unauthorizedCallback: (() => void) | null = null
 
@@ -20,10 +10,23 @@ export const setUnauthorizedCallback = (callback: () => void) => {
 
 export default class Api {
   private static instance: Api
+  private axiosInstance: ReturnType<typeof axios.create>
   
-  public static getInstance(): Api {
+  constructor(baseURL?: string) {
+    const url = baseURL || import.meta.env.VITE_BASE_URL_USERS_MS
+    console.log({ url })
+    
+    this.axiosInstance = axios.create({
+      baseURL: url,
+      headers: {
+        'Content-type': 'application/json',
+      },
+    })
+  }
+  
+  public static getInstance(baseURL?: string): Api {
     if (!Api.instance) {
-      Api.instance = new Api()
+      Api.instance = new Api(baseURL)
     }
     return Api.instance
   }
@@ -32,7 +35,7 @@ export default class Api {
     const token = await this.getToken()
     const headers = this.buildHeaders(token)
     try {
-      const responseGet: AxiosResponse = await apiAxios.get(path, {
+      const responseGet: AxiosResponse = await this.axiosInstance.get(path, {
         params: data,
         data: body,
         headers,
@@ -49,7 +52,7 @@ export default class Api {
       const token = await this.getToken()
       const headers = this.buildHeaders(token, isFormData)
       
-      const responsePost: AxiosResponse = await apiAxios.post(path, data, {
+      const responsePost: AxiosResponse = await this.axiosInstance.post(path, data, {
         headers,
       })
       return await responsePost.data
@@ -64,7 +67,7 @@ export default class Api {
       const token = await this.getToken()
       const headers = this.buildHeaders(token, isFormData)
       
-      const responsePost: AxiosResponse = await apiAxios.patch(path, data, {
+      const responsePost: AxiosResponse = await this.axiosInstance.patch(path, data, {
         headers,
       })
       return await responsePost.data
@@ -78,7 +81,7 @@ export default class Api {
     try {
       const token = await this.getToken()
       const headers = this.buildHeaders(token)
-      const responsePut: AxiosResponse = await apiAxios.put(path, data, {
+      const responsePut: AxiosResponse = await this.axiosInstance.put(path, data, {
         headers,
       })
       return await responsePut.data
@@ -92,7 +95,7 @@ export default class Api {
     try {
       const token = await this.getToken()
       const headers = this.buildHeaders(token)
-      const responseDelete: AxiosResponse = await apiAxios.delete(path, {
+      const responseDelete: AxiosResponse = await this.axiosInstance.delete(path, {
         data: data,
         headers,
       })
