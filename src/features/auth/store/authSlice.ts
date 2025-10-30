@@ -2,11 +2,12 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createAppSlice } from '../../../app/createAppSlice';
 import { AuthState, LoginCredentials, User } from '../types';
 import { login, logout as logoutService, getCurrentUser } from '../services/authService';
+import { AppConstants } from '@/shared/constants/appConstants';
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('auth_token'),
-  isAuthenticated: !!localStorage.getItem('auth_token'),
+  token: localStorage.getItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN),
+  isAuthenticated: !!localStorage.getItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN),
   isLoading: false,
   error: null,
 };
@@ -27,8 +28,8 @@ export const authSlice = createAppSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.error = null;
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('user');
+      localStorage.removeItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN);
+      localStorage.removeItem(AppConstants.LOCAL_STORAGE.USER);
     }),
     loginAsync: create.asyncThunk(
       async (credentials: LoginCredentials) => await login(credentials),

@@ -1,11 +1,15 @@
 import { useEffect, type JSX } from "react"
 import { Box, Typography } from "@mui/material"
 import { useTranslation } from "react-i18next"
-import { StoredSessionsList, WhatsappControls } from "../components"
+import { StoredSessionsList, WhatsappControls, SyncWhatsappDialog } from "../components"
 import { websocketService } from "@/shared/services/websocket.service"
+import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { closeSyncDialog, selectIsSyncDialogOpen } from "../store/whatsappSlice"
 
 export const WhatsAppPage = (): JSX.Element => {
   const { t } = useTranslation("whatsapp")
+  const dispatch = useAppDispatch()
+  const isSyncDialogOpen = useAppSelector(selectIsSyncDialogOpen)
 
   useEffect(() => {
     // Connect to WebSocket when component mounts
@@ -32,6 +36,7 @@ export const WhatsAppPage = (): JSX.Element => {
 
       <WhatsappControls />
       <StoredSessionsList />
+      <SyncWhatsappDialog open={isSyncDialogOpen} onClose={() => dispatch(closeSyncDialog())} />
     </Box>
   )
 }

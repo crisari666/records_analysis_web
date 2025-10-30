@@ -9,11 +9,13 @@ import {
   Box,
   CircularProgress,
   Typography,
+  Alert,
 } from "@mui/material"
 import { useTranslation } from "react-i18next"
-import { useAppDispatch } from "@/app/hooks"
-import { createSessionAsync, setQrCode } from "../store/whatsappSlice"
+import { useAppDispatch, useAppSelector } from "@/app/hooks"
+import { createSessionAsync, setQrCode, selectSelectedSessionId, selectQrCode, getStoredSessionsAsync } from "../store/whatsappSlice"
 import { websocketService } from "@/shared/services/websocket.service"
+import QRCode from "react-qr-code"
 
 type SyncWhatsappDialogProps = {
   open: boolean
@@ -26,69 +28,29 @@ type QrEventData = {
 }
 
 /**
- * Parses WhatsApp QR code format and converts it to a data URL for image display
- * WhatsApp QR format: "2@base64part1,base64part2,base64part3,base64part4,1"
- * @param qrString - The QR code string from WhatsApp
- * @returns Data URL string for image display, or null if parsing fails
+ * Normalizes the WhatsApp QR payload to a string that can be rendered as a QR code.
+ * WhatsApp typically sends strings like "2@XXXXX,...,1" which should be rendered as-is.
  */
 const parseWhatsAppQrCode = (qrString: string): string | null => {
-  try {
-    // WhatsApp QR format is: "version@base64part1,base64part2,...,lastpart,version"
-    // Example: "2@base64part1,base64part2,base64part3,base64part4,1"
-    
-    if (!qrString || typeof qrString !== 'string') {
-      return null
-    }
-
-    // Check if it's already a data URL
-    if (qrString.startsWith('data:image')) {
-      return qrString
-    }
-
-    // Check if it contains the @ symbol (WhatsApp multi-part format)
-    if (qrString.includes('@')) {
-      // Extract the base64 parts (everything after @, excluding the last version number)
-      const parts = qrString.split('@')[1].split(',')
-      
-      // Remove the last element if it's just a number (version indicator)
-      const lastPart = parts[parts.length - 1]
-      if (/^\d+$/.test(lastPart)) {
-        parts.pop()
-      }
-      
-      // Join all base64 parts
-      const base64Data = parts.join('')
-      
-      // Convert to data URL
-      return `data:image/png;base64,${base64Data}`
-    }
-
-    // If no @ symbol, assume it's already a base64 string (maybe single-part format)
-    // Try to use it directly as base64
-    if (qrString.includes(',')) {
-      // Handle comma-separated format without @
-      const parts = qrString.split(',')
-      const base64Data = parts.join('')
-      return `data:image/png;base64,${base64Data}`
-    }
-
-    // Assume it's a plain base64 string
-    return `data:image/png;base64,${qrString}`
-  } catch (error) {
-    console.error('Error parsing QR code:', error)
+  if (!qrString || typeof qrString !== "string") {
     return null
   }
+  return qrString.trim()
 }
 
 export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): JSX.Element => {
   const { t } = useTranslation("whatsapp")
   const dispatch = useAppDispatch()
+  const preselectedSessionId = useAppSelector(selectSelectedSessionId)
+  const globalQrCode = useAppSelector(selectQrCode)
   const [sessionId, setSessionId] = useState("")
   const [qrCode, setQrCodeLocal] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const unsubscribeQrRef = useRef<(() => void) | null>(null)
   const unsubscribeErrorRef = useRef<(() => void) | null>(null)
+  const unsubscribeReadingRef = useRef<(() => void) | null>(null)
 
   useEffect(() => {
     if (!open) {
@@ -96,6 +58,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       setSessionId("")
       setQrCodeLocal(null)
       setError(null)
+      setSuccess(null)
       setIsLoading(false)
       dispatch(setQrCode(null))
       
@@ -108,6 +71,10 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
         unsubscribeErrorRef.current()
         unsubscribeErrorRef.current = null
       }
+      if (unsubscribeReadingRef.current) {
+        unsubscribeReadingRef.current()
+        unsubscribeReadingRef.current = null
+      }
     }
     
     // Cleanup on unmount
@@ -118,14 +85,37 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       if (unsubscribeErrorRef.current) {
         unsubscribeErrorRef.current()
       }
+      if (unsubscribeReadingRef.current) {
+        unsubscribeReadingRef.current()
+      }
     }
   }, [open, dispatch])
+
+  // Prefill from Redux when opened
+  useEffect(() => {
+    if (open && preselectedSessionId) {
+      setSessionId(preselectedSessionId)
+    }
+  }, [open, preselectedSessionId])
+
+  // Auto trigger submit when opened with a preselected id and no QR yet
+  useEffect(() => {
+    if (open && preselectedSessionId && !isLoading && !qrCode && !globalQrCode) {
+      // Avoid immediate synchronous call clashing with render
+      const timer = setTimeout(() => {
+        void handleSubmit()
+      }, 0)
+      return () => clearTimeout(timer)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, preselectedSessionId])
 
   const handleClose = () => {
     // Cleanup
     setSessionId("")
     setQrCodeLocal(null)
     setError(null)
+    setSuccess(null)
     setIsLoading(false)
     dispatch(setQrCode(null))
     onClose()
@@ -166,6 +156,9 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       if (unsubscribeErrorRef.current) {
         unsubscribeErrorRef.current()
       }
+      if (unsubscribeReadingRef.current) {
+        unsubscribeReadingRef.current()
+      }
 
       // Listen for QR code event
       unsubscribeQrRef.current = websocketService.on<QrEventData>("qr", (data) => {
@@ -199,6 +192,23 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
           }
         }
       })
+
+      // Listen for reading event (successful QR scan / linking)
+      unsubscribeReadingRef.current = websocketService.on<{ sessionId: string }>(
+        "ready",
+        (data) => {
+          if (data?.sessionId === sessionId.trim()) {
+            setIsLoading(false)
+            setSuccess(t("readingSuccess"))
+            // Refresh stored sessions to update list item status
+            dispatch(getStoredSessionsAsync())
+            if (unsubscribeReadingRef.current) {
+              unsubscribeReadingRef.current()
+              unsubscribeReadingRef.current = null
+            }
+          }
+        },
+      )
 
     } catch (err: any) {
       setError(err.message || t("errorCreatingSession"))
@@ -235,25 +245,20 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
           {qrCode && (
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 2 }}>
               <Typography variant="h6">{t("scanQrCode")}</Typography>
-              <Box
-                component="img"
-                src={qrCode}
-                alt="QR Code"
-                sx={{
-                  maxWidth: "100%",
-                  height: "auto",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 1,
-                  p: 1,
-                  backgroundColor: "background.paper",
-                }}
-              />
+              <Box sx={{ p: 1, border: "1px solid", borderColor: "divider", borderRadius: 1, backgroundColor: "whiteSmoke" }}>
+                <QRCode value={qrCode} size={220} color="blue" bgColor="orange" fgColor="black" />
+              </Box>
               <Typography variant="body2" color="text.secondary" align="center">
                 {t("qrCodeInstructions")}
               </Typography>
             </Box>
           )}
+
+        {success && (
+          <Alert severity="success" sx={{ mt: 1 }}>
+            {success}
+          </Alert>
+        )}
 
           {error && (
             <Typography variant="body2" color="error" sx={{ mt: 1 }}>

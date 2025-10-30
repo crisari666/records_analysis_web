@@ -12,6 +12,10 @@ import esDashboard from './locales/es/dashboard.json';
 import esUsers from './locales/es/users.json';
 import esRecords from './locales/es/records.json';
 import esProjects from './locales/es/projects.json';
+import enWhatsapp from './locales/en/whatsapp.json';
+import esWhatsapp from './locales/es/whatsapp.json';
+import enGroups from './locales/en/groups.json';
+import esGroups from './locales/es/groups.json';
 
 const resources = {
   en: {
@@ -20,6 +24,8 @@ const resources = {
     users: enUsers,
     records: enRecords,
     projects: enProjects,
+    whatsapp: enWhatsapp,
+    groups: enGroups,
   },
   es: {
     auth: esAuth,
@@ -27,6 +33,8 @@ const resources = {
     users: esUsers,
     records: esRecords,
     projects: esProjects,
+    whatsapp: esWhatsapp,
+    groups: esGroups,
   },
 };
 

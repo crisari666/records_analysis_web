@@ -23,6 +23,8 @@
   "createdAt": "Created At",
   "updatedAt": "Updated At"
   ,
+  "readingSuccess": "Linked successfully! Session is initializing."
+  ,
   "sessionChatsTitle": "Session Chats",
   "noChats": "No chats found",
   "noMessages": "No messages yet",
@@ -34,6 +36,9 @@
   },
   "messageDeleted": "Message deleted",
   "messageEdited": "Edited",
-  "messageEditions": "Message editions"
+  "messageEditions": "Message editions",
+  "totalDeletedMessages": "Deleted messages",
+  "totalEditedMessages": "Edited messages",
+  "showOnlyDeletedOrEdited": "Show only deleted/edited"
 }
 

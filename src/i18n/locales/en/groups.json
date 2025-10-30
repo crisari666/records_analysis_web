@@ -1,0 +1,22 @@
+{
+  "title": "Groups",
+  "create_group": "Create Group",
+  "edit_group": "Edit Group",
+  "group_title": "Group name",
+  "project": "Project",
+  "users": "Users",
+  "filter_by_project": "Filter by project",
+  "users_count": "Users: {{count}}",
+  "project_chip": "Project: {{name}}",
+  "created_at": "Created: {{date}}",
+  "updated_at": "Updated: {{date}}",
+  "edit": "Edit",
+  "delete": "Delete",
+  "save": "Save",
+  "cancel": "Cancel",
+  "loading": "Loading...",
+  "confirm_delete": "Are you sure you want to delete this group?",
+  "no_groups": "No groups found"
+}
+
+

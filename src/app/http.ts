@@ -1,5 +1,6 @@
 import type { AxiosError, AxiosResponse } from 'axios'
 import axios from 'axios'
+import { AppConstants } from '@/shared/constants/appConstants'
 
 // Callback to handle unauthorized errors without circular dependency
 let unauthorizedCallback: (() => void) | null = null
@@ -107,7 +108,7 @@ export default class Api {
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token_records')
+    return localStorage.getItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN)
   }
 
   private buildHeaders(token: string | null, isFormData: boolean = false): Record<string, string> {
@@ -127,8 +128,8 @@ export default class Api {
       const data: any = error.response?.data
       if (data?.error === 'Unauthorized' || data?.message === 'No token provided' || data?.message === 'Invalid credentials') {
         // Clear token and user from localStorage
-        localStorage.removeItem('auth_token_records')
-        localStorage.removeItem('user')
+        localStorage.removeItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN)
+        localStorage.removeItem(AppConstants.LOCAL_STORAGE.USER)
         
         // Use callback to handle logout if available
         if (unauthorizedCallback) {

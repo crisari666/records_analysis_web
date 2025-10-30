@@ -1,5 +1,6 @@
 import { LoginCredentials, LoginResponse, User } from '../types';
 import Api from '../../../app/http';
+import { AppConstants } from '@/shared/constants/appConstants';
 
 const api = Api.getInstance();
 
@@ -11,9 +12,9 @@ export async function login(credentials: LoginCredentials): Promise<{ user: User
     data: credentials,
   });
   
-  // Store token in localStorage
-  localStorage.setItem('auth_token', response.access_token);
-  localStorage.setItem('user', JSON.stringify(response.user));
+  // Store token and user in localStorage
+  localStorage.setItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN, response.access_token);
+  localStorage.setItem(AppConstants.LOCAL_STORAGE.USER, JSON.stringify(response.user));
   
   return {
     user: response.user,
@@ -31,13 +32,13 @@ export async function logout(): Promise<void> {
     // Continue with logout even if server request fails
     console.warn('Logout request failed:', error);
   } finally {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+    localStorage.removeItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN);
+    localStorage.removeItem(AppConstants.LOCAL_STORAGE.USER);
   }
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN);
   if (!token) return null;
 
   try {
@@ -45,8 +46,8 @@ export async function getCurrentUser(): Promise<User | null> {
       path: '/auth/me',
     });
   } catch (error) {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
+    localStorage.removeItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN);
+    localStorage.removeItem(AppConstants.LOCAL_STORAGE.USER);
     return null;
   }
 }

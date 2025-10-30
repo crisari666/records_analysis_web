@@ -1,15 +1,23 @@
+import { useState, useMemo } from "react"
 import { Card, CardContent, List, ListItem, ListItemText, Box, Typography, Chip, Tooltip } from "@mui/material"
 import DeleteIcon from "@mui/icons-material/Delete"
 import EditIcon from "@mui/icons-material/Edit"
 import { useTranslation } from "react-i18next"
 import { useAppSelector } from "@/app/hooks"
 import { selectCurrentChat, selectIsMessagesLoading, selectMessages } from "../store/whatsappSessionSlice"
+import { WhatsappChatHeader } from "./WhatsappChatHeader"
 
 export const WhatsappChatContent = () => {
   const { t } = useTranslation("whatsapp")
   const messages = useAppSelector(selectMessages)
   const currentChat = useAppSelector(selectCurrentChat)
   const isLoading = useAppSelector(selectIsMessagesLoading)
+  const [filterEnabled, setFilterEnabled] = useState(false)
+
+  const filteredMessages = useMemo(() => {
+    if (!filterEnabled) return messages
+    return messages.filter((msg) => msg.isDeleted || (msg.edition && msg.edition.length > 0))
+  }, [messages, filterEnabled])
 
   return (
     <Card sx={{ height: "100%" }}>
@@ -21,14 +29,28 @@ export const WhatsappChatContent = () => {
             <Typography>{t("loading")}</Typography>
           </Box>
         ) : (
-          <Box sx={{ flex: 1, overflowY: "auto" }}>
-            <List>
-            {messages.map((message) => (
+          <>
+            <WhatsappChatHeader
+              messages={messages}
+              filterEnabled={filterEnabled}
+              onFilterChange={setFilterEnabled}
+            />
+            <Box sx={{ flex: 1, overflowY: "auto" }}>
+              <List>
+              {filteredMessages.map((message) => (
               <ListItem key={message.messageId} sx={{ justifyContent: message.fromMe ? "flex-end" : "flex-start" }} >
                 <Box
                   sx={{
-                    bgcolor: message.fromMe ? "primary.main" : "grey.200",
-                    color: message.fromMe ? "primary.contrastText" : "text.primary",
+                    bgcolor: message.isDeleted
+                      ? "error.main"
+                      : message.fromMe
+                        ? "primary.main"
+                        : "grey.200",
+                    color: message.isDeleted
+                      ? "error.contrastText"
+                      : message.fromMe
+                        ? "primary.contrastText"
+                        : "text.primary",
                     px: 1,
                     py: 0.5,
                     borderRadius: 2,
@@ -79,16 +101,23 @@ export const WhatsappChatContent = () => {
                         </Box>
                       </Box>
                     }
-                    secondaryTypographyProps={{ color: message.fromMe ? "primary.contrastText" : "text.secondary" }}
+                    secondaryTypographyProps={{
+                      color: message.isDeleted
+                        ? "error.contrastText"
+                        : message.fromMe
+                          ? "primary.contrastText"
+                          : "text.secondary",
+                    }}
                   />
                 </Box>
               </ListItem>
             ))}
-            {messages.length === 0 && (
-              <Typography color="text.secondary">{t("noMessages")}</Typography>
-            )}
-            </List>
-          </Box>
+              {filteredMessages.length === 0 && (
+                <Typography color="text.secondary">{t("noMessages")}</Typography>
+              )}
+              </List>
+            </Box>
+          </>
         )}
       </CardContent>
     </Card>

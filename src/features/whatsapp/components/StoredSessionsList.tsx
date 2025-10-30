@@ -23,6 +23,7 @@ import {
   selectIsLoading,
   selectError,
 } from "../store/whatsappSlice"
+import { openSyncDialog } from "../store/whatsappSlice"
 
 export const StoredSessionsList = (): JSX.Element => {
   const { t } = useTranslation("whatsapp")
@@ -103,7 +104,15 @@ export const StoredSessionsList = (): JSX.Element => {
             <TableRow
               key={session.sessionId}
               hover
-              onClick={() => navigate(`/dashboard/whatsapp/sessions/${session.sessionId}/chats`)}
+              onClick={() => {
+                const status = session.status
+                const isReady = status === "ready" || status === "authenticated"
+                if (isReady) {
+                  navigate(`/dashboard/whatsapp/sessions/${session.sessionId}/chats`)
+                } else {
+                  dispatch(openSyncDialog(session.sessionId))
+                }
+              }}
               sx={{ cursor: "pointer" }}
             >
               <TableCell>

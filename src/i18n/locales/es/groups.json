@@ -1,0 +1,22 @@
+{
+  "title": "Grupos",
+  "create_group": "Crear Grupo",
+  "edit_group": "Editar Grupo",
+  "group_title": "Nombre del grupo",
+  "project": "Proyecto",
+  "users": "Usuarios",
+  "filter_by_project": "Filtrar por proyecto",
+  "users_count": "Usuarios: {{count}}",
+  "project_chip": "Proyecto: {{name}}",
+  "created_at": "Creado: {{date}}",
+  "updated_at": "Actualizado: {{date}}",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "loading": "Cargando...",
+  "confirm_delete": "¿Seguro que deseas eliminar este grupo?",
+  "no_groups": "No se encontraron grupos"
+}
+
+

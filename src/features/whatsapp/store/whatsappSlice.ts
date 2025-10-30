@@ -30,6 +30,9 @@ const initialState: WhatsappState = {
   isLoading: false,
   error: null,
   status: "idle",
+  // UI state
+  isSyncDialogOpen: false,
+  selectedSessionId: null,
 }
 
 export const whatsappSlice = createAppSlice({
@@ -38,6 +41,14 @@ export const whatsappSlice = createAppSlice({
   reducers: (create) => ({
     setQrCode: create.reducer((state, action: PayloadAction<string | null>) => {
       state.qrCode = action.payload
+    }),
+    openSyncDialog: create.reducer((state, action: PayloadAction<string | null>) => {
+      state.isSyncDialogOpen = true
+      state.selectedSessionId = action.payload ?? null
+    }),
+    closeSyncDialog: create.reducer((state) => {
+      state.isSyncDialogOpen = false
+      state.selectedSessionId = null
     }),
     setCurrentSession: create.reducer((state, action: PayloadAction<ActiveSession | null>) => {
       state.currentSession = action.payload
@@ -283,11 +294,15 @@ export const whatsappSlice = createAppSlice({
     selectIsLoading: (whatsapp) => whatsapp.isLoading,
     selectError: (whatsapp) => whatsapp.error,
     selectStatus: (whatsapp) => whatsapp.status,
+    selectIsSyncDialogOpen: (whatsapp) => whatsapp.isSyncDialogOpen,
+    selectSelectedSessionId: (whatsapp) => whatsapp.selectedSessionId,
   },
 })
 
 export const {
   setQrCode,
+  openSyncDialog,
+  closeSyncDialog,
   setCurrentSession,
   clearError,
   clearSessions,
@@ -314,4 +329,6 @@ export const {
   selectIsLoading,
   selectError,
   selectStatus,
+  selectIsSyncDialogOpen,
+  selectSelectedSessionId,
 } = whatsappSlice.selectors

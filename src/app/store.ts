@@ -7,6 +7,7 @@ import { usersSlice } from "../features/users/store/usersSlice"
 import { devicesSlice } from "../features/devices/store/devicesSlice"
 import { recordsSlice } from "../features/records/store/recordsSlice"
 import { projectsSlice } from "../features/projects/store/projectsSlice"
+import { groupsSlice } from "../features/groups/store/groupsSlice"
 import { whatsappSlice } from "../features/whatsapp/store/whatsappSlice"
 import { whatsappSessionSlice } from "../features/whatsapp/store/whatsappSessionSlice"
 import { setUnauthorizedCallback } from "./http"
@@ -21,6 +22,7 @@ export const rootReducer = combineSlices(
   devicesSlice,
   recordsSlice,
   projectsSlice,
+  groupsSlice,
   whatsappSlice,
   whatsappSessionSlice,
 )
