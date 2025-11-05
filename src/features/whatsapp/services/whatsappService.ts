@@ -3,10 +3,13 @@ import type {
   ActiveSession,
   StoredSession,
   SessionStatusResponse,
+  CreateSessionRequest,
   CreateSessionResponse,
+  UpdateSessionGroupRequest,
+  UpdateSessionGroupResponse,
   DestroySessionResponse,
   SendMessageRequest,
-  
+  SendMessageResponse,
   Chat,
   StoredChat,
   Message,
@@ -25,6 +28,7 @@ const API_ENDPOINTS = {
   SESSIONS: `${API_BASE}/sessions`,
   STORED_SESSIONS: `${API_BASE}/sessions/stored`,
   SESSION: (id: string) => `${API_BASE}/session/${id}`,
+  SESSION_GROUP: (id: string) => `${API_BASE}/session/${id}/group`,
   SESSION_STATUS: (id: string) => `${API_BASE}/session/${id}/status`,
   SEND_MESSAGE: (id: string) => `${API_BASE}/send/${id}`,
   SESSION_CHATS: (id: string) => `${API_BASE}/session/${id}/chats`,
@@ -43,8 +47,13 @@ const api = new Api(whatsappBaseUrl)
 
 export const whatsappService = {
   // Session Management
-  async createSession(id: string): Promise<CreateSessionResponse> {
-    const response = await api.post({ path: API_ENDPOINTS.SESSION(id) })
+  async createSession(id: string, data: CreateSessionRequest): Promise<CreateSessionResponse> {
+    const response = await api.post({ path: API_ENDPOINTS.SESSION(id), data })
+    return response
+  },
+
+  async updateSessionGroup(id: string, data: UpdateSessionGroupRequest): Promise<UpdateSessionGroupResponse> {
+    const response = await api.post({ path: API_ENDPOINTS.SESSION_GROUP(id), data })
     return response
   },
 

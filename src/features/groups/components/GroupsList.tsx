@@ -21,7 +21,7 @@ export const GroupsList: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    //dispatch(fetchGroups(filterProjectId || undefined));
+    dispatch(fetchGroups(filterProjectId || undefined));
   }, [dispatch, filterProjectId]);
 
   const projectNameById = useMemo(() => {

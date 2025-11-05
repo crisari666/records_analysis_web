@@ -1,7 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { groupsService } from "../services/groupsService"
-import { Group, CreateGroupRequest, UpdateGroupRequest, UpdateGroupUsersRequest, GroupsSliceState } from "../types"
+import { CreateGroupRequest, UpdateGroupRequest, UpdateGroupUsersRequest, GroupsSliceState } from "../types"
 
 const initialState: GroupsSliceState = {
   groups: [],

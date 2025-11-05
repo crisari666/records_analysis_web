@@ -1,4 +1,4 @@
-import { useEffect, type JSX } from "react"
+import { useEffect, useState, type JSX } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Table,
@@ -13,8 +13,10 @@ import {
   Box,
   CircularProgress,
   Alert,
+  IconButton,
   type ChipProps,
 } from "@mui/material"
+import { Edit as EditIcon } from "@mui/icons-material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import {
@@ -22,8 +24,11 @@ import {
   selectStoredSessions,
   selectIsLoading,
   selectError,
+  openSyncDialog,
 } from "../store/whatsappSlice"
-import { openSyncDialog } from "../store/whatsappSlice"
+import { fetchGroups, selectGroups } from "@/features/groups/store/groupsSlice"
+import { UpdateSessionGroupModal } from "./UpdateSessionGroupModal"
+import type { StoredSession } from "../types"
 
 export const StoredSessionsList = (): JSX.Element => {
   const { t } = useTranslation("whatsapp")
@@ -32,10 +37,32 @@ export const StoredSessionsList = (): JSX.Element => {
   const storedSessions = useAppSelector(selectStoredSessions)
   const isLoading = useAppSelector(selectIsLoading)
   const error = useAppSelector(selectError)
+  const groups = useAppSelector(selectGroups)
+  const [updateModalOpen, setUpdateModalOpen] = useState(false)
+  const [selectedSession, setSelectedSession] = useState<StoredSession | null>(null)
 
   useEffect(() => {
     dispatch(getStoredSessionsAsync())
+    dispatch(fetchGroups())
   }, [dispatch])
+
+  const getGroupName = (refId: string | undefined): string => {
+    if (!refId) return t("noGroup") || "No Group"
+    const group = groups.find(g => g._id === refId)
+    return group?.name || refId
+  }
+
+  const handleUpdateGroup = (e: React.MouseEvent, session: StoredSession) => {
+    e.stopPropagation()
+    setSelectedSession(session)
+    setUpdateModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setUpdateModalOpen(false)
+    setSelectedSession(null)
+    dispatch(getStoredSessionsAsync())
+  }
 
   const getStatusColor = (status: string): ChipProps["color"] => {
     switch (status) {
@@ -88,15 +115,18 @@ export const StoredSessionsList = (): JSX.Element => {
   }
 
   return (
-    <TableContainer component={Paper}>
+    <>
+      <TableContainer component={Paper}>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell>{t("sessionId")}</TableCell>
             <TableCell>{t("status")}</TableCell>
+            <TableCell>{t("group")}</TableCell>
             <TableCell>{t("lastSeen")}</TableCell>
             <TableCell>{t("createdAt")}</TableCell>
             <TableCell>{t("updatedAt")}</TableCell>
+            <TableCell>{t("actions") || "Actions"}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -130,6 +160,11 @@ export const StoredSessionsList = (): JSX.Element => {
               </TableCell>
               <TableCell>
                 <Typography variant="body2" color="text.secondary">
+                  {getGroupName(session.refId)}
+                </Typography>
+              </TableCell>
+              <TableCell>
+                <Typography variant="body2" color="text.secondary">
                   {new Date(session.lastSeen).toLocaleString()}
                 </Typography>
               </TableCell>
@@ -143,10 +178,25 @@ export const StoredSessionsList = (): JSX.Element => {
                   {new Date(session.updatedAt).toLocaleString()}
                 </Typography>
               </TableCell>
+              <TableCell>
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleUpdateGroup(e, session)}
+                  aria-label={t("updateGroup") || "Update Group"}
+                >
+                  <EditIcon fontSize="small" />
+                </IconButton>
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-    </TableContainer>
+      </TableContainer>
+      <UpdateSessionGroupModal
+        open={updateModalOpen}
+        onClose={handleCloseModal}
+        session={selectedSession}
+      />
+    </>
   )
 }

@@ -1,6 +1,7 @@
 export { WhatsappControls } from "./WhatsappControls"
 export { SyncWhatsappDialog } from "./SyncWhatsappDialog"
 export { StoredSessionsList } from "./StoredSessionsList"
+export { UpdateSessionGroupModal } from "./UpdateSessionGroupModal"
 export { WhatsappSessionChatsList } from "./WhatsappSessionChatsList"
 export { WhatsappChatContent } from "./WhatsappChatContent"
 export { WhatsappChatHeader } from "./WhatsappChatHeader"

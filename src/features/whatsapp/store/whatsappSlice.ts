@@ -6,6 +6,8 @@ import type {
   ActiveSession,
   StoredSession,
   SessionStatusResponse,
+  CreateSessionRequest,
+  UpdateSessionGroupRequest,
   DestroySessionResponse,
   SendMessageRequest,
   StoredChat,
@@ -63,8 +65,8 @@ export const whatsappSlice = createAppSlice({
     // moved to whatsappSessionSlice: clearChats, clearMessages
     // Async Thunks - Session Management
     createSessionAsync: create.asyncThunk(
-      async (id: string) => {
-        const response = await whatsappService.createSession(id)
+      async ({ id, data }: { id: string; data: CreateSessionRequest }) => {
+        const response = await whatsappService.createSession(id, data)
         return response
       },
       {
@@ -81,6 +83,30 @@ export const whatsappSlice = createAppSlice({
           state.isLoading = false
           state.status = "failed"
           state.error = action.error.message || "Failed to create session"
+        },
+      },
+    ),
+    updateSessionGroupAsync: create.asyncThunk(
+      async ({ id, data }: { id: string; data: UpdateSessionGroupRequest }) => {
+        const response = await whatsappService.updateSessionGroup(id, data)
+        return { id, groupId: data.groupId, response }
+      },
+      {
+        pending: (state) => {
+          state.isLoading = true
+          state.error = null
+        },
+        fulfilled: (state, action: PayloadAction<{ id: string; groupId: string; response: { success: boolean } }>) => {
+          state.isLoading = false
+          // Update the stored session's refId
+          const session = state.storedSessions.find((s) => s.sessionId === action.payload.id)
+          if (session && action.payload.response.success) {
+            session.refId = action.payload.groupId
+          }
+        },
+        rejected: (state, action) => {
+          state.isLoading = false
+          state.error = action.error.message || "Failed to update session group"
         },
       },
     ),
@@ -307,6 +333,7 @@ export const {
   clearError,
   clearSessions,
   createSessionAsync,
+  updateSessionGroupAsync,
   getActiveSessionsAsync,
   getStoredSessionsAsync,
   getSessionStatusAsync,

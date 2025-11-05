@@ -11,7 +11,7 @@ const api = new Api()
 
 export const groupsService = {
   async getGroups(projectId?: string): Promise<Group[]> {
-    const response = await api.get({ path: API_ENDPOINTS.GROUPS, params: projectId ? { projectId } : undefined })
+    const response = await api.get({ path: API_ENDPOINTS.GROUPS, data: projectId ? { projectId } : undefined })
     return response
   },
 

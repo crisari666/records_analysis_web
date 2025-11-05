@@ -39,6 +39,15 @@
   "messageEditions": "Message editions",
   "totalDeletedMessages": "Deleted messages",
   "totalEditedMessages": "Edited messages",
-  "showOnlyDeletedOrEdited": "Show only deleted/edited"
+  "showOnlyDeletedOrEdited": "Show only deleted/edited",
+  "group": "Group",
+  "noGroup": "No Group",
+  "updateGroup": "Update Group",
+  "updateSessionGroup": "Update Session Group",
+  "actions": "Actions",
+  "sessionIdRequired": "Session ID is required",
+  "groupIdRequired": "Group is required",
+  "loadingGroups": "Loading groups...",
+  "save": "Save"
 }
 

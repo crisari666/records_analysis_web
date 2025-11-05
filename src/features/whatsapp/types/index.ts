@@ -13,6 +13,7 @@ export type StoredSession = {
                               lastSeen: string
                               updatedAt: string
                               createdAt: string
+                              refId?: string
                             }
 
 export type SessionStatusResponse = {
@@ -21,11 +22,23 @@ export type SessionStatusResponse = {
                                      state?: any
                                    }
 
+export type CreateSessionRequest = {
+                                     groupId: string
+                                   }
+
 export type CreateSessionResponse = {
                                      success: boolean
                                      sessionId: string
                                      message: string
                                    }
+
+export type UpdateSessionGroupRequest = {
+                                          groupId: string
+                                        }
+
+export type UpdateSessionGroupResponse = {
+                                           success: boolean
+                                         }
 
 export type DestroySessionResponse = {
                                        success: boolean
@@ -163,5 +176,7 @@ export type WhatsappState = {
                               isLoading: boolean
                               error: string | null
                               status: "idle" | "loading" | "failed"
+                              isSyncDialogOpen: boolean
+                              selectedSessionId: string | null
                             }
 

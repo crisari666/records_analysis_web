@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type JSX } from "react"
+import { useState, useEffect, useRef, useMemo, type JSX } from "react"
 import {
   Dialog,
   DialogTitle,
@@ -10,10 +10,12 @@ import {
   CircularProgress,
   Typography,
   Alert,
+  Autocomplete,
 } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { createSessionAsync, setQrCode, selectSelectedSessionId, selectQrCode, getStoredSessionsAsync } from "../store/whatsappSlice"
+import { fetchGroups, selectGroups } from "@/features/groups/store/groupsSlice"
 import { websocketService } from "@/shared/services/websocket.service"
 import QRCode from "react-qr-code"
 
@@ -43,7 +45,9 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
   const dispatch = useAppDispatch()
   const preselectedSessionId = useAppSelector(selectSelectedSessionId)
   const globalQrCode = useAppSelector(selectQrCode)
+  const groups = useAppSelector(selectGroups)
   const [sessionId, setSessionId] = useState("")
+  const [groupId, setGroupId] = useState<string>("")
   const [qrCode, setQrCodeLocal] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -52,10 +56,19 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
   const unsubscribeErrorRef = useRef<(() => void) | null>(null)
   const unsubscribeReadingRef = useRef<(() => void) | null>(null)
 
+  const groupOptions = useMemo(() => groups.map(g => ({ label: g.name, value: g._id })), [groups])
+
+  useEffect(() => {
+    if (open && groups.length === 0) {
+      dispatch(fetchGroups())
+    }
+  }, [open, dispatch, groups.length])
+
   useEffect(() => {
     if (!open) {
       // Reset state when dialog closes
       setSessionId("")
+      setGroupId("")
       setQrCodeLocal(null)
       setError(null)
       setSuccess(null)
@@ -113,6 +126,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
   const handleClose = () => {
     // Cleanup
     setSessionId("")
+    setGroupId("")
     setQrCodeLocal(null)
     setError(null)
     setSuccess(null)
@@ -123,6 +137,12 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
 
   const handleSubmit = async () => {
     if (!sessionId.trim()) {
+      setError(t("sessionIdRequired") || "Session ID is required")
+      return
+    }
+
+    if (!groupId) {
+      setError(t("groupIdRequired") || "Group is required")
       return
     }
 
@@ -138,7 +158,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
 
     try {
       // Create session
-      const result = await dispatch(createSessionAsync(sessionId.trim())).unwrap()
+      const result = await dispatch(createSessionAsync({ id: sessionId.trim(), data: { groupId } })).unwrap()
       
       if (!result.success) {
         setError(result.message || t("errorCreatingSession"))
@@ -222,15 +242,31 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
           {!qrCode && (
-            <TextField
-              label={t("sessionId")}
-              value={sessionId}
-              onChange={e => setSessionId(e.target.value)}
-              fullWidth
-              required
-              placeholder={t("sessionIdPlaceholder")}
-              disabled={isLoading}
-            />
+            <>
+              <TextField
+                label={t("sessionId")}
+                value={sessionId}
+                onChange={e => setSessionId(e.target.value)}
+                fullWidth
+                required
+                placeholder={t("sessionIdPlaceholder")}
+                disabled={isLoading}
+              />
+              <Autocomplete
+                options={groupOptions}
+                value={groupOptions.find(o => o.value === groupId) || null}
+                onChange={(_, val) => setGroupId(val ? val.value : "")}
+                renderInput={(params) => (
+                  <TextField {...params} label={t("group")} required disabled={isLoading || groups.length === 0} />
+                )}
+                disabled={isLoading || groups.length === 0}
+              />
+              {groups.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  {t("loadingGroups") || "Loading groups..."}
+                </Typography>
+              )}
+            </>
           )}
 
           {isLoading && (
@@ -275,7 +311,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
           <Button
             onClick={handleSubmit}
             variant="contained"
-            disabled={!sessionId.trim() || isLoading}
+            disabled={!sessionId.trim() || !groupId || isLoading || groups.length === 0}
           >
             {t("sync")}
           </Button>
