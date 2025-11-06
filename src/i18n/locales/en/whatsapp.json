@@ -48,6 +48,9 @@
   "sessionIdRequired": "Session ID is required",
   "groupIdRequired": "Group is required",
   "loadingGroups": "Loading groups...",
-  "save": "Save"
+  "save": "Save",
+  "syncMessages": "Sync Messages",
+  "syncingMessages": "Syncing messages...",
+  "syncMessagesSuccess": "Messages synced successfully"
 }
 

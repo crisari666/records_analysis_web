@@ -305,6 +305,25 @@ export const whatsappSlice = createAppSlice({
         },
       },
     ),
+    syncChatsAsync: create.asyncThunk(
+      async (id: string) => {
+        const chats = await whatsappService.getChats(id)
+        return chats
+      },
+      {
+        pending: (state) => {
+          state.isLoading = true
+          state.error = null
+        },
+        fulfilled: (state) => {
+          state.isLoading = false
+        },
+        rejected: (state, action) => {
+          state.isLoading = false
+          state.error = action.error.message || "Failed to sync chats"
+        },
+      },
+    ),
     // moved to whatsappSessionSlice: getMessageByIdAsync, getMessageEditHistoryAsync
   }),
   selectors: {
@@ -343,6 +362,7 @@ export const {
   getStoredChatByIdAsync,
   getStoredMessagesAsync,
   getDeletedMessagesAsync,
+  syncChatsAsync,
 } = whatsappSlice.actions
 
 export const {
