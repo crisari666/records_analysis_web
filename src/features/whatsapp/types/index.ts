@@ -170,8 +170,7 @@ export type WhatsappState = {
                               storedSessions: StoredSession[]
                               currentSession: ActiveSession | null
                               storedChats: StoredChat[]
-                              storedMessages: StoredMessage[]
-                              deletedMessages: DeletedMessage[]
+                              // moved to whatsappSessionSlice: storedMessages, deletedMessages
                               qrCode: string | null
                               isLoading: boolean
                               error: string | null

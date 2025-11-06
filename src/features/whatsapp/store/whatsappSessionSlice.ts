@@ -4,17 +4,23 @@ import { whatsappService } from "../services/whatsappService"
 import type {
   Chat,
   StoredMessage,
+  Message,
+  DeletedMessage,
+  GetChatMessagesParams,
   GetStoredMessagesParams,
+  GetDeletedMessagesParams,
 } from "../types"
 
 type WhatsappSessionState = {
   currentSessionId: string | null
   chats: Chat[]
   messages: StoredMessage[]
+  deletedMessages: DeletedMessage[]
   currentChat: Chat | null
   currentMessage: StoredMessage | null
   isChatsLoading: boolean
   isMessagesLoading: boolean
+  isSyncing: boolean
   error: string | null
   status: "idle" | "loading" | "failed"
 }
@@ -23,10 +29,12 @@ const initialState: WhatsappSessionState = {
   currentSessionId: null,
   chats: [],
   messages: [],
+  deletedMessages: [],
   currentChat: null,
   currentMessage: null,
   isChatsLoading: false,
   isMessagesLoading: false,
+  isSyncing: false,
   error: null,
   status: "idle",
 }
@@ -138,8 +146,49 @@ export const whatsappSessionSlice = createAppSlice({
       },
     ),
     getChatMessagesAsync: create.asyncThunk(
-      async ({ id, chatId, params }: { id: string; chatId: string; params?: GetStoredMessagesParams }) => {
-        const messages = await whatsappService.getStoredMessages(id, { chatId, ...params })
+      async ({ id, chatId, params }: { id: string; chatId: string; params?: GetChatMessagesParams }) => {
+        const messages = await whatsappService.getChatMessages(id, chatId, params)
+        return { messages, chatId }
+      },
+      {
+        pending: (state) => {
+          state.isSyncing = true
+          state.error = null
+        },
+        fulfilled: (state, action: PayloadAction<{ messages: Message[]; chatId: string }>) => {
+          state.isSyncing = false
+          // Convert Message[] to StoredMessage[] format for compatibility
+          const storedMessages: StoredMessage[] = action.payload.messages.map((msg) => ({
+            messageId: msg.id,
+            chatId: action.payload.chatId,
+            body: msg.body,
+            type: "text", // Default type as Message doesn't have this field
+            from: msg.from,
+            to: msg.to,
+            author: null,
+            fromMe: msg.fromMe,
+            timestamp: msg.timestamp,
+            isDeleted: msg.isDeleted,
+            deletedAt: null,
+            deletedBy: null,
+            edition: [],
+            hasMedia: msg.hasMedia,
+            mediaType: msg.mediaType,
+            hasQuotedMsg: msg.hasQuotedMsg,
+            isForwarded: msg.isForwarded,
+            isStarred: msg.isStarred,
+          }))
+          state.messages = storedMessages
+        },
+        rejected: (state, action) => {
+          state.isSyncing = false
+          state.error = action.error.message || "Failed to fetch chat messages"
+        },
+      },
+    ),
+    getStoredMessagesAsync: create.asyncThunk(
+      async ({ id, params }: { id: string; params?: GetStoredMessagesParams }) => {
+        const messages = await whatsappService.getStoredMessages(id, params)
         return messages
       },
       {
@@ -153,7 +202,28 @@ export const whatsappSessionSlice = createAppSlice({
         },
         rejected: (state, action) => {
           state.isMessagesLoading = false
-          state.error = action.error.message || "Failed to fetch chat messages"
+          state.isSyncing = false
+          state.error = action.error.message || "Failed to fetch stored messages"
+        },
+      },
+    ),
+    getDeletedMessagesAsync: create.asyncThunk(
+      async ({ id, params }: { id: string; params?: GetDeletedMessagesParams }) => {
+        const messages = await whatsappService.getDeletedMessages(id, params)
+        return messages
+      },
+      {
+        pending: (state) => {
+          state.isMessagesLoading = true
+          state.error = null
+        },
+        fulfilled: (state, action: PayloadAction<DeletedMessage[]>) => {
+          state.isMessagesLoading = false
+          state.deletedMessages = action.payload
+        },
+        rejected: (state, action) => {
+          state.isMessagesLoading = false
+          state.error = action.error.message || "Failed to fetch deleted messages"
         },
       },
     ),
@@ -201,10 +271,12 @@ export const whatsappSessionSlice = createAppSlice({
     selectSessionId: (state) => state.currentSessionId,
     selectChats: (state) => state.chats,
     selectMessages: (state) => state.messages,
+    selectDeletedMessages: (state) => state.deletedMessages,
     selectCurrentChat: (state) => state.currentChat,
     selectCurrentMessage: (state) => state.currentMessage,
     selectIsChatsLoading: (state) => state.isChatsLoading,
     selectIsMessagesLoading: (state) => state.isMessagesLoading,
+    selectIsSyncing: (state) => state.isSyncing,
     selectError: (state) => state.error,
     selectStatus: (state) => state.status,
   },
@@ -221,6 +293,8 @@ export const {
   updateChatWithNewMessage,
   getChatsAsync,
   getChatMessagesAsync,
+  getStoredMessagesAsync,
+  getDeletedMessagesAsync,
   getMessageByIdAsync,
   getMessageEditHistoryAsync,
 } = whatsappSessionSlice.actions
@@ -229,10 +303,12 @@ export const {
   selectSessionId,
   selectChats,
   selectMessages,
+  selectDeletedMessages,
   selectCurrentChat,
   selectCurrentMessage,
   selectIsChatsLoading,
   selectIsMessagesLoading,
+  selectIsSyncing,
   selectError,
   selectStatus,
 } = whatsappSessionSlice.selectors

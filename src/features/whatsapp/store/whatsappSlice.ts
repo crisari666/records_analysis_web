@@ -11,10 +11,6 @@ import type {
   DestroySessionResponse,
   SendMessageRequest,
   StoredChat,
-  StoredMessage,
-  DeletedMessage,
-  GetStoredMessagesParams,
-  GetDeletedMessagesParams,
   GetStoredChatsParams,
 } from "../types"
 
@@ -24,10 +20,7 @@ const initialState: WhatsappState = {
   currentSession: null,
   // moved to whatsappSessionSlice
   storedChats: [],
-  // moved to whatsappSessionSlice
-  storedMessages: [],
-  deletedMessages: [],
-  // moved to whatsappSessionSlice
+  // moved to whatsappSessionSlice: storedMessages, deletedMessages
   qrCode: null,
   isLoading: false,
   error: null,
@@ -264,77 +257,14 @@ export const whatsappSlice = createAppSlice({
         },
       },
     ),
-    // Async Thunks - Stored Messages
-    getStoredMessagesAsync: create.asyncThunk(
-      async ({ id, params }: { id: string; params?: GetStoredMessagesParams }) => {
-        const messages = await whatsappService.getStoredMessages(id, params)
-        return messages
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state, action: PayloadAction<StoredMessage[]>) => {
-          state.isLoading = false
-          state.storedMessages = action.payload
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch stored messages"
-        },
-      },
-    ),
-    getDeletedMessagesAsync: create.asyncThunk(
-      async ({ id, params }: { id: string; params?: GetDeletedMessagesParams }) => {
-        const messages = await whatsappService.getDeletedMessages(id, params)
-        return messages
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state, action: PayloadAction<DeletedMessage[]>) => {
-          state.isLoading = false
-          state.deletedMessages = action.payload
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch deleted messages"
-        },
-      },
-    ),
-    syncChatsAsync: create.asyncThunk(
-      async (id: string) => {
-        const chats = await whatsappService.getChats(id)
-        return chats
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state) => {
-          state.isLoading = false
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to sync chats"
-        },
-      },
-    ),
-    // moved to whatsappSessionSlice: getMessageByIdAsync, getMessageEditHistoryAsync
+    // moved to whatsappSessionSlice: getStoredMessagesAsync, getDeletedMessagesAsync, getMessageByIdAsync, getMessageEditHistoryAsync
   }),
   selectors: {
     selectSessions: (whatsapp) => whatsapp.sessions,
     selectStoredSessions: (whatsapp) => whatsapp.storedSessions,
     selectCurrentSession: (whatsapp) => whatsapp.currentSession,
     selectStoredChats: (whatsapp) => whatsapp.storedChats,
-    // moved to whatsappSessionSlice: selectChats, selectMessages
-    selectStoredMessages: (whatsapp) => whatsapp.storedMessages,
-    selectDeletedMessages: (whatsapp) => whatsapp.deletedMessages,
-    // moved to whatsappSessionSlice: selectCurrentChat, selectCurrentMessage
+    // moved to whatsappSessionSlice: selectChats, selectMessages, selectDeletedMessages, selectCurrentChat, selectCurrentMessage
     selectQrCode: (whatsapp) => whatsapp.qrCode,
     selectIsLoading: (whatsapp) => whatsapp.isLoading,
     selectError: (whatsapp) => whatsapp.error,
@@ -360,9 +290,7 @@ export const {
   sendMessageAsync,
   getStoredChatsAsync,
   getStoredChatByIdAsync,
-  getStoredMessagesAsync,
-  getDeletedMessagesAsync,
-  syncChatsAsync,
+  // moved to whatsappSessionSlice: getStoredMessagesAsync, getDeletedMessagesAsync
 } = whatsappSlice.actions
 
 export const {
@@ -370,8 +298,7 @@ export const {
   selectStoredSessions,
   selectCurrentSession,
   selectStoredChats,
-  selectStoredMessages,
-  selectDeletedMessages,
+  // moved to whatsappSessionSlice: selectStoredMessages, selectDeletedMessages
   selectQrCode,
   selectIsLoading,
   selectError,

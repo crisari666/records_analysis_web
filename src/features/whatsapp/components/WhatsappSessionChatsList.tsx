@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { Card, CardContent, List, ListItem, ListItemText, ListItemButton, CircularProgress, Box, Typography, Chip } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { getChatsAsync, selectChats, selectIsChatsLoading, setCurrentSessionId, setCurrentChat, getChatMessagesAsync } from "../store/whatsappSessionSlice"
+import { getChatsAsync, selectChats, selectIsChatsLoading, setCurrentSessionId, setCurrentChat, getStoredMessagesAsync } from "../store/whatsappSessionSlice"
 
 type WhatsappSessionChatsListProps = {
   sessionId: string
@@ -35,7 +35,7 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
                 <ListItemButton
                   onClick={() => {
                     dispatch(setCurrentChat(chat))
-                    dispatch(getChatMessagesAsync({ id: sessionId, chatId: chat.id, params: { includeDeleted: true } }))
+                    dispatch(getStoredMessagesAsync({ id: sessionId, params: { chatId: chat.id, includeDeleted: true } }))
                   }}
                 >
                   <ListItemText

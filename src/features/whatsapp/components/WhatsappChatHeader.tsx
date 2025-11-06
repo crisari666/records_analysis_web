@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Box, Typography, Chip, FormControlLabel, Switch, Button, CircularProgress, Snackbar, Alert } from "@mui/material"
 import SyncIcon from "@mui/icons-material/Sync"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { syncChatsAsync, selectIsLoading, selectError } from "../store/whatsappSlice"
-import { selectSessionId } from "../store/whatsappSessionSlice"
+import { selectSessionId, selectIsSyncing, selectCurrentChat, getChatMessagesAsync } from "../store/whatsappSessionSlice"
 import type { StoredMessage } from "../types"
 
 type WhatsappChatHeaderProps = {
@@ -17,9 +16,8 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
   const { t } = useTranslation("whatsapp")
   const dispatch = useAppDispatch()
   const sessionId = useAppSelector(selectSessionId)
-  const isLoading = useAppSelector(selectIsLoading)
-  const error = useAppSelector(selectError)
-  const [isSyncing, setIsSyncing] = useState(false)
+  const currentChat = useAppSelector(selectCurrentChat)
+  const isSyncing = useAppSelector(selectIsSyncing)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success")
@@ -27,29 +25,21 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
   const deletedCount = messages.filter((msg) => msg.isDeleted).length
   const editedCount = messages.filter((msg) => msg.edition && msg.edition.length > 0).length
 
-  // Track sync state changes
-  useEffect(() => {
-    if (isSyncing && !isLoading) {
-      // Sync completed
-      setIsSyncing(false)
-      // Show success notification
-      if (!error) {
+  const handleSyncMessages = async () => {
+    if (sessionId && currentChat && !isSyncing) {
+      try {
+        await dispatch(getChatMessagesAsync({ id: sessionId, chatId: currentChat.id })).unwrap()
+        // Sync completed successfully
         setSnackbarMessage(t("syncMessagesSuccess"))
         setSnackbarSeverity("success")
         setSnackbarOpen(true)
-      } else {
-        // Show error notification
-        setSnackbarMessage(error)
+      } catch (err) {
+        // Sync failed
+        const errorMessage = err instanceof Error ? err.message : "Failed to sync messages"
+        setSnackbarMessage(errorMessage)
         setSnackbarSeverity("error")
         setSnackbarOpen(true)
       }
-    }
-  }, [isLoading, isSyncing, error, t])
-
-  const handleSyncMessages = () => {
-    if (sessionId && !isSyncing) {
-      setIsSyncing(true)
-      dispatch(syncChatsAsync(sessionId))
     }
   }
 
@@ -97,7 +87,7 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
             variant="outlined"
             startIcon={<SyncIcon />}
             onClick={handleSyncMessages}
-            disabled={!sessionId}
+            disabled={!sessionId || !currentChat}
             size="small"
           >
             {t("syncMessages")}

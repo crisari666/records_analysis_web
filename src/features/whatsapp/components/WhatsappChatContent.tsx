@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
 import { Card, CardContent, List, ListItem, ListItemText, Box, Typography, Chip, Tooltip } from "@mui/material"
 import DeleteIcon from "@mui/icons-material/Delete"
 import EditIcon from "@mui/icons-material/Edit"
@@ -13,15 +13,35 @@ export const WhatsappChatContent = () => {
   const currentChat = useAppSelector(selectCurrentChat)
   const isLoading = useAppSelector(selectIsMessagesLoading)
   const [filterEnabled, setFilterEnabled] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const prevLoadingRef = useRef<boolean>(false)
 
   const filteredMessages = useMemo(() => {
     if (!filterEnabled) return messages
     return messages.filter((msg) => msg.isDeleted || (msg.edition && msg.edition.length > 0))
   }, [messages, filterEnabled])
 
+  // Scroll to bottom when messages are loaded
+  useEffect(() => {
+    // Check if loading just finished
+    if (prevLoadingRef.current && !isLoading && filteredMessages.length > 0) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: "smooth" })
+        } else if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
+        }
+      }, 100)
+    }
+    prevLoadingRef.current = isLoading
+  }, [isLoading, filteredMessages.length])
+
   return (
     <Card sx={{ height: "100%" }}>
-      <CardContent sx={{ height: "100%", p: 0, display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ height: "100%", p: 0,
+         display: "flex", flexDirection: "column" }}>
         {!currentChat ? (
           <Typography color="text.secondary">{t("selectChatPrompt")}</Typography>
         ) : isLoading ? (
@@ -35,7 +55,7 @@ export const WhatsappChatContent = () => {
               filterEnabled={filterEnabled}
               onFilterChange={setFilterEnabled}
             />
-            <Box sx={{ flex: 1, overflowY: "auto" }}>
+            <Box ref={scrollContainerRef} sx={{ flex: 1, overflowY: "auto" }}>
               <List>
               {filteredMessages.map((message) => (
               <ListItem key={message.messageId} sx={{ justifyContent: message.fromMe ? "flex-end" : "flex-start" }} >
@@ -117,6 +137,7 @@ export const WhatsappChatContent = () => {
               {filteredMessages.length === 0 && (
                 <Typography color="text.secondary">{t("noMessages")}</Typography>
               )}
+              <div ref={messagesEndRef} />
               </List>
             </Box>
           </>
