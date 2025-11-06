@@ -19,24 +19,23 @@ import {
   Devices as DevicesIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { 
   fetchProjects, 
   deleteProject
 } from '../store/projectsSlice';
-import { ProjectFormModal } from './ProjectFormModal';
 import { ProjectDevicesModal } from './ProjectDevicesModal';
 import { Project } from '../types';
 
 export const ListProjects: React.FC = () => {
   const { t } = useTranslation('projects');
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const projects = useAppSelector((state) => state.projects.projects);
   const status = useAppSelector((state) => state.projects.status);
   const error = useAppSelector((state) => state.projects.error);
 
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
   const [devicesModalOpen, setDevicesModalOpen] = useState(false);
   const [selectedProjectForDevices, setSelectedProjectForDevices] = useState<Project | null>(null);
 
@@ -45,19 +44,13 @@ export const ListProjects: React.FC = () => {
   }, [dispatch]);
 
   const handleEditProject = (project: Project) => {
-    setEditingProject(project);
-    setModalOpen(true);
+    navigate(`/dashboard/project/${project._id}`);
   };
 
   const handleDeleteProject = (projectId: string) => {
     if (window.confirm(t('confirm_delete'))) {
       dispatch(deleteProject(projectId));
     }
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setEditingProject(null);
   };
 
   const handleManageDevices = (project: Project) => {
@@ -172,12 +165,6 @@ export const ListProjects: React.FC = () => {
           </Grid>
         ))}
       </Grid>
-
-      <ProjectFormModal
-        open={modalOpen}
-        onClose={handleCloseModal}
-        project={editingProject}
-      />
 
       <ProjectDevicesModal
         open={devicesModalOpen}

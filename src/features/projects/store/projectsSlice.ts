@@ -5,12 +5,14 @@ import { Project, CreateProjectRequest, UpdateProjectRequest, UpdateProjectDevic
 
 export type ProjectsSliceState = {
   projects: Project[]
+  selectedProject: Project | null
   status: "idle" | "loading" | "failed"
   error: string | null
 }
 
 const initialState: ProjectsSliceState = {
   projects: [],
+  selectedProject: null,
   status: "idle",
   error: null,
 }
@@ -45,6 +47,35 @@ export const projectsSlice = createAppSlice({
         },
       },
     ),
+    fetchProjectById: create.asyncThunk(
+      async (id: string) => {
+        const response = await projectsService.getProjectById(id)
+        return response
+      },
+      {
+        pending: state => {
+          state.status = "loading"
+          state.error = null
+        },
+        fulfilled: (state, action) => {
+          state.status = "idle"
+          state.selectedProject = action.payload
+          const index = state.projects.findIndex(project => project._id === action.payload._id)
+          if (index !== -1) {
+            state.projects[index] = action.payload
+          } else {
+            state.projects.push(action.payload)
+          }
+        },
+        rejected: (state, action) => {
+          state.status = "failed"
+          state.error = action.error.message || "Failed to fetch project"
+        },
+      },
+    ),
+    clearSelectedProject: create.reducer(state => {
+      state.selectedProject = null
+    }),
     createProject: create.asyncThunk(
       async (projectData: CreateProjectRequest) => {
         const response = await projectsService.createProject(projectData)
@@ -134,6 +165,7 @@ export const projectsSlice = createAppSlice({
   }),
   selectors: {
     selectProjects: projects => projects.projects,
+    selectSelectedProject: projects => projects.selectedProject,
     selectStatus: projects => projects.status,
     selectError: projects => projects.error,
     selectProjectById: (projects, id: string) => projects.projects.find(project => project._id === id),
@@ -144,7 +176,9 @@ export const projectsSlice = createAppSlice({
 export const { 
   clearError, 
   setStatus, 
-  fetchProjects, 
+  fetchProjects,
+  fetchProjectById,
+  clearSelectedProject,
   createProject, 
   updateProject, 
   updateProjectDevices, 
@@ -153,7 +187,8 @@ export const {
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.
 export const { 
-  selectProjects, 
+  selectProjects,
+  selectSelectedProject,
   selectStatus, 
   selectError, 
   selectProjectById 

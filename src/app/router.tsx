@@ -6,6 +6,7 @@ import { UsersListPage } from '../features/users/pages/UsersListPage';
 import { DevicesPage } from '../features/devices/pages/DevicesPage';
 import { RecordsPage } from '../features/records/pages/RecordsPage';
 import { ProjectsPage } from '../features/projects/pages/ProjectsPage';
+import { ProjectPage } from '../features/projects/pages/ProjectPage';
 import { GroupsPage } from '../features/groups/pages/GroupsPage';
 import { WhatsAppPage } from '../features/whatsapp/pages/WhatsAppPage';
 import { WhatsasppSessionChatsPage } from '../features/whatsapp/pages/WhatsasppSessionChatsPage';
@@ -43,6 +44,14 @@ export const router = createBrowserRouter([
       {
         path: 'projects',
         element: <ProjectsPage />,
+      },
+      {
+        path: 'project',
+        element: <ProjectPage />,
+      },
+      {
+        path: 'project/:id',
+        element: <ProjectPage />,
       },
       {
         path: 'groups',
