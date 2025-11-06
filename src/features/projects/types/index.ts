@@ -8,9 +8,21 @@ export type Indicator = {
   exampleOutput?: string;
 };
 
+export type ExampleAnalysis = {
+  name?: string;
+  input: string;
+  output: Record<string, any>;
+};
+
 export type ProjectConfig = {
   mainPrompt?: string;
   indicators?: Indicator[];
+  name?: string;
+  description?: string;
+  domain?: string;
+  example_analysis?: ExampleAnalysis | ExampleAnalysis[];
+  example_analysis_fail?: ExampleAnalysis | ExampleAnalysis[];
+  examples_analysis?: Record<string, ExampleAnalysis>;
 };
 
 export type Project = {

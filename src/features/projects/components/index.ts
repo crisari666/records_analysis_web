@@ -8,3 +8,7 @@ export { IndicatorsList } from './IndicatorsList';
 export { ProjectFormContent } from './ProjectFormContent';
 export { ProjectFormContainer } from './ProjectFormContainer';
 export { ProjectBreadcrumbs } from './ProjectBreadcrumbs';
+export { ExampleAnalysisField } from './ExampleAnalysisField';
+export { ExampleAnalysesList } from './ExampleAnalysesList';
+export { TrainingDataDialog } from './TrainingDataDialog';
+export { TrainingDataDisplay } from './TrainingDataDisplay';

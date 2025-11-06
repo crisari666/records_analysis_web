@@ -12,9 +12,12 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { createProject, updateProject, clearError, fetchProjects } from '../store/projectsSlice';
-import { Project, ProjectConfig, Indicator } from '../types';
+import { Project, ProjectConfig, Indicator, ExampleAnalysis } from '../types';
 import { MainPromptField } from './MainPromptField';
 import { IndicatorsList } from './IndicatorsList';
+import { TrainingDataDialog } from './TrainingDataDialog';
+import { TrainingDataDisplay } from './TrainingDataDisplay';
+import { ExampleAnalysesList } from './ExampleAnalysesList';
 
 type ProjectFormContentProps = {
   project?: Project | null;
@@ -31,9 +34,19 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
   const error = useAppSelector((state) => state.projects.error);
 
   const [title, setTitle] = useState('');
+  const [configName, setConfigName] = useState('');
+  const [configDescription, setConfigDescription] = useState('');
+  const [domain, setDomain] = useState('');
   const [mainPrompt, setMainPrompt] = useState('');
   const [indicators, setIndicators] = useState<Indicator[]>([]);
+  const [exampleAnalyses, setExampleAnalyses] = useState<ExampleAnalysis[]>([]);
+  const [exampleAnalysesFail, setExampleAnalysesFail] = useState<ExampleAnalysis[]>([]);
+  const [examplesAnalysis, setExamplesAnalysis] = useState<Record<string, ExampleAnalysis>>({});
   const [wasSubmitted, setWasSubmitted] = useState(false);
+  const [trainingDataDialogOpen, setTrainingDataDialogOpen] = useState(false);
+  const [trainingDataDialogType, setTrainingDataDialogType] = useState<'success' | 'fail'>('success');
+  const [editingTrainingDataIndex, setEditingTrainingDataIndex] = useState<number | null>(null);
+  const [editingExampleKey, setEditingExampleKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (project) {
@@ -51,6 +64,11 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
       
       // Handle both new ProjectConfig format and legacy format
       if (config && typeof config === 'object' && !Array.isArray(config)) {
+        // Extract config name, description, and domain
+        setConfigName(config.name || '');
+        setConfigDescription(config.description || '');
+        setDomain(config.domain || '');
+        
         // Extract mainPrompt - check for new format (instructions array) or legacy format (mainPrompt string)
         if (config.mainPrompt !== undefined && config.mainPrompt !== null) {
           // Legacy format: mainPrompt is a string
@@ -115,16 +133,65 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
         } else {
           setIndicators([]);
         }
+        
+        // Extract example analyses - handle new format (examples_analysis object) or legacy format (arrays)
+        if (config.examples_analysis && typeof config.examples_analysis === 'object' && !Array.isArray(config.examples_analysis)) {
+          // New format: examples_analysis is an object
+          setExamplesAnalysis(config.examples_analysis);
+          setExampleAnalyses([]);
+          setExampleAnalysesFail([]);
+        } else {
+          // Legacy format: handle example_analysis and example_analysis_fail arrays
+          setExamplesAnalysis({});
+          
+          if (config.example_analysis) {
+            if (Array.isArray(config.example_analysis)) {
+              setExampleAnalyses(config.example_analysis);
+            } else if (typeof config.example_analysis === 'object' && config.example_analysis.input !== undefined) {
+              // Single example, convert to array
+              setExampleAnalyses([config.example_analysis]);
+            } else {
+              setExampleAnalyses([]);
+            }
+          } else {
+            setExampleAnalyses([]);
+          }
+          
+          if (config.example_analysis_fail) {
+            if (Array.isArray(config.example_analysis_fail)) {
+              setExampleAnalysesFail(config.example_analysis_fail);
+            } else if (typeof config.example_analysis_fail === 'object' && config.example_analysis_fail.input !== undefined) {
+              // Single example, convert to array
+              setExampleAnalysesFail([config.example_analysis_fail]);
+            } else {
+              setExampleAnalysesFail([]);
+            }
+          } else {
+            setExampleAnalysesFail([]);
+          }
+        }
       } else {
         // Config is null, undefined, or invalid - reset to defaults
+        setConfigName('');
+        setConfigDescription('');
+        setDomain('');
         setMainPrompt('');
         setIndicators([]);
+        setExampleAnalyses([]);
+        setExampleAnalysesFail([]);
+        setExamplesAnalysis({});
       }
     } else {
       // No project - reset to defaults
       setTitle('');
+      setConfigName('');
+      setConfigDescription('');
+      setDomain('');
       setMainPrompt('');
       setIndicators([]);
+      setExampleAnalyses([]);
+      setExampleAnalysesFail([]);
+      setExamplesAnalysis({});
     }
     dispatch(clearError());
     setWasSubmitted(false);
@@ -169,6 +236,11 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
   const handleJsonConfigChange = (jsonString: string) => {
     try {
       const parsedConfig = JSON.parse(jsonString);
+      
+      // Update config name, description, and domain
+      setConfigName(parsedConfig.name || '');
+      setConfigDescription(parsedConfig.description || '');
+      setDomain(parsedConfig.domain || '');
       
       // Update mainPrompt from instructions array
       if (parsedConfig.instructions && Array.isArray(parsedConfig.instructions)) {
@@ -223,6 +295,39 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
         );
         setIndicators(validIndicators);
       }
+      
+      // Update example analyses - handle new format (examples_analysis object) or legacy format
+      if (parsedConfig.examples_analysis && typeof parsedConfig.examples_analysis === 'object' && !Array.isArray(parsedConfig.examples_analysis)) {
+        setExamplesAnalysis(parsedConfig.examples_analysis);
+        setExampleAnalyses([]);
+        setExampleAnalysesFail([]);
+      } else {
+        setExamplesAnalysis({});
+        
+        if (parsedConfig.example_analysis) {
+          if (Array.isArray(parsedConfig.example_analysis)) {
+            setExampleAnalyses(parsedConfig.example_analysis);
+          } else if (typeof parsedConfig.example_analysis === 'object' && parsedConfig.example_analysis.input !== undefined) {
+            setExampleAnalyses([parsedConfig.example_analysis]);
+          } else {
+            setExampleAnalyses([]);
+          }
+        } else {
+          setExampleAnalyses([]);
+        }
+        
+        if (parsedConfig.example_analysis_fail) {
+          if (Array.isArray(parsedConfig.example_analysis_fail)) {
+            setExampleAnalysesFail(parsedConfig.example_analysis_fail);
+          } else if (typeof parsedConfig.example_analysis_fail === 'object' && parsedConfig.example_analysis_fail.input !== undefined) {
+            setExampleAnalysesFail([parsedConfig.example_analysis_fail]);
+          } else {
+            setExampleAnalysesFail([]);
+          }
+        } else {
+          setExampleAnalysesFail([]);
+        }
+      }
     } catch (error) {
       // Invalid JSON - don't update state
       console.error('Invalid JSON config:', error);
@@ -236,6 +341,19 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
 
     // Build config in the format expected by the backend
     const config: any = {};
+    
+    // Add config name, description, and domain
+    if (configName.trim()) {
+      config.name = configName.trim();
+    }
+    
+    if (configDescription.trim()) {
+      config.description = configDescription.trim();
+    }
+    
+    if (domain.trim()) {
+      config.domain = domain.trim();
+    }
     
     // Convert mainPrompt to instructions array (split by newlines)
     if (mainPrompt.trim()) {
@@ -287,6 +405,20 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
         example,
       };
     }
+    
+    // Add example analyses - prefer new format (examples_analysis object) if available
+    if (Object.keys(examplesAnalysis).length > 0) {
+      config.examples_analysis = examplesAnalysis;
+    } else {
+      // Legacy format: save as arrays
+      if (exampleAnalyses.length > 0) {
+        config.example_analysis = exampleAnalyses;
+      }
+      
+      if (exampleAnalysesFail.length > 0) {
+        config.example_analysis_fail = exampleAnalysesFail;
+      }
+    }
 
     setWasSubmitted(true);
 
@@ -310,6 +442,18 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
 
   const buildConfigJson = () => {
     const config: any = {};
+    
+    if (configName.trim()) {
+      config.name = configName.trim();
+    }
+    
+    if (configDescription.trim()) {
+      config.description = configDescription.trim();
+    }
+    
+    if (domain.trim()) {
+      config.domain = domain.trim();
+    }
     
     if (mainPrompt.trim()) {
       config.instructions = mainPrompt
@@ -356,6 +500,20 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
       };
     }
     
+    // Prefer new format (examples_analysis object) if available
+    if (Object.keys(examplesAnalysis).length > 0) {
+      config.examples_analysis = examplesAnalysis;
+    } else {
+      // Legacy format: save as arrays
+      if (exampleAnalyses.length > 0) {
+        config.example_analysis = exampleAnalyses;
+      }
+      
+      if (exampleAnalysesFail.length > 0) {
+        config.example_analysis_fail = exampleAnalysesFail;
+      }
+    }
+    
     return JSON.stringify(config, null, 2);
   };
 
@@ -389,6 +547,39 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
                   required
                   disabled={isLoading}
                   placeholder={t('project_title_placeholder')}
+                  size="small"
+                />
+
+                <TextField
+                  label={t('config_name')}
+                  value={configName}
+                  onChange={(e) => setConfigName(e.target.value)}
+                  fullWidth
+                  disabled={isLoading}
+                  placeholder={t('config_name_placeholder')}
+                  size="small"
+                />
+
+                <TextField
+                  label={t('config_description')}
+                  value={configDescription}
+                  onChange={(e) => setConfigDescription(e.target.value)}
+                  fullWidth
+                  multiline
+                  rows={3}
+                  disabled={isLoading}
+                  placeholder={t('config_description_placeholder')}
+                  size="small"
+                />
+
+                <TextField
+                  label={t('config_domain')}
+                  value={domain}
+                  onChange={(e) => setDomain(e.target.value)}
+                  fullWidth
+                  disabled={isLoading}
+                  placeholder={t('config_domain_placeholder')}
+                  size="small"
                 />
 
                 <MainPromptField
@@ -398,6 +589,70 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
                   onJsonConfigChange={handleJsonConfigChange}
                   disabled={isLoading}
                 />
+
+                <Box sx={{ mt: 2 }}>
+                  {Object.keys(examplesAnalysis).length > 0 ? (
+                    <ExampleAnalysesList
+                      examples={examplesAnalysis}
+                      onEdit={(key: string) => {
+                        setEditingExampleKey(key);
+                        setTrainingDataDialogOpen(true);
+                      }}
+                      onDelete={(key: string) => {
+                        const newExamples = { ...examplesAnalysis };
+                        delete newExamples[key];
+                        setExamplesAnalysis(newExamples);
+                      }}
+                      onAdd={() => {
+                        setEditingExampleKey(null);
+                        setTrainingDataDialogOpen(true);
+                      }}
+                      indicators={indicators}
+                      disabled={isLoading}
+                    />
+                  ) : (
+                    <>
+                      <TrainingDataDisplay
+                        examples={exampleAnalyses}
+                        onEdit={(index) => {
+                          setEditingTrainingDataIndex(index);
+                          setTrainingDataDialogType('success');
+                          setTrainingDataDialogOpen(true);
+                        }}
+                        onDelete={(index) => {
+                          setExampleAnalyses(exampleAnalyses.filter((_, i) => i !== index));
+                        }}
+                        onAdd={() => {
+                          setEditingTrainingDataIndex(null);
+                          setTrainingDataDialogType('success');
+                          setTrainingDataDialogOpen(true);
+                        }}
+                        indicators={indicators}
+                        disabled={isLoading}
+                      />
+                      <Box sx={{ mt: 2 }}>
+                        <TrainingDataDisplay
+                          examples={exampleAnalysesFail}
+                          onEdit={(index) => {
+                            setEditingTrainingDataIndex(index);
+                            setTrainingDataDialogType('fail');
+                            setTrainingDataDialogOpen(true);
+                          }}
+                          onDelete={(index) => {
+                            setExampleAnalysesFail(exampleAnalysesFail.filter((_, i) => i !== index));
+                          }}
+                          onAdd={() => {
+                            setEditingTrainingDataIndex(null);
+                            setTrainingDataDialogType('fail');
+                            setTrainingDataDialogOpen(true);
+                          }}
+                          indicators={indicators}
+                          disabled={isLoading}
+                        />
+                      </Box>
+                    </>
+                  )}
+                </Box>
               </Box>
             </Grid>
 
@@ -411,6 +666,7 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
               />
             </Grid>
           </Grid>
+
 
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
             <Button
@@ -435,6 +691,62 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
           </Box>
         </Box>
       </Paper>
+
+      <TrainingDataDialog
+        open={trainingDataDialogOpen}
+        onClose={() => {
+          setTrainingDataDialogOpen(false);
+          setEditingTrainingDataIndex(null);
+          setEditingExampleKey(null);
+        }}
+        onSave={(example) => {
+          // Handle new format (examples_analysis object)
+          if (editingExampleKey !== null || Object.keys(examplesAnalysis).length > 0) {
+            const key = example.name?.trim() || editingExampleKey || `example_${Date.now()}`;
+            const trimmedKey = key.trim();
+            
+            // If editing and key changed, remove old key
+            const newExamples = { ...examplesAnalysis };
+            if (editingExampleKey !== null && editingExampleKey !== trimmedKey) {
+              delete newExamples[editingExampleKey];
+            }
+            
+            // Add/update with new key
+            newExamples[trimmedKey] = { ...example, name: trimmedKey };
+            setExamplesAnalysis(newExamples);
+          } else {
+            // Handle legacy format (arrays)
+            if (trainingDataDialogType === 'success') {
+              if (editingTrainingDataIndex !== null) {
+                const newExamples = [...exampleAnalyses];
+                newExamples[editingTrainingDataIndex] = example;
+                setExampleAnalyses(newExamples);
+              } else {
+                setExampleAnalyses([...exampleAnalyses, example]);
+              }
+            } else {
+              if (editingTrainingDataIndex !== null) {
+                const newExamples = [...exampleAnalysesFail];
+                newExamples[editingTrainingDataIndex] = example;
+                setExampleAnalysesFail(newExamples);
+              } else {
+                setExampleAnalysesFail([...exampleAnalysesFail, example]);
+              }
+            }
+          }
+        }}
+        example={
+          editingExampleKey !== null && examplesAnalysis[editingExampleKey]
+            ? examplesAnalysis[editingExampleKey]
+            : editingTrainingDataIndex !== null
+            ? trainingDataDialogType === 'success'
+              ? exampleAnalyses[editingTrainingDataIndex] || null
+              : exampleAnalysesFail[editingTrainingDataIndex] || null
+            : null
+        }
+        indicators={indicators}
+        disabled={isLoading}
+      />
     </Box>
   );
 };
