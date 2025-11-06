@@ -23,7 +23,6 @@ export class WebSocketService {
 
     this.socket = io(serverUrl, {
       transports: ['websocket'],
-      
       autoConnect: true,
       ...options,
     })

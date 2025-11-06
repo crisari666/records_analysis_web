@@ -53,6 +53,69 @@ export const whatsappSessionSlice = createAppSlice({
     clearMessages: create.reducer((state) => {
       state.messages = []
     }),
+    addMessage: create.reducer((state, action: PayloadAction<StoredMessage>) => {
+      // Check if message already exists
+      const existingIndex = state.messages.findIndex((m) => m.messageId === action.payload.messageId)
+      if (existingIndex === -1) {
+        // Add new message at the end (messages are sorted by timestamp)
+        state.messages.push(action.payload)
+        // Sort by timestamp ascending
+        state.messages.sort((a, b) => a.timestamp - b.timestamp)
+      }
+    }),
+    updateChatWithNewMessage: create.reducer((state, action: PayloadAction<{ chatId: string; message: StoredMessage }>) => {
+      const chatIndex = state.chats.findIndex((c) => c.id === action.payload.chatId)
+      if (chatIndex !== -1) {
+        const chat = state.chats[chatIndex]
+        // Update chat with new lastMessage and timestamp
+        chat.lastMessage = {
+          id: action.payload.message.messageId,
+          body: action.payload.message.body,
+          from: action.payload.message.from,
+          to: action.payload.message.to,
+          fromMe: action.payload.message.fromMe,
+          timestamp: action.payload.message.timestamp,
+          hasMedia: action.payload.message.hasMedia,
+          mediaType: action.payload.message.mediaType,
+          hasQuotedMsg: action.payload.message.hasQuotedMsg,
+          isForwarded: action.payload.message.isForwarded,
+          isStarred: action.payload.message.isStarred,
+          isDeleted: action.payload.message.isDeleted,
+        }
+        chat.timestamp = action.payload.message.timestamp
+        
+        // Move chat to first position
+        state.chats.splice(chatIndex, 1)
+        state.chats.unshift(chat)
+      } else {
+        // If chat doesn't exist, we might need to fetch it, but for now we'll just add it
+        // This should ideally trigger a chat fetch, but for simplicity we'll create a minimal chat
+        const newChat: Chat = {
+          id: action.payload.chatId,
+          name: action.payload.chatId, // Will be updated when chats are fetched
+          isGroup: false,
+          unreadCount: 0,
+          timestamp: action.payload.message.timestamp,
+          archive: false,
+          pinned: false,
+          lastMessage: {
+            id: action.payload.message.messageId,
+            body: action.payload.message.body,
+            from: action.payload.message.from,
+            to: action.payload.message.to,
+            fromMe: action.payload.message.fromMe,
+            timestamp: action.payload.message.timestamp,
+            hasMedia: action.payload.message.hasMedia,
+            mediaType: action.payload.message.mediaType,
+            hasQuotedMsg: action.payload.message.hasQuotedMsg,
+            isForwarded: action.payload.message.isForwarded,
+            isStarred: action.payload.message.isStarred,
+            isDeleted: action.payload.message.isDeleted,
+          },
+        }
+        state.chats.unshift(newChat)
+      }
+    }),
     // Async Thunks - Per-session data
     getChatsAsync: create.asyncThunk(
       async (id: string) => {
@@ -154,6 +217,8 @@ export const {
   clearError,
   clearChats,
   clearMessages,
+  addMessage,
+  updateChatWithNewMessage,
   getChatsAsync,
   getChatMessagesAsync,
   getMessageByIdAsync,

@@ -41,7 +41,7 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
                   <ListItemText
                     primary={
                       <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="body1">{chat.name || chat.id}</Typography>
+                        <Typography variant="body1" component="span">{chat.name || chat.id}</Typography>
                         {chat.archive && (
                           <Chip 
                             label={t("archived")} 
@@ -53,14 +53,14 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
                       </Box>
                     }
                     secondary={
-                      <Box>
+                      <Box component="span">
                         {chat.lastMessage?.body && (
-                          <Typography variant="body2" color="text.secondary" noWrap sx={{ mb: 0.5, maxWidth: "200px" }}>
+                          <Typography component="span" variant="body2" color="text.secondary" noWrap sx={{ mb: 0.5, maxWidth: "200px", display: "block" }}>
                             {chat.lastMessage.body.substring(0, 15)}
                           </Typography>
                         )}
                         {chat.timestamp && (
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography component="span" variant="caption" color="text.secondary" sx={{ display: "block" }}>
                             {new Date(chat.timestamp * 1000).toLocaleString()}
                           </Typography>
                         )}

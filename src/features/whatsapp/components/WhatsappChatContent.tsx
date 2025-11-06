@@ -60,20 +60,20 @@ export const WhatsappChatContent = () => {
                   <ListItemText
                     primary={message.body}
                     secondary={
-                      <Box>
+                      <Box component="span">
                         <Typography variant="caption" component="span" sx={{ display: "block" }}>
                           {new Date(message.timestamp * 1000).toLocaleString()}
                         </Typography>
-                        <Box sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
+                        <Box component="span" sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
                           {message.edition && message.edition.length > 0 && (
                             <Tooltip
                               title={
-                                <Box>
-                                  <Typography variant="caption" sx={{ display: "block", fontWeight: "bold", mb: 0.5 }}>
+                                <Box component="span">
+                                  <Typography component="span" variant="caption" sx={{ display: "block", fontWeight: "bold", mb: 0.5 }}>
                                     {t("messageEditions")}:
                                   </Typography>
                                   {message.edition.map((edition, index) => (
-                                    <Typography key={index} variant="caption" sx={{ display: "block" }}>
+                                    <Typography component="span" key={index} variant="caption" sx={{ display: "block" }}>
                                       {index + 1}. {edition}
                                     </Typography>
                                   ))}
@@ -81,6 +81,7 @@ export const WhatsappChatContent = () => {
                               }
                             >
                               <Chip
+                                component="span"
                                 icon={<EditIcon />}
                                 label={t("messageEdited")}
                                 size="small"
@@ -91,6 +92,7 @@ export const WhatsappChatContent = () => {
                           {message.isDeleted && message.deletedAt && (
                             <Tooltip title={`${t("messageDeleted")} - ${new Date(message.deletedAt).toLocaleString()}`}>
                               <Chip
+                                component="span"
                                 icon={<DeleteIcon />}
                                 label={t("messageDeleted")}
                                 size="small"

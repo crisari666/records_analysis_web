@@ -3,6 +3,7 @@ import { Breadcrumbs, Link, Typography, Box, Grid } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { WhatsappSessionChatsList } from "../components/WhatsappSessionChatsList"
 import { WhatsappChatContent } from "../components/WhatsappChatContent"
+import { WhatsappSocketListener } from "../components/WhatsappSocketListener"
 
 export const WhatsasppSessionChatsPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -10,6 +11,7 @@ export const WhatsasppSessionChatsPage = () => {
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>
+      {id && <WhatsappSocketListener sessionId={id} />}
       <Breadcrumbs aria-label="breadcrumb">
         <Link component={RouterLink} color="inherit" to="/dashboard/whatsapp">
           {t("breadcrumbs.sessions")}

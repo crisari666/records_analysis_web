@@ -165,9 +165,11 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
         setIsLoading(false)
         return
       }
-
+      const roomName = `session:${sessionId.trim()}`
+      console.log({roomName});
+      
       // Join room with sessionId to receive events for this specific session
-      websocketService.joinRoom(sessionId.trim())
+      websocketService.joinRoom(roomName)
 
       // Clean up any existing listeners
       if (unsubscribeQrRef.current) {
