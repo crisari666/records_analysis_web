@@ -7,3 +7,4 @@ export { IndicatorField } from './IndicatorField';
 export { IndicatorsList } from './IndicatorsList';
 export { ProjectFormContent } from './ProjectFormContent';
 export { ProjectFormContainer } from './ProjectFormContainer';
+export { ProjectBreadcrumbs } from './ProjectBreadcrumbs';
