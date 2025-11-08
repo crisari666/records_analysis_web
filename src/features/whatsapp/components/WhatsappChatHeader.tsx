@@ -28,7 +28,7 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
   const handleSyncMessages = async () => {
     if (sessionId && currentChat && !isSyncing) {
       try {
-        await dispatch(getChatMessagesAsync({ id: sessionId, chatId: currentChat.id })).unwrap()
+        await dispatch(getChatMessagesAsync({ id: sessionId, chatId: currentChat.chatId })).unwrap()
         // Sync completed successfully
         setSnackbarMessage(t("syncMessagesSuccess"))
         setSnackbarSeverity("success")

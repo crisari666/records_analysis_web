@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { Card, CardContent, List, ListItem, ListItemText, ListItemButton, CircularProgress, Box, Typography, Chip } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { getChatsAsync, selectChats, selectIsChatsLoading, setCurrentSessionId, setCurrentChat, getStoredMessagesAsync } from "../store/whatsappSessionSlice"
+import { getStoredChatsAsync, selectChats, selectIsChatsLoading, setCurrentSessionId, setCurrentChat, getStoredMessagesAsync } from "../store/whatsappSessionSlice"
 
 type WhatsappSessionChatsListProps = {
   sessionId: string
@@ -17,7 +17,7 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
   useEffect(() => {
     if (!sessionId) return
     dispatch(setCurrentSessionId(sessionId))
-    dispatch(getChatsAsync(sessionId))
+    dispatch(getStoredChatsAsync({ id: sessionId }))
   }, [dispatch, sessionId])
 
   return (
@@ -31,18 +31,26 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
           <Box sx={{ flex: 1, overflowY: "auto" }}>
             <List>
             {chats.map((chat) => (
-              <ListItem key={chat.id} divider disablePadding>
+              <ListItem key={chat.chatId} divider disablePadding>
                 <ListItemButton
                   onClick={() => {
                     dispatch(setCurrentChat(chat))
-                    dispatch(getStoredMessagesAsync({ id: sessionId, params: { chatId: chat.id, includeDeleted: true } }))
+                    dispatch(getStoredMessagesAsync({ id: sessionId, params: { chatId: chat.chatId, includeDeleted: true } }))
                   }}
                 >
                   <ListItemText
                     primary={
                       <Box display="flex" alignItems="center" gap={1}>
-                        <Typography variant="body1" component="span">{chat.name || chat.id}</Typography>
-                        {chat.archive && (
+                        <Typography variant="body1" component="span">{chat.name || chat.chatId}</Typography>
+                        {chat.deleted && (
+                          <Chip 
+                            label={t("chatDeleted")} 
+                            size="small" 
+                            color="error"
+                            variant="filled"
+                          />
+                        )}
+                        {chat.archived && (
                           <Chip 
                             label={t("archived")} 
                             size="small" 
@@ -54,9 +62,9 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
                     }
                     secondary={
                       <Box component="span">
-                        {chat.lastMessage?.body && (
+                        {chat.lastMessage && (
                           <Typography component="span" variant="body2" color="text.secondary" noWrap sx={{ mb: 0.5, maxWidth: "200px", display: "block" }}>
-                            {chat.lastMessage.body.substring(0, 15)}
+                            {chat.lastMessage.substring(0, 15)}
                           </Typography>
                         )}
                         {chat.timestamp && (

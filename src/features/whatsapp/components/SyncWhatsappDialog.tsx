@@ -284,7 +284,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
             <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, py: 2 }}>
               <Typography variant="h6">{t("scanQrCode")}</Typography>
               <Box sx={{ p: 1, border: "1px solid", borderColor: "divider", borderRadius: 1, backgroundColor: "whiteSmoke" }}>
-                <QRCode value={qrCode} size={220} color="blue" bgColor="orange" fgColor="black" />
+                <QRCode value={qrCode} size={220} color="blue" bgColor="white" fgColor="black" />
               </Box>
               <Typography variant="body2" color="text.secondary" align="center">
                 {t("qrCodeInstructions")}

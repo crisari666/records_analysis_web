@@ -48,8 +48,8 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
 
   // Update refs to track current values
   useEffect(() => {
-    currentChatIdRef.current = currentChat?.id || null
-  }, [currentChat?.id])
+    currentChatIdRef.current = currentChat?.chatId || null
+  }, [currentChat?.chatId])
 
   useEffect(() => {
     activeSessionIdRef.current = activeSessionId

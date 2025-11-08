@@ -74,21 +74,11 @@ export type Message = {
                       }
 
 // Chat Types
-export type Chat = {
-                     id: string
-                     name: string
-                     isGroup: boolean
-                     unreadCount: number
-                     timestamp: number
-                     archive: boolean
-                     pinned: boolean
-                     lastMessage: Message | null
-                   }
-
 export type StoredChat = {
                            _id: string
                            chatId: string
                            sessionId: string
+                           __v: number
                            name: string
                            isGroup: boolean
                            unreadCount: number
@@ -97,10 +87,12 @@ export type StoredChat = {
                            pinned: boolean
                            isReadOnly: boolean
                            isMuted: boolean
-                           muteExpiration: number | null
-                           lastMessage: string | null
-                           lastMessageTimestamp: number | null
-                           lastMessageFromMe: boolean | null
+                           muteExpiration: number
+                           lastMessage: string
+                           lastMessageTimestamp: number
+                           lastMessageFromMe: boolean
+                           deleted: boolean
+                           deletedAt: string[]
                            createdAt: string
                            updatedAt: string
                          }

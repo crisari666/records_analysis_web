@@ -51,6 +51,7 @@
   "save": "Save",
   "syncMessages": "Sync Messages",
   "syncingMessages": "Syncing messages...",
-  "syncMessagesSuccess": "Messages synced successfully"
+  "syncMessagesSuccess": "Messages synced successfully",
+  "chatDeleted": "Chat deleted"
 }
 

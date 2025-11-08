@@ -2,21 +2,22 @@ import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { whatsappService } from "../services/whatsappService"
 import type {
-  Chat,
   StoredMessage,
   Message,
   DeletedMessage,
+  StoredChat,
   GetChatMessagesParams,
   GetStoredMessagesParams,
   GetDeletedMessagesParams,
+  GetStoredChatsParams,
 } from "../types"
 
 type WhatsappSessionState = {
   currentSessionId: string | null
-  chats: Chat[]
+  chats: StoredChat[]
   messages: StoredMessage[]
   deletedMessages: DeletedMessage[]
-  currentChat: Chat | null
+  currentChat: StoredChat | null
   currentMessage: StoredMessage | null
   isChatsLoading: boolean
   isMessagesLoading: boolean
@@ -46,7 +47,7 @@ export const whatsappSessionSlice = createAppSlice({
     setCurrentSessionId: create.reducer((state, action: PayloadAction<string | null>) => {
       state.currentSessionId = action.payload
     }),
-    setCurrentChat: create.reducer((state, action: PayloadAction<Chat | null>) => {
+    setCurrentChat: create.reducer((state, action: PayloadAction<StoredChat | null>) => {
       state.currentChat = action.payload
     }),
     setCurrentMessage: create.reducer((state, action: PayloadAction<StoredMessage | null>) => {
@@ -72,25 +73,15 @@ export const whatsappSessionSlice = createAppSlice({
       }
     }),
     updateChatWithNewMessage: create.reducer((state, action: PayloadAction<{ chatId: string; message: StoredMessage }>) => {
-      const chatIndex = state.chats.findIndex((c) => c.id === action.payload.chatId)
+      const chatIndex = state.chats.findIndex((c) => c.chatId === action.payload.chatId)
       if (chatIndex !== -1) {
         const chat = state.chats[chatIndex]
         // Update chat with new lastMessage and timestamp
-        chat.lastMessage = {
-          id: action.payload.message.messageId,
-          body: action.payload.message.body,
-          from: action.payload.message.from,
-          to: action.payload.message.to,
-          fromMe: action.payload.message.fromMe,
-          timestamp: action.payload.message.timestamp,
-          hasMedia: action.payload.message.hasMedia,
-          mediaType: action.payload.message.mediaType,
-          hasQuotedMsg: action.payload.message.hasQuotedMsg,
-          isForwarded: action.payload.message.isForwarded,
-          isStarred: action.payload.message.isStarred,
-          isDeleted: action.payload.message.isDeleted,
-        }
+        chat.lastMessage = action.payload.message.body
+        chat.lastMessageTimestamp = action.payload.message.timestamp
+        chat.lastMessageFromMe = action.payload.message.fromMe
         chat.timestamp = action.payload.message.timestamp
+        chat.updatedAt = new Date().toISOString()
         
         // Move chat to first position
         state.chats.splice(chatIndex, 1)
@@ -98,28 +89,28 @@ export const whatsappSessionSlice = createAppSlice({
       } else {
         // If chat doesn't exist, we might need to fetch it, but for now we'll just add it
         // This should ideally trigger a chat fetch, but for simplicity we'll create a minimal chat
-        const newChat: Chat = {
-          id: action.payload.chatId,
+        const now = new Date().toISOString()
+        const newChat: StoredChat = {
+          _id: `temp-${action.payload.chatId}`,
+          chatId: action.payload.chatId,
+          sessionId: state.currentSessionId || "",
+          __v: 0,
           name: action.payload.chatId, // Will be updated when chats are fetched
           isGroup: false,
           unreadCount: 0,
           timestamp: action.payload.message.timestamp,
-          archive: false,
+          archived: false,
           pinned: false,
-          lastMessage: {
-            id: action.payload.message.messageId,
-            body: action.payload.message.body,
-            from: action.payload.message.from,
-            to: action.payload.message.to,
-            fromMe: action.payload.message.fromMe,
-            timestamp: action.payload.message.timestamp,
-            hasMedia: action.payload.message.hasMedia,
-            mediaType: action.payload.message.mediaType,
-            hasQuotedMsg: action.payload.message.hasQuotedMsg,
-            isForwarded: action.payload.message.isForwarded,
-            isStarred: action.payload.message.isStarred,
-            isDeleted: action.payload.message.isDeleted,
-          },
+          isReadOnly: false,
+          isMuted: false,
+          muteExpiration: 0,
+          lastMessage: action.payload.message.body,
+          lastMessageTimestamp: action.payload.message.timestamp,
+          lastMessageFromMe: action.payload.message.fromMe,
+          deleted: false,
+          deletedAt: [],
+          createdAt: now,
+          updatedAt: now,
         }
         state.chats.unshift(newChat)
       }
@@ -135,7 +126,7 @@ export const whatsappSessionSlice = createAppSlice({
           state.isChatsLoading = true
           state.error = null
         },
-        fulfilled: (state, action: PayloadAction<Chat[]>) => {
+        fulfilled: (state, action: PayloadAction<StoredChat[]>) => {
           state.isChatsLoading = false
           state.chats = action.payload
         },
@@ -266,6 +257,26 @@ export const whatsappSessionSlice = createAppSlice({
         },
       },
     ),
+    getStoredChatsAsync: create.asyncThunk(
+      async ({ id, params }: { id: string; params?: GetStoredChatsParams }) => {
+        const storedChats = await whatsappService.getStoredChats(id, params)
+        return storedChats
+      },
+      {
+        pending: (state) => {
+          state.isChatsLoading = true
+          state.error = null
+        },
+        fulfilled: (state, action: PayloadAction<StoredChat[]>) => {
+          state.isChatsLoading = false
+          state.chats = action.payload
+        },
+        rejected: (state, action) => {
+          state.isChatsLoading = false
+          state.error = action.error.message || "Failed to fetch stored chats"
+        },
+      },
+    ),
   }),
   selectors: {
     selectSessionId: (state) => state.currentSessionId,
@@ -297,6 +308,7 @@ export const {
   getDeletedMessagesAsync,
   getMessageByIdAsync,
   getMessageEditHistoryAsync,
+  getStoredChatsAsync,
 } = whatsappSessionSlice.actions
 
 export const {

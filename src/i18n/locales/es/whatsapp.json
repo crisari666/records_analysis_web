@@ -51,6 +51,7 @@
   "save": "Guardar",
   "syncMessages": "Sincronizar Mensajes",
   "syncingMessages": "Sincronizando mensajes...",
-  "syncMessagesSuccess": "Mensajes sincronizados exitosamente"
+  "syncMessagesSuccess": "Mensajes sincronizados exitosamente",
+  "chatDeleted": "Chat eliminado"
 }
 

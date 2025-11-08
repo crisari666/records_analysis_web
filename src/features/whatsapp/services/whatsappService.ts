@@ -10,7 +10,6 @@ import type {
   DestroySessionResponse,
   SendMessageRequest,
   SendMessageResponse,
-  Chat,
   StoredChat,
   Message,
   StoredMessage,
@@ -84,7 +83,7 @@ export const whatsappService = {
   },
 
   // Chats
-  async getChats(id: string): Promise<Chat[]> {
+  async getChats(id: string): Promise<StoredChat[]> {
     const response = await api.get({ path: API_ENDPOINTS.SESSION_CHATS(id) })
     return response
   },

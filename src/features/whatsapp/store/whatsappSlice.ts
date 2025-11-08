@@ -11,7 +11,6 @@ import type {
   DestroySessionResponse,
   SendMessageRequest,
   StoredChat,
-  GetStoredChatsParams,
 } from "../types"
 
 const initialState: WhatsappState = {
@@ -210,26 +209,6 @@ export const whatsappSlice = createAppSlice({
       },
     ),
     // Async Thunks - Stored Chats
-    getStoredChatsAsync: create.asyncThunk(
-      async ({ id, params }: { id: string; params?: GetStoredChatsParams }) => {
-        const chats = await whatsappService.getStoredChats(id, params)
-        return chats
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state, action: PayloadAction<StoredChat[]>) => {
-          state.isLoading = false
-          state.storedChats = action.payload
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch stored chats"
-        },
-      },
-    ),
     getStoredChatByIdAsync: create.asyncThunk(
       async ({ id, chatId }: { id: string; chatId: string }) => {
         const chat = await whatsappService.getStoredChatById(id, chatId)
@@ -288,9 +267,8 @@ export const {
   getSessionStatusAsync,
   destroySessionAsync,
   sendMessageAsync,
-  getStoredChatsAsync,
   getStoredChatByIdAsync,
-  // moved to whatsappSessionSlice: getStoredMessagesAsync, getDeletedMessagesAsync
+  // moved to whatsappSessionSlice: getStoredChatsAsync, getStoredMessagesAsync, getDeletedMessagesAsync
 } = whatsappSlice.actions
 
 export const {
