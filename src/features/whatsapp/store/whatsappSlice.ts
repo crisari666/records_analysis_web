@@ -1,6 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { whatsappService } from "../services/whatsappService"
+import { conversationService } from "../services/conversationService"
 import type {
   WhatsappState,
   ActiveSession,
@@ -211,7 +212,7 @@ export const whatsappSlice = createAppSlice({
     // Async Thunks - Stored Chats
     getStoredChatByIdAsync: create.asyncThunk(
       async ({ id, chatId }: { id: string; chatId: string }) => {
-        const chat = await whatsappService.getStoredChatById(id, chatId)
+        const chat = await conversationService.getStoredChatById(id, chatId)
         return chat
       },
       {

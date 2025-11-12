@@ -1,6 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { whatsappService } from "../services/whatsappService"
+import { conversationService } from "../services/conversationService"
 import type {
   StoredMessage,
   Message,
@@ -179,7 +180,7 @@ export const whatsappSessionSlice = createAppSlice({
     ),
     getStoredMessagesAsync: create.asyncThunk(
       async ({ id, params }: { id: string; params?: GetStoredMessagesParams }) => {
-        const messages = await whatsappService.getStoredMessages(id, params)
+        const messages = await conversationService.getStoredMessages(id, params)
         return messages
       },
       {
@@ -200,7 +201,7 @@ export const whatsappSessionSlice = createAppSlice({
     ),
     getDeletedMessagesAsync: create.asyncThunk(
       async ({ id, params }: { id: string; params?: GetDeletedMessagesParams }) => {
-        const messages = await whatsappService.getDeletedMessages(id, params)
+        const messages = await conversationService.getDeletedMessages(id, params)
         return messages
       },
       {
@@ -220,7 +221,7 @@ export const whatsappSessionSlice = createAppSlice({
     ),
     getMessageByIdAsync: create.asyncThunk(
       async ({ id, messageId }: { id: string; messageId: string }) => {
-        const message = await whatsappService.getMessageById(id, messageId)
+        const message = await conversationService.getMessageById(id, messageId)
         return message
       },
       {
@@ -240,7 +241,7 @@ export const whatsappSessionSlice = createAppSlice({
     ),
     getMessageEditHistoryAsync: create.asyncThunk(
       async ({ id, messageId }: { id: string; messageId: string }) => {
-        const history = await whatsappService.getMessageEditHistory(id, messageId)
+        const history = await conversationService.getMessageEditHistory(id, messageId)
         return history
       },
       {
@@ -259,7 +260,7 @@ export const whatsappSessionSlice = createAppSlice({
     ),
     getStoredChatsAsync: create.asyncThunk(
       async ({ id, params }: { id: string; params?: GetStoredChatsParams }) => {
-        const storedChats = await whatsappService.getStoredChats(id, params)
+        const storedChats = await conversationService.getStoredChats(id, params)
         return storedChats
       },
       {

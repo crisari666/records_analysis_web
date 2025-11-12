@@ -59,7 +59,7 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
   useEffect(() => {
     // Connect to WebSocket if not already connected
     if (!websocketService.isConnectedToServer()) {
-      const wsUrl = import.meta.env.VITE_WEBSOCKET_URL?.replace(/^http/, "ws")
+      const wsUrl = import.meta.env.VITE_AI_CONVERSATION_WEBSOCKET?.replace(/^http/, "ws")
       if (wsUrl) {
         websocketService.connect(wsUrl)
       } else {
