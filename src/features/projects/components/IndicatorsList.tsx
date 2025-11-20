@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
-import { Indicator, IndicatorType } from '../types';
+import { Indicator } from '../types';
 import { IndicatorField } from './IndicatorField';
 
 type IndicatorsListProps = {

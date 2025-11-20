@@ -1,7 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { whatsappService } from "../services/whatsappService"
-import { conversationService } from "../services/conversationService"
 import type {
   WhatsappState,
   ActiveSession,
@@ -11,7 +10,6 @@ import type {
   UpdateSessionGroupRequest,
   DestroySessionResponse,
   SendMessageRequest,
-  StoredChat,
 } from "../types"
 
 const initialState: WhatsappState = {
@@ -209,34 +207,6 @@ export const whatsappSlice = createAppSlice({
         },
       },
     ),
-    // Async Thunks - Stored Chats
-    getStoredChatByIdAsync: create.asyncThunk(
-      async ({ id, chatId }: { id: string; chatId: string }) => {
-        const chat = await conversationService.getStoredChatById(id, chatId)
-        return chat
-      },
-      {
-        pending: (state) => {
-          state.isLoading = true
-          state.error = null
-        },
-        fulfilled: (state, action: PayloadAction<StoredChat | null>) => {
-          state.isLoading = false
-          if (action.payload) {
-            const index = state.storedChats.findIndex((c) => c.chatId === action.payload?.chatId)
-            if (index !== -1) {
-              state.storedChats[index] = action.payload
-            } else {
-              state.storedChats.push(action.payload)
-            }
-          }
-        },
-        rejected: (state, action) => {
-          state.isLoading = false
-          state.error = action.error.message || "Failed to fetch stored chat"
-        },
-      },
-    ),
     // moved to whatsappSessionSlice: getStoredMessagesAsync, getDeletedMessagesAsync, getMessageByIdAsync, getMessageEditHistoryAsync
   }),
   selectors: {
@@ -268,7 +238,6 @@ export const {
   getSessionStatusAsync,
   destroySessionAsync,
   sendMessageAsync,
-  getStoredChatByIdAsync,
   // moved to whatsappSessionSlice: getStoredChatsAsync, getStoredMessagesAsync, getDeletedMessagesAsync
 } = whatsappSlice.actions
 
