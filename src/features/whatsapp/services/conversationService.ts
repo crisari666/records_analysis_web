@@ -18,6 +18,7 @@ const API_ENDPOINTS = {
   SESSION_DELETED_MESSAGES: (id: string) => `${API_BASE}/sessions/${id}/messages/deleted`,
   SESSION_MESSAGE: (id: string, messageId: string) => `${API_BASE}/sessions/${id}/messages/${messageId}`,
   SESSION_MESSAGE_EDITS: (id: string, messageId: string) => `${API_BASE}/sessions/${id}/messages/${messageId}/edits`,
+  ANALYZE_CHAT: (sessionId: string, chatId: string) => `${API_BASE}/sessions/${sessionId}/chats/${chatId}/analyze`,
 } as const
 
 // Create a new Api instance with conversation analysis base URL
@@ -97,6 +98,11 @@ export const conversationService = {
 
   async getMessageEditHistory(id: string, messageId: string): Promise<MessageEditHistory> {
     const response = await conversationApi.get({ path: API_ENDPOINTS.SESSION_MESSAGE_EDITS(id, messageId) })
+    return response
+  },
+
+  async analyzeChat(sessionId: string, chatId: string): Promise<{ success: boolean; chatId: string; analysis: Record<string, any> }> {
+    const response = await conversationApi.post({ path: API_ENDPOINTS.ANALYZE_CHAT(sessionId, chatId) })
     return response
   },
 }

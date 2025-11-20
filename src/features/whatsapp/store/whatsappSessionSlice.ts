@@ -26,6 +26,7 @@ type WhatsappSessionState = {
   isChatsLoading: boolean
   isMessagesLoading: boolean
   isSyncing: boolean
+  isAnalyzing: boolean
   error: string | null
   status: "idle" | "loading" | "failed"
 }
@@ -41,6 +42,7 @@ const initialState: WhatsappSessionState = {
   isChatsLoading: false,
   isMessagesLoading: false,
   isSyncing: false,
+  isAnalyzing: false,
   error: null,
   status: "idle",
 }
@@ -315,6 +317,33 @@ export const whatsappSessionSlice = createAppSlice({
         },
       },
     ),
+    analyzeChatAsync: create.asyncThunk(
+      async ({ sessionId, chatId }: { sessionId: string; chatId: string }) => {
+        const response = await conversationService.analyzeChat(sessionId, chatId)
+        return response
+      },
+      {
+        pending: (state) => {
+          state.isAnalyzing = true
+          state.error = null
+        },
+        fulfilled: (state, action) => {
+          state.isAnalyzing = false
+          if (state.currentChat && state.currentChat.chatId === action.payload.chatId) {
+            state.currentChat.analysis = action.payload.analysis
+          }
+          // Also update the chat in the list if it exists
+          const chatIndex = state.chats.findIndex(c => c.chatId === action.payload.chatId)
+          if (chatIndex !== -1) {
+            state.chats[chatIndex].analysis = action.payload.analysis
+          }
+        },
+        rejected: (state, action) => {
+          state.isAnalyzing = false
+          state.error = action.error.message || "Failed to analyze chat"
+        },
+      },
+    ),
   }),
   selectors: {
     selectSessionId: (state) => state.currentSessionId,
@@ -327,6 +356,7 @@ export const whatsappSessionSlice = createAppSlice({
     selectIsChatsLoading: (state) => state.isChatsLoading,
     selectIsMessagesLoading: (state) => state.isMessagesLoading,
     selectIsSyncing: (state) => state.isSyncing,
+    selectIsAnalyzing: (state) => state.isAnalyzing,
     selectError: (state) => state.error,
     selectStatus: (state) => state.status,
   },
@@ -349,6 +379,7 @@ export const {
   getMessageByIdAsync,
   getMessageEditHistoryAsync,
   getStoredChatsAsync,
+  analyzeChatAsync,
 } = whatsappSessionSlice.actions
 
 export const {
@@ -362,6 +393,7 @@ export const {
   selectIsChatsLoading,
   selectIsMessagesLoading,
   selectIsSyncing,
+  selectIsAnalyzing,
   selectError,
   selectStatus,
 } = whatsappSessionSlice.selectors

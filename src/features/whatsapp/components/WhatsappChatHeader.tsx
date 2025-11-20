@@ -3,9 +3,10 @@ import { Box, Typography, Chip, FormControlLabel, Switch, Button, CircularProgre
 import SyncIcon from "@mui/icons-material/Sync"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { selectSessionId, selectIsSyncing, selectCurrentChat, selectCurrentProject, getChatMessagesAsync } from "../store/whatsappSessionSlice"
+import { selectSessionId, selectIsSyncing, selectIsAnalyzing, selectCurrentChat, selectCurrentProject, getChatMessagesAsync, analyzeChatAsync } from "../store/whatsappSessionSlice"
 import { ConversationAnalysis } from "./ConversationAnalysis"
 import type { StoredMessage } from "../types"
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 type WhatsappChatHeaderProps = {
   messages: StoredMessage[]
@@ -20,6 +21,7 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
   const currentChat = useAppSelector(selectCurrentChat)
   const currentProject = useAppSelector(selectCurrentProject)
   const isSyncing = useAppSelector(selectIsSyncing)
+  const isAnalyzing = useAppSelector(selectIsAnalyzing)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success")
@@ -38,6 +40,22 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
       } catch (err) {
         // Sync failed
         const errorMessage = err instanceof Error ? err.message : "Failed to sync messages"
+        setSnackbarMessage(errorMessage)
+        setSnackbarSeverity("error")
+        setSnackbarOpen(true)
+      }
+    }
+  }
+
+  const handleAnalyzeChat = async () => {
+    if (sessionId && currentChat && !isAnalyzing) {
+      try {
+        await dispatch(analyzeChatAsync({ sessionId, chatId: currentChat.chatId })).unwrap()
+        setSnackbarMessage(t("analysisSuccess"))
+        setSnackbarSeverity("success")
+        setSnackbarOpen(true)
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Failed to analyze chat"
         setSnackbarMessage(errorMessage)
         setSnackbarSeverity("error")
         setSnackbarOpen(true)
@@ -89,16 +107,35 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
               {t("syncingMessages")}
             </Typography>
           </Box>
+        ) : isAnalyzing ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, py: 0.5 }}>
+            <CircularProgress size={20} color="secondary" />
+            <Typography variant="body2" color="text.secondary">
+              {t("analyzingChat")}
+            </Typography>
+          </Box>
         ) : (
-          <Button
-            variant="outlined"
-            startIcon={<SyncIcon />}
-            onClick={handleSyncMessages}
-            disabled={!sessionId || !currentChat}
-            size="small"
-          >
-            {t("syncMessages")}
-          </Button>
+          <>
+            <Button
+              variant="outlined"
+              startIcon={<AutoAwesomeIcon />}
+              onClick={handleAnalyzeChat}
+              disabled={!sessionId || !currentChat}
+              size="small"
+              color="secondary"
+            >
+              {t("analyze")}
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<SyncIcon />}
+              onClick={handleSyncMessages}
+              disabled={!sessionId || !currentChat}
+              size="small"
+            >
+              {t("syncMessages")}
+            </Button>
+          </>
         )}
         <FormControlLabel
           control={<Switch checked={filterEnabled} onChange={(e) => onFilterChange(e.target.checked)} />}
