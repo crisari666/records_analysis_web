@@ -5,9 +5,20 @@ import { WhatsappSessionChatsList } from "../components/WhatsappSessionChatsList
 import { WhatsappChatContent } from "../components/WhatsappChatContent"
 import { WhatsappSocketListener } from "../components/WhatsappSocketListener"
 
+import { useEffect } from "react"
+import { useAppDispatch } from "@/app/hooks"
+import { fetchSessionAndProject } from "../store/whatsappSessionSlice"
+
 export const WhatsasppSessionChatsPage = () => {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation("whatsapp")
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchSessionAndProject(id))
+    }
+  }, [id, dispatch])
 
   return (
     <Box display="flex" flexDirection="column" gap={2}>

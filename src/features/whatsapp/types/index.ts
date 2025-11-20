@@ -2,172 +2,173 @@
 export type SessionStatus = "initializing" | "qr_generated" | "authenticated" | "ready" | "disconnected" | "auth_failure" | "error"
 
 export type ActiveSession = {
-                            sessionId: string
-                            isReady: boolean
-                            lastRestore: string
-                          }
+  sessionId: string
+  isReady: boolean
+  lastRestore: string
+}
 
 export type StoredSession = {
-                              sessionId: string
-                              status: SessionStatus
-                              lastSeen: string
-                              updatedAt: string
-                              createdAt: string
-                              refId?: string
-                            }
+  sessionId: string
+  status: SessionStatus
+  lastSeen: string
+  updatedAt: string
+  createdAt: string
+  refId?: string
+}
 
 export type SessionStatusResponse = {
-                                     exists: boolean
-                                     ready: boolean
-                                     state?: any
-                                   }
+  exists: boolean
+  ready: boolean
+  state?: any
+}
 
 export type CreateSessionRequest = {
-                                     groupId: string
-                                   }
+  groupId: string
+}
 
 export type CreateSessionResponse = {
-                                     success: boolean
-                                     sessionId: string
-                                     message: string
-                                   }
+  success: boolean
+  sessionId: string
+  message: string
+}
 
 export type UpdateSessionGroupRequest = {
-                                          groupId: string
-                                        }
+  groupId: string
+}
 
 export type UpdateSessionGroupResponse = {
-                                           success: boolean
-                                         }
+  success: boolean
+}
 
 export type DestroySessionResponse = {
-                                       success: boolean
-                                       message: string
-                                     }
+  success: boolean
+  message: string
+}
 
 // Messaging Types
 export type SendMessageRequest = {
-                                  phone: string
-                                  message: string
-                                }
+  phone: string
+  message: string
+}
 
 export type SendMessageResponse = {
-                                   success: boolean
-                                   messageId: string
-                                   timestamp: number
-                                 }
+  success: boolean
+  messageId: string
+  timestamp: number
+}
 
 // Message Types
 export type Message = {
-                        id: string
-                        body: string
-                        from: string
-                        to: string
-                        fromMe: boolean
-                        timestamp: number
-                        hasMedia: boolean
-                        mediaType: string | null
-                        hasQuotedMsg: boolean
-                        isForwarded: boolean
-                        isStarred: boolean
-                        isDeleted: boolean
-                      }
+  id: string
+  body: string
+  from: string
+  to: string
+  fromMe: boolean
+  timestamp: number
+  hasMedia: boolean
+  mediaType: string | null
+  hasQuotedMsg: boolean
+  isForwarded: boolean
+  isStarred: boolean
+  isDeleted: boolean
+}
 
 // Chat Types
 export type StoredChat = {
-                           _id: string
-                           chatId: string
-                           sessionId: string
-                           __v: number
-                           name: string
-                           isGroup: boolean
-                           unreadCount: number
-                           timestamp: number
-                           archived: boolean
-                           pinned: boolean
-                           isReadOnly: boolean
-                           isMuted: boolean
-                           muteExpiration: number
-                           lastMessage: string
-                           lastMessageTimestamp: number
-                           lastMessageFromMe: boolean
-                           deleted: boolean
-                           deletedAt: string[]
-                           createdAt: string
-                           updatedAt: string
-                         }
+  _id: string
+  chatId: string
+  sessionId: string
+  __v: number
+  name: string
+  isGroup: boolean
+  unreadCount: number
+  timestamp: number
+  archived: boolean
+  pinned: boolean
+  isReadOnly: boolean
+  isMuted: boolean
+  muteExpiration: number
+  lastMessage: string
+  lastMessageTimestamp: number
+  lastMessageFromMe: boolean
+  deleted: boolean
+  deletedAt: string[]
+  createdAt: string
+  updatedAt: string
+  analysis?: Record<string, any>
+}
 
 export type StoredMessage = {
-                              messageId: string
-                              chatId: string
-                              body: string
-                              type: string
-                              from: string
-                              to: string
-                              author: string | null
-                              fromMe: boolean
-                              timestamp: number
-                              isDeleted: boolean
-                              deletedAt: string | null
-                              deletedBy: "everyone" | "me" | null
-                              edition: string[]
-                              hasMedia: boolean
-                              mediaType: string | null
-                              hasQuotedMsg: boolean
-                              isForwarded: boolean
-                              isStarred: boolean
-                            }
+  messageId: string
+  chatId: string
+  body: string
+  type: string
+  from: string
+  to: string
+  author: string | null
+  fromMe: boolean
+  timestamp: number
+  isDeleted: boolean
+  deletedAt: string | null
+  deletedBy: "everyone" | "me" | null
+  edition: string[]
+  hasMedia: boolean
+  mediaType: string | null
+  hasQuotedMsg: boolean
+  isForwarded: boolean
+  isStarred: boolean
+}
 
 export type DeletedMessage = StoredMessage & {
-                                 _id: string
-                                 sessionId: string
-                                 createdAt: string
-                                 updatedAt: string
-                               }
+  _id: string
+  sessionId: string
+  createdAt: string
+  updatedAt: string
+}
 
 export type MessageEditHistory = {
-                                  messageId: string
-                                  currentBody: string
-                                  editionHistory: string[]
-                                  editCount: number
-                                }
+  messageId: string
+  currentBody: string
+  editionHistory: string[]
+  editCount: number
+}
 
 // Request Parameter Types
 export type GetChatMessagesParams = {
-                                     limit?: number
-                                   }
+  limit?: number
+}
 
 export type GetStoredMessagesParams = {
-                                       chatId?: string
-                                       includeDeleted?: boolean
-                                       limit?: number
-                                       skip?: number
-                                     }
+  chatId?: string
+  includeDeleted?: boolean
+  limit?: number
+  skip?: number
+}
 
 export type GetDeletedMessagesParams = {
-                                        chatId?: string
-                                        limit?: number
-                                      }
+  chatId?: string
+  limit?: number
+}
 
 export type GetStoredChatsParams = {
-                                    archived?: boolean
-                                    isGroup?: boolean
-                                    limit?: number
-                                    skip?: number
-                                  }
+  archived?: boolean
+  isGroup?: boolean
+  limit?: number
+  skip?: number
+}
 
 // Redux State Types
 export type WhatsappState = {
-                              sessions: ActiveSession[]
-                              storedSessions: StoredSession[]
-                              currentSession: ActiveSession | null
-                              storedChats: StoredChat[]
-                              // moved to whatsappSessionSlice: storedMessages, deletedMessages
-                              qrCode: string | null
-                              isLoading: boolean
-                              error: string | null
-                              status: "idle" | "loading" | "failed"
-                              isSyncDialogOpen: boolean
-                              selectedSessionId: string | null
-                            }
+  sessions: ActiveSession[]
+  storedSessions: StoredSession[]
+  currentSession: ActiveSession | null
+  storedChats: StoredChat[]
+  // moved to whatsappSessionSlice: storedMessages, deletedMessages
+  qrCode: string | null
+  isLoading: boolean
+  error: string | null
+  status: "idle" | "loading" | "failed"
+  isSyncDialogOpen: boolean
+  selectedSessionId: string | null
+}
 

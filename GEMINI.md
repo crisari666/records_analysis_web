@@ -1,0 +1,146 @@
+---
+alwaysApply: true
+---
+
+# 🧭 Project Architecture & Rules
+
+## 🧱 1. Overview
+
+This project uses **React + TypeScript + Vite + Material UI + Redux Toolkit + React Router DOM**.
+
+Architecture is based on a **Feature-First Layered Structure**.  
+Each feature is self-contained and manages its own components, pages, services, types, and store slice.
+
+Key principle:  
+- **Keep files small and focused.**  
+- **Pages never connect directly to Redux.**
+
+### Core Principles
+- Keep each file **small and focused**.  
+- **Pages never connect directly to Redux.**  
+- Use **custom hooks** for business logic.  
+- **Services** handle backend requests.  
+- Maintain **separation of concerns** between UI, state, and data layers.
+- **Use Material UI exclusively** for all styling, layout, and design.
+- ❌ **Do not create custom CSS, SCSS, or styled-components.**
+
+## 🌐 Internationalization (i18n)
+
+- **All user-facing text must come from i18n** — never hardcode strings in components.
+- Store translations under `/src/i18n/locales/`.
+- Use translation keys such as `t('feature_name.key')`.
+- Every new feature must include its own localized translation keys under its scope.
+- Ensure that every visible text element supports multiple languages.
+
+## ⚙️ Services & API Layer
+
+- All backend communication must go through the centralized `http.ts` file.
+- The `http.ts` file defines the main HTTP methods: **GET**, **POST**, **PATCH**, and **DELETE**.
+- This file is preconfigured with:
+  - The **base URL** of the backend.
+  - Common **middleware** such as authentication headers, interceptors, and error handling.
+  - Support for dynamic **request parameters** and **main params**.
+
+- **Never** use Axios or Fetch directly inside components or services.
+- Each feature must define its own `service.ts` file (e.g. `featureService.ts`) that imports and uses the `http.ts` methods.
+- The UI components must **never call the backend directly**.
+- Keep any environment variables, tokens, and constants in `/src/config/`.
+- Centralize all API endpoints in a dedicated constants file (e.g. `apiEndpoints.ts`) to avoid duplication and inconsistencies.
+
+## 📁 2. Folder Structure
+
+src/
+│
+├── app/
+│ ├── store.ts
+│ ├── hooks.ts
+│ └── router.tsx
+│
+├── features/
+│ ├── feature-name/
+│ │ ├── components/
+│ │ ├── pages/
+│ │ ├── services/
+│ │ ├── store/
+│ │ └── types/
+│
+├── shared/
+│ ├── components/
+│ ├── hooks/
+│ ├── utils/
+│ └── constants/
+│
+├── theme/
+│ └── index.ts
+│
+├── main.tsx
+└── index.html
+
+## ⚙️ 3. Layer Responsibilities
+
+### Pages
+- Contain **only UI and local state**.
+- Never connect to Redux directly.
+- Use small, composable components.
+- Handle layout, rendering, and user interactions.
+- Dont use state or redux connections in *Page.ts files, create small component and connect there to state or redux stat
+
+### Components
+- Contain **only UI logic**.
+- No Redux or API logic.
+- Must be **small, reusable, and focused**.
+- Each component should live in its own folder.
+
+### Services
+- Handle **HTTP requests** and backend communication.
+- Contain only **data-fetching logic**.
+- Must return **typed data**.
+- No UI or state management inside services.
+
+### Store (Redux Slice)
+- One slice per feature.
+- Manage **global state** relevant to that feature.
+- Keep reducers pure and predictable.
+- Create the redux state type in their own files for avoid large redux files
+- Export **actions and selectors** only.
+
+### Router
+- All routes defined in `app/router.tsx`.
+- Pages are imported from their feature folders.
+- No logic should exist inside route definitions.
+
+---
+
+## 🧩 4. Coding Guidelines
+
+| Category | Rule |
+|-----------|------|
+| **Architecture** | Follow feature-first structure. |
+| **Components** | Use `PascalCase` naming. |
+| **Hooks / Utils** | Use `camelCase` naming. |
+| **Exports** | Prefer named exports; only slices or store may use default. |
+| **Imports** | Use aliases (`@/features/...`) for cleaner imports. |
+| **Redux** | Avoid direct connections in pages; use hooks instead. |
+| **File Size** | Split files exceeding ~150 lines. |
+| **Responsibility** | One component = one purpose. |
+| **Styling** | Use Material UI theme consistently. dont create new css use alwas the component from material UI |
+| **Cross-Feature Imports** | Only via re-export from index files. |
+| **Testing** | Focus on logic (hooks, reducers, services), not styling. |
+| **Interface, Types** | create types instead interface when is possible. |
+
+---
+
+## 🧰 5. Summary
+
+✅ Feature-based architecture  
+✅ Small, modular components  
+✅ Pages → Without state  
+✅ Services → API logic only  
+✅ Store → global state only  
+✅ Centralized router  
+✅ Consistent Material UI usage  
+✅ No large, mixed-responsibility files  
+
+---
+
+> 🏗️ Following these conventions ensures scalability, readability, and minimal re-renders in large React applications.

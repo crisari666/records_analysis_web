@@ -2,6 +2,8 @@ import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { whatsappService } from "../services/whatsappService"
 import { conversationService } from "../services/conversationService"
+import { projectsService } from "../../projects/services/projectsService"
+import type { Project } from "../../projects/types"
 import type {
   StoredMessage,
   Message,
@@ -20,6 +22,7 @@ type WhatsappSessionState = {
   deletedMessages: DeletedMessage[]
   currentChat: StoredChat | null
   currentMessage: StoredMessage | null
+  currentProject: Project | null
   isChatsLoading: boolean
   isMessagesLoading: boolean
   isSyncing: boolean
@@ -34,6 +37,7 @@ const initialState: WhatsappSessionState = {
   deletedMessages: [],
   currentChat: null,
   currentMessage: null,
+  currentProject: null,
   isChatsLoading: false,
   isMessagesLoading: false,
   isSyncing: false,
@@ -83,7 +87,7 @@ export const whatsappSessionSlice = createAppSlice({
         chat.lastMessageFromMe = action.payload.message.fromMe
         chat.timestamp = action.payload.message.timestamp
         chat.updatedAt = new Date().toISOString()
-        
+
         // Move chat to first position
         state.chats.splice(chatIndex, 1)
         state.chats.unshift(chat)
@@ -117,6 +121,39 @@ export const whatsappSessionSlice = createAppSlice({
       }
     }),
     // Async Thunks - Per-session data
+    fetchSessionAndProject: create.asyncThunk(
+      async (sessionId: string) => {
+        // 1. Get Session
+        const session = await whatsappService.getSession(sessionId)
+
+        // 2. If session has refId, get Project using the new service method
+        let project: Project | null = null
+        if (session.refId) {
+          try {
+            project = await projectsService.getProjectByGroupId(session.refId)
+          } catch (error) {
+            console.error("Failed to fetch project for session", error)
+          }
+        }
+
+        return { session, project }
+      },
+      {
+        pending: (state) => {
+          state.status = "loading"
+          state.error = null
+        },
+        fulfilled: (state, action) => {
+          state.status = "idle"
+          state.currentSessionId = action.payload.session.sessionId
+          state.currentProject = action.payload.project
+        },
+        rejected: (state, action) => {
+          state.status = "failed"
+          state.error = action.error.message || "Failed to fetch session and project"
+        },
+      },
+    ),
     getChatsAsync: create.asyncThunk(
       async (id: string) => {
         const chats = await whatsappService.getChats(id)
@@ -286,6 +323,7 @@ export const whatsappSessionSlice = createAppSlice({
     selectDeletedMessages: (state) => state.deletedMessages,
     selectCurrentChat: (state) => state.currentChat,
     selectCurrentMessage: (state) => state.currentMessage,
+    selectCurrentProject: (state) => state.currentProject,
     selectIsChatsLoading: (state) => state.isChatsLoading,
     selectIsMessagesLoading: (state) => state.isMessagesLoading,
     selectIsSyncing: (state) => state.isSyncing,
@@ -303,6 +341,7 @@ export const {
   clearMessages,
   addMessage,
   updateChatWithNewMessage,
+  fetchSessionAndProject,
   getChatsAsync,
   getChatMessagesAsync,
   getStoredMessagesAsync,
@@ -319,6 +358,7 @@ export const {
   selectDeletedMessages,
   selectCurrentChat,
   selectCurrentMessage,
+  selectCurrentProject,
   selectIsChatsLoading,
   selectIsMessagesLoading,
   selectIsSyncing,

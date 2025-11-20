@@ -29,7 +29,7 @@ const API_ENDPOINTS = {
 } as const
 
 // Create a new Api instance with WhatsApp-specific base URL if available, otherwise use default
-const whatsappBaseUrl = import.meta.env.VITE_WEBSOCKET_MS_URL
+const whatsappBaseUrl = import.meta.env.VITE_WS_BASE_URL
 const api = new Api(whatsappBaseUrl)
 
 export const whatsappService = {
@@ -51,6 +51,11 @@ export const whatsappService = {
 
   async getStoredSessions(): Promise<StoredSession[]> {
     const response = await api.get({ path: API_ENDPOINTS.STORED_SESSIONS })
+    return response
+  },
+
+  async getSession(id: string): Promise<StoredSession> {
+    const response = await api.get({ path: API_ENDPOINTS.SESSION(id) })
     return response
   },
 

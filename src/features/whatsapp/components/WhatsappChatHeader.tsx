@@ -3,7 +3,8 @@ import { Box, Typography, Chip, FormControlLabel, Switch, Button, CircularProgre
 import SyncIcon from "@mui/icons-material/Sync"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { selectSessionId, selectIsSyncing, selectCurrentChat, getChatMessagesAsync } from "../store/whatsappSessionSlice"
+import { selectSessionId, selectIsSyncing, selectCurrentChat, selectCurrentProject, getChatMessagesAsync } from "../store/whatsappSessionSlice"
+import { ConversationAnalysis } from "./ConversationAnalysis"
 import type { StoredMessage } from "../types"
 
 type WhatsappChatHeaderProps = {
@@ -17,6 +18,7 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
   const dispatch = useAppDispatch()
   const sessionId = useAppSelector(selectSessionId)
   const currentChat = useAppSelector(selectCurrentChat)
+  const currentProject = useAppSelector(selectCurrentProject)
   const isSyncing = useAppSelector(selectIsSyncing)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState("")
@@ -74,6 +76,11 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
           <Chip label={editedCount} size="small" color="primary" variant="outlined" />
         </Box>
       </Box>
+
+      {currentChat?.analysis && currentProject?.config && (
+        <ConversationAnalysis analysis={currentChat.analysis} config={currentProject.config} />
+      )}
+
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
         {isSyncing ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 2, py: 0.5 }}>

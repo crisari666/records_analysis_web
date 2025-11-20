@@ -5,6 +5,7 @@ const API_ENDPOINTS = {
   PROJECTS: '/projects',
   PROJECT_BY_ID: (id: string) => `/projects/${id}`,
   PROJECT_DEVICES: (id: string) => `/projects/${id}/devices`,
+  PROJECT_BY_GROUP_ID: (id: string) => `/groups/${id}/project`,
 } as const
 
 const api = new Api()
@@ -17,6 +18,11 @@ export const projectsService = {
 
   async getProjectById(id: string): Promise<Project> {
     const response = await api.get({ path: API_ENDPOINTS.PROJECT_BY_ID(id) })
+    return response
+  },
+
+  async getProjectByGroupId(id: string): Promise<Project> {
+    const response = await api.get({ path: API_ENDPOINTS.PROJECT_BY_GROUP_ID(id) })
     return response
   },
 
