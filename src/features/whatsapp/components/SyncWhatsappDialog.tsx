@@ -14,7 +14,7 @@ import {
 } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { createSessionAsync, setQrCode, selectSelectedSessionId, selectQrCode, getStoredSessionsAsync } from "../store/whatsappSlice"
+import { createSessionAsync, setQrCode, selectSelectedSessionId, selectQrCode, selectSessionError, getStoredSessionsAsync, setSessionError, clearSessionError } from "../store/whatsappSlice"
 import { fetchGroups, selectGroups } from "@/features/groups/store/groupsSlice"
 import { websocketService } from "@/shared/services/websocket.service"
 import QRCode from "react-qr-code"
@@ -45,6 +45,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
   const dispatch = useAppDispatch()
   const preselectedSessionId = useAppSelector(selectSelectedSessionId)
   const globalQrCode = useAppSelector(selectQrCode)
+  const sessionError = useAppSelector(selectSessionError)
   const groups = useAppSelector(selectGroups)
   const [sessionId, setSessionId] = useState("")
   const [groupId, setGroupId] = useState<string>("")
@@ -52,6 +53,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [currentRoomName, setCurrentRoomName] = useState<string | null>(null)
   const unsubscribeQrRef = useRef<(() => void) | null>(null)
   const unsubscribeErrorRef = useRef<(() => void) | null>(null)
   const unsubscribeReadingRef = useRef<(() => void) | null>(null)
@@ -74,7 +76,14 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       setSuccess(null)
       setIsLoading(false)
       dispatch(setQrCode(null))
-      
+      dispatch(clearSessionError())
+
+      // Leave room if joined
+      if (currentRoomName && websocketService.isConnectedToServer()) {
+        websocketService.leaveRoom(currentRoomName)
+        setCurrentRoomName(null)
+      }
+
       // Cleanup listeners
       if (unsubscribeQrRef.current) {
         unsubscribeQrRef.current()
@@ -89,7 +98,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
         unsubscribeReadingRef.current = null
       }
     }
-    
+
     // Cleanup on unmount
     return () => {
       if (unsubscribeQrRef.current) {
@@ -120,10 +129,16 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       }, 0)
       return () => clearTimeout(timer)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, preselectedSessionId])
 
   const handleClose = () => {
+    // Leave room if joined
+    if (currentRoomName && websocketService.isConnectedToServer()) {
+      websocketService.leaveRoom(currentRoomName)
+      setCurrentRoomName(null)
+    }
+
     // Cleanup
     setSessionId("")
     setGroupId("")
@@ -132,10 +147,12 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
     setSuccess(null)
     setIsLoading(false)
     dispatch(setQrCode(null))
+    dispatch(clearSessionError())
     onClose()
   }
 
   const handleSubmit = async () => {
+
     if (!sessionId.trim()) {
       setError(t("sessionIdRequired") || "Session ID is required")
       return
@@ -155,35 +172,32 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
     setIsLoading(true)
     setError(null)
     setQrCodeLocal(null)
+    dispatch(clearSessionError())
+
+    const roomName = `session:${sessionId.trim()}`
 
     try {
-      // Create session
-      const result = await dispatch(createSessionAsync({ id: sessionId.trim(), data: { groupId } })).unwrap()
-      
-      if (!result.success) {
-        setError(result.message || t("errorCreatingSession"))
-        setIsLoading(false)
-        return
-      }
-      const roomName = `session:${sessionId.trim()}`
-      console.log({roomName});
-      
-      // Join room with sessionId to receive events for this specific session
+      // Join room IMMEDIATELY before waiting for response
+      // This ensures we receive events that the backend sends before the HTTP response
       websocketService.joinRoom(roomName)
+      setCurrentRoomName(roomName)
 
       // Clean up any existing listeners
       if (unsubscribeQrRef.current) {
         unsubscribeQrRef.current()
+        unsubscribeQrRef.current = null
       }
       if (unsubscribeErrorRef.current) {
         unsubscribeErrorRef.current()
+        unsubscribeErrorRef.current = null
       }
       if (unsubscribeReadingRef.current) {
         unsubscribeReadingRef.current()
+        unsubscribeReadingRef.current = null
       }
 
       // Listen for QR code event
-      unsubscribeQrRef.current = websocketService.on<QrEventData>("qr", (data) => {
+      const qrHandler = (data: QrEventData) => {
         // Verify the sessionId matches
         if (data.sessionId === sessionId.trim() && data.qr) {
           // Parse the QR code string and convert to displayable format
@@ -201,13 +215,24 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
             setIsLoading(false)
           }
         }
-      })
+      }
+
+      unsubscribeQrRef.current = websocketService.on<QrEventData>("qr", qrHandler)
 
       // Also listen for errors
       unsubscribeErrorRef.current = websocketService.on("error", (errorData: any) => {
         if (errorData?.sessionId === sessionId.trim()) {
-          setError(errorData.message || t("errorReceivingQr"))
+          const errorMessage = errorData.message || t("errorReceivingQr")
+          setError(errorMessage)
+          dispatch(setSessionError(errorMessage))
           setIsLoading(false)
+
+          // Leave room on error
+          if (currentRoomName && websocketService.isConnectedToServer()) {
+            websocketService.leaveRoom(currentRoomName)
+            setCurrentRoomName(null)
+          }
+
           if (unsubscribeErrorRef.current) {
             unsubscribeErrorRef.current()
             unsubscribeErrorRef.current = null
@@ -232,9 +257,34 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
         },
       )
 
+      // Now create session (backend may send events before responding)
+      const result = await dispatch(createSessionAsync({ id: sessionId.trim(), data: { groupId } })).unwrap()
+
+      if (!result.success) {
+        const errorMessage = result.message || t("errorCreatingSession")
+        setError(errorMessage)
+        dispatch(setSessionError(errorMessage))
+        setIsLoading(false)
+
+        // Leave room on error
+        if (currentRoomName && websocketService.isConnectedToServer()) {
+          websocketService.leaveRoom(currentRoomName)
+          setCurrentRoomName(null)
+        }
+        return
+      }
+
     } catch (err: any) {
-      setError(err.message || t("errorCreatingSession"))
+      const errorMessage = err.message || t("errorCreatingSession")
+      setError(errorMessage)
+      dispatch(setSessionError(errorMessage))
       setIsLoading(false)
+
+      // Leave room on error
+      if (currentRoomName && websocketService.isConnectedToServer()) {
+        websocketService.leaveRoom(currentRoomName)
+        setCurrentRoomName(null)
+      }
     }
   }
 
@@ -292,16 +342,22 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
             </Box>
           )}
 
-        {success && (
-          <Alert severity="success" sx={{ mt: 1 }}>
-            {success}
-          </Alert>
-        )}
+          {success && (
+            <Alert severity="success" sx={{ mt: 1 }}>
+              {success}
+            </Alert>
+          )}
 
           {error && (
             <Typography variant="body2" color="error" sx={{ mt: 1 }}>
               {error}
             </Typography>
+          )}
+
+          {sessionError && (
+            <Alert severity="error" sx={{ mt: 1 }}>
+              {sessionError}
+            </Alert>
           )}
         </Box>
       </DialogContent>

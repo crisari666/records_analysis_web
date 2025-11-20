@@ -63,7 +63,7 @@ export class WebSocketService {
    */
   public on<T = any>(eventName: string, callback: (data: T) => void): () => void {
     if (!this.socket) {
-      return () => {}
+      return () => { }
     }
 
     this.socket.on(eventName, callback)

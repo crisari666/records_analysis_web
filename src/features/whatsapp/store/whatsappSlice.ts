@@ -22,6 +22,7 @@ const initialState: WhatsappState = {
   qrCode: null,
   isLoading: false,
   error: null,
+  sessionError: null,
   status: "idle",
   // UI state
   isSyncDialogOpen: false,
@@ -50,6 +51,12 @@ export const whatsappSlice = createAppSlice({
     clearError: create.reducer((state) => {
       state.error = null
     }),
+    setSessionError: create.reducer((state, action: PayloadAction<string | null>) => {
+      state.sessionError = action.payload
+    }),
+    clearSessionError: create.reducer((state) => {
+      state.sessionError = null
+    }),
     clearSessions: create.reducer((state) => {
       state.sessions = []
     }),
@@ -65,14 +72,17 @@ export const whatsappSlice = createAppSlice({
           state.isLoading = true
           state.status = "loading"
           state.error = null
+          state.sessionError = null
         },
         fulfilled: (state) => {
           state.isLoading = false
           state.status = "idle"
+          state.sessionError = null
         },
         rejected: (state, action) => {
           state.isLoading = false
           state.status = "failed"
+          state.sessionError = action.error.message || "Failed to create session"
           state.error = action.error.message || "Failed to create session"
         },
       },
@@ -218,6 +228,7 @@ export const whatsappSlice = createAppSlice({
     selectQrCode: (whatsapp) => whatsapp.qrCode,
     selectIsLoading: (whatsapp) => whatsapp.isLoading,
     selectError: (whatsapp) => whatsapp.error,
+    selectSessionError: (whatsapp) => whatsapp.sessionError,
     selectStatus: (whatsapp) => whatsapp.status,
     selectIsSyncDialogOpen: (whatsapp) => whatsapp.isSyncDialogOpen,
     selectSelectedSessionId: (whatsapp) => whatsapp.selectedSessionId,
@@ -230,6 +241,8 @@ export const {
   closeSyncDialog,
   setCurrentSession,
   clearError,
+  setSessionError,
+  clearSessionError,
   clearSessions,
   createSessionAsync,
   updateSessionGroupAsync,
@@ -250,6 +263,7 @@ export const {
   selectQrCode,
   selectIsLoading,
   selectError,
+  selectSessionError,
   selectStatus,
   selectIsSyncDialogOpen,
   selectSelectedSessionId,

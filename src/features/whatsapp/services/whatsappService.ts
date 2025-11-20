@@ -8,6 +8,7 @@ import type {
   UpdateSessionGroupRequest,
   UpdateSessionGroupResponse,
   DestroySessionResponse,
+  GetSessionQrCodeResponse,
   SendMessageRequest,
   SendMessageResponse,
   StoredChat,
@@ -23,6 +24,7 @@ const API_ENDPOINTS = {
   SESSION: (id: string) => `${API_BASE}/session/${id}`,
   SESSION_GROUP: (id: string) => `${API_BASE}/session/${id}/group`,
   SESSION_STATUS: (id: string) => `${API_BASE}/session/${id}/status`,
+  SESSION_QR_CODE: (id: string) => `${API_BASE}/session/${id}/qr-code`,
   SEND_MESSAGE: (id: string) => `${API_BASE}/send/${id}`,
   SESSION_CHATS: (id: string) => `${API_BASE}/session/${id}/chats`,
   SESSION_CHAT_MESSAGES: (id: string, chatId: string) => `${API_BASE}/session/${id}/chats/${chatId}/messages`,
@@ -61,6 +63,11 @@ export const whatsappService = {
 
   async getSessionStatus(id: string): Promise<SessionStatusResponse> {
     const response = await api.get({ path: API_ENDPOINTS.SESSION_STATUS(id) })
+    return response
+  },
+
+  async getSessionQrCode(id: string): Promise<GetSessionQrCodeResponse> {
+    const response = await api.get({ path: API_ENDPOINTS.SESSION_QR_CODE(id) })
     return response
   },
 

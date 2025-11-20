@@ -45,6 +45,16 @@ export type DestroySessionResponse = {
   message: string
 }
 
+export type GetSessionQrCodeResponse = {
+  success: boolean
+  sessionId?: string
+  status?: string
+  qrCode: string | null
+  qrAttempts?: number
+  maxQrAttempts?: number
+  message?: string
+}
+
 // Messaging Types
 export type SendMessageRequest = {
   phone: string
@@ -167,8 +177,10 @@ export type WhatsappState = {
   qrCode: string | null
   isLoading: boolean
   error: string | null
+  sessionError: string | null
   status: "idle" | "loading" | "failed"
   isSyncDialogOpen: boolean
   selectedSessionId: string | null
 }
+
 
