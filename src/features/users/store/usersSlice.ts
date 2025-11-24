@@ -100,7 +100,7 @@ const usersSlice = createAppSlice({
       })
       .addCase(updateUserAsync.fulfilled, (state, action: PayloadAction<User>) => {
         state.isLoading = false
-        const index = state.users.findIndex(user => user.id === action.payload.id)
+        const index = state.users.findIndex(user => user._id === action.payload._id)
         if (index !== -1) {
           state.users[index] = action.payload
         }
@@ -116,7 +116,7 @@ const usersSlice = createAppSlice({
       })
       .addCase(deleteUserAsync.fulfilled, (state, action: PayloadAction<string>) => {
         state.isLoading = false
-        state.users = state.users.filter(user => user.id !== action.payload)
+        state.users = state.users.filter(user => user._id !== action.payload)
       })
       .addCase(deleteUserAsync.rejected, (state, action) => {
         state.isLoading = false

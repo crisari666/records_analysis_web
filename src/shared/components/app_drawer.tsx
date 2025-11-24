@@ -119,11 +119,14 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 )
 
+type UserRole = 'root' | 'admin' | 'user'
+
 type NavigationItem = {
   text: string
   icon: React.ReactElement
   path: string
   translationKey: string
+  allowedRoles: UserRole[]
 }
 
 type AppDrawerProps = {
@@ -144,43 +147,50 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
       text: t('navigation.home'), 
       icon: <HomeIcon />, 
       path: '/dashboard',
-      translationKey: 'navigation.home'
+      translationKey: 'navigation.home',
+      allowedRoles: ['root', 'admin', 'user']
     },
     { 
       text: t('navigation.users'), 
       icon: <GroupIcon />, 
       path: '/dashboard/users',
-      translationKey: 'navigation.users'
+      translationKey: 'navigation.users',
+      allowedRoles: ['user']
     },
     { 
       text: t('navigation.devices'), 
       icon: <PhoneAndroidIcon />, 
       path: '/dashboard/devices',
-      translationKey: 'navigation.devices'
+      translationKey: 'navigation.devices',
+      allowedRoles: ['root']
     },
     { 
       text: t('navigation.records'), 
       icon: <RecordVoiceOverIcon />, 
       path: '/dashboard/records',
-      translationKey: 'navigation.records'
+      translationKey: 'navigation.records',
+      allowedRoles: ['root']
     },
     { 
       text: t('navigation.projects'), 
       icon: <FolderIcon />, 
       path: '/dashboard/projects',
-      translationKey: 'navigation.projects'
+      translationKey: 'navigation.projects',
+      allowedRoles: ['root', 'admin']
     },
     { 
       text: t('navigation.groups'), 
       icon: <GroupsIcon />, 
       path: '/dashboard/groups',
-      translationKey: 'navigation.groups'
+      translationKey: 'navigation.groups',
+      allowedRoles: ['root', 'admin']
     },
     { 
       text: t('navigation.whatsapp'), 
       icon: <ChatIcon />, 
       path: '/dashboard/whatsapp',
-      translationKey: 'navigation.whatsapp'
+      translationKey: 'navigation.whatsapp',
+      allowedRoles: ['root', 'admin']
     },
   ]
 
@@ -208,58 +218,65 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
     return location.pathname.startsWith(path)
   }
 
+  const hasAccess = (allowedRoles: UserRole[]): boolean => {
+    if (!user || !user.role) return false
+    return allowedRoles.includes(user.role as UserRole)
+  }
+
   const renderNavigationItems = () => {
-    return navigationItems.map((item) => (
-      <ListItem key={item.path} disablePadding sx={{ display: 'block' }}>
-        <ListItemButton
-          selected={isActiveRoute(item.path)}
-          onClick={() => handleNavigate(item.path)}
-          sx={[
-            {
-              minHeight: 48,
-              px: 2.5,
-            },
-            open
-              ? {
-                  justifyContent: 'initial',
-                }
-              : {
-                  justifyContent: 'center',
-                },
-          ]}
-        >
-          <ListItemIcon
+    return navigationItems
+      .filter((item) => hasAccess(item.allowedRoles))
+      .map((item) => (
+        <ListItem key={item.path} disablePadding sx={{ display: 'block' }}>
+          <ListItemButton
+            selected={isActiveRoute(item.path)}
+            onClick={() => handleNavigate(item.path)}
             sx={[
               {
-                minWidth: 0,
-                justifyContent: 'center',
+                minHeight: 48,
+                px: 2.5,
               },
               open
                 ? {
-                    mr: 3,
+                    justifyContent: 'initial',
                   }
                 : {
-                    mr: 'auto',
+                    justifyContent: 'center',
                   },
             ]}
           >
-            {item.icon}
-          </ListItemIcon>
-          <ListItemText
-            primary={item.text}
-            sx={[
-              open
-                ? {
-                    opacity: 1,
-                  }
-                : {
-                    opacity: 0,
-                  },
-            ]}
-          />
-        </ListItemButton>
-      </ListItem>
-    ))
+            <ListItemIcon
+              sx={[
+                {
+                  minWidth: 0,
+                  justifyContent: 'center',
+                },
+                open
+                  ? {
+                      mr: 3,
+                    }
+                  : {
+                      mr: 'auto',
+                    },
+              ]}
+            >
+              {item.icon}
+            </ListItemIcon>
+            <ListItemText
+              primary={item.text}
+              sx={[
+                open
+                  ? {
+                      opacity: 1,
+                    }
+                  : {
+                      opacity: 0,
+                    },
+              ]}
+            />
+          </ListItemButton>
+        </ListItem>
+      ))
   }
 
   return (

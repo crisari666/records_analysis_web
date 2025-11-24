@@ -15,7 +15,6 @@ export default class Api {
   
   constructor(baseURL?: string) {
     const url = baseURL || import.meta.env.VITE_BASE_URL_USERS_MS
-    console.log({ url })
     
     this.axiosInstance = axios.create({
       baseURL: url,

@@ -42,9 +42,17 @@ export async function getCurrentUser(): Promise<User | null> {
   if (!token) return null;
 
   try {
-    return await api.get({
+    const response = await api.get({
       path: '/auth/me',
     });
+
+    const {user, access_token} = response;
+    
+    // Store token and user in localStorage
+    localStorage.setItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN, access_token);
+    localStorage.setItem(AppConstants.LOCAL_STORAGE.USER, JSON.stringify(user));
+    
+    return user;
   } catch (error) {
     localStorage.removeItem(AppConstants.LOCAL_STORAGE.AUTH_TOKEN);
     localStorage.removeItem(AppConstants.LOCAL_STORAGE.USER);

@@ -5,6 +5,8 @@
   "confirmDelete": "¿Estás seguro de que quieres eliminar este usuario?",
   "table": {
     "name": "Nombre",
+    "lastName": "Apellido",
+    "username": "Nombre de Usuario",
     "email": "Correo",
     "role": "Rol",
     "status": "Estado",
@@ -15,5 +17,36 @@
     "active": "Activo",
     "inactive": "Inactivo"
   },
-  "noUsers": "No se encontraron usuarios"
+  "roles": {
+    "root": "Root",
+    "admin": "Administrador",
+    "user": "Usuario"
+  },
+  "noUsers": "No se encontraron usuarios",
+  "form": {
+    "addUser": "Agregar Usuario",
+    "editUser": "Editar Usuario",
+    "name": "Nombre",
+    "lastName": "Apellido",
+    "username": "Nombre de Usuario",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "role": "Rol",
+    "roleUser": "Usuario",
+    "roleAdmin": "Administrador",
+    "roleRoot": "Root",
+    "nameRequired": "El nombre es requerido",
+    "lastNameRequired": "El apellido es requerido",
+    "userRequired": "El nombre de usuario es requerido",
+    "emailRequired": "El correo electrónico es requerido",
+    "emailInvalid": "Por favor ingrese un correo electrónico válido",
+    "passwordRequired": "La contraseña es requerida",
+    "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+    "passwordOptional": "Deje en blanco para mantener la contraseña actual",
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "save": "Guardar",
+    "createError": "Error al crear usuario",
+    "updateError": "Error al actualizar usuario"
+  }
 }

@@ -54,10 +54,10 @@ export const ProjectUsersModal: React.FC<ProjectUsersModalProps> = ({
     if (project && open && users.length > 0) {
       const projectUserIds = project.users || [];
       const projectUsers = users.filter(user => 
-        projectUserIds.includes(user.id)
+        projectUserIds.includes(user._id)
       );
       setSelectedUsers(projectUsers);
-    } else if (!project?.users || project.users.length === 0) {
+    } else if (!project?.users || project.users?.length === 0) {
       setSelectedUsers([]);
     }
   }, [project, users, open]);
@@ -72,7 +72,7 @@ export const ProjectUsersModal: React.FC<ProjectUsersModalProps> = ({
 
     setIsSubmitting(true);
     try {
-      const userIds = selectedUsers.map(user => user.id);
+      const userIds = selectedUsers.map(user => user._id);
       await dispatch(updateProjectUsers({
         id: project._id,
         users: userIds,
@@ -139,7 +139,7 @@ export const ProjectUsersModal: React.FC<ProjectUsersModalProps> = ({
               value={selectedUsers}
               onChange={(_, newValue) => setSelectedUsers(newValue)}
               getOptionLabel={getUserLabel}
-              isOptionEqualToValue={(option, value) => option.id === value.id}
+              isOptionEqualToValue={(option, value) => option._id === value._id}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -151,7 +151,7 @@ export const ProjectUsersModal: React.FC<ProjectUsersModalProps> = ({
                 value.map((option, index) => (
                   <Chip
                     {...getTagProps({ index })}
-                    key={option.id}
+                    key={'project-user-' + option._id}
                     label={option.name}
                     size="small"
                   />

@@ -1,9 +1,11 @@
 export type User = {
-  id: string
+  _id: string
   name: string
+  lastName: string
+  user: string
   email: string
-  role: string
-  status: 'active' | 'inactive'
+  role: 'root' | 'admin' | 'user'
+  removed: boolean
   createdAt: string
   updatedAt: string
 }
@@ -16,14 +18,19 @@ export type UsersState = {
 
 export type CreateUserRequest = {
   name: string
+  lastName: string
+  user: string
   email: string
-  role: string
+  password: string
+  role?: 'root' | 'admin' | 'user'
 }
 
 export type UpdateUserRequest = {
   id: string
   name?: string
+  lastName?: string
+  user?: string
   email?: string
-  role?: string
-  status?: 'active' | 'inactive'
+  password?: string
+  role?: 'root' | 'admin' | 'user'
 }

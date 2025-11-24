@@ -31,39 +31,75 @@ export const router = createBrowserRouter([
       },
       {
         path: 'users',
-        element: <UsersListPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root']}>
+            <UsersListPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'devices',
-        element: <DevicesPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root']}>
+            <DevicesPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'records',
-        element: <RecordsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root']}>
+            <RecordsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'projects',
-        element: <ProjectsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root', 'admin']}>
+            <ProjectsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'project',
-        element: <ProjectPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root', 'admin']}>
+            <ProjectPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'project/:id',
-        element: <ProjectPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root', 'admin']}>
+            <ProjectPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'groups',
-        element: <GroupsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root', 'admin']}>
+            <GroupsPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'whatsapp',
-        element: <WhatsAppPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root', 'admin']}>
+            <WhatsAppPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'whatsapp/sessions/:id/chats',
-        element: <WhatsasppSessionChatsPage />,
+        element: (
+          <ProtectedRoute allowedRoles={['root', 'admin']}>
+            <WhatsasppSessionChatsPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

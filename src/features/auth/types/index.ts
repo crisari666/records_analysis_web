@@ -4,6 +4,7 @@ export type User = {
   lastName: string;
   user: string;
   email: string;
+  role: 'root' | 'admin' | 'user';
 };
 
 export type LoginCredentials = {

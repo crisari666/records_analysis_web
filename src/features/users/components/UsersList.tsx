@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Typography,
@@ -23,11 +23,15 @@ import {
 } from '@mui/icons-material'
 import { useAppDispatch, useAppSelector } from '../../../app/hooks'
 import { getUsersAsync, deleteUserAsync } from '../store/usersSlice'
+import { UserFormModal } from './UserFormModal'
+import type { User } from '../types'
 
 export const UsersList = () => {
   const { t } = useTranslation('users')
   const dispatch = useAppDispatch()
   const { users, isLoading, error } = useAppSelector((state) => state.users)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   useEffect(() => {
     dispatch(getUsersAsync())
@@ -39,8 +43,25 @@ export const UsersList = () => {
     }
   }
 
-  const getStatusColor = (status: string) => {
-    return status === 'active' ? 'success' : 'default'
+  const handleOpenModal = (user?: User) => {
+    setSelectedUser(user || null)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedUser(null)
+  }
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'root':
+        return 'error'
+      case 'admin':
+        return 'warning'
+      default:
+        return 'default'
+    }
   }
 
   if (isLoading) {
@@ -64,6 +85,7 @@ export const UsersList = () => {
           variant="contained"
           startIcon={<AddIcon />}
           sx={{ mb: 2 }}
+          onClick={() => handleOpenModal()}
         >
           {t('addUser')}
         </Button>
@@ -80,9 +102,10 @@ export const UsersList = () => {
           <TableHead>
             <TableRow>
               <TableCell>{t('table.name')}</TableCell>
+              <TableCell>{t('table.lastName')}</TableCell>
+              <TableCell>{t('table.username')}</TableCell>
               <TableCell>{t('table.email')}</TableCell>
               <TableCell>{t('table.role')}</TableCell>
-              <TableCell>{t('table.status')}</TableCell>
               <TableCell>{t('table.createdAt')}</TableCell>
               <TableCell align="right">{t('table.actions')}</TableCell>
             </TableRow>
@@ -90,7 +113,7 @@ export const UsersList = () => {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center">
+                <TableCell colSpan={7} align="center">
                   <Typography variant="body2" color="text.secondary">
                     {t('noUsers')}
                   </Typography>
@@ -98,25 +121,21 @@ export const UsersList = () => {
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow key={user.id} hover>
+                <TableRow key={user._id} hover>
                   <TableCell>
                     <Typography variant="body2" fontWeight="medium">
                       {user.name}
                     </Typography>
                   </TableCell>
+                  <TableCell>{user.lastName}</TableCell>
+                  <TableCell>{user.user}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
                     <Chip
-                      label={user.role}
+                      label={t(`roles.${user.role}`)}
                       size="small"
+                      color={getRoleColor(user.role)}
                       variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={t(`status.${user.status}`)}
-                      size="small"
-                      color={getStatusColor(user.status)}
                     />
                   </TableCell>
                   <TableCell>
@@ -126,17 +145,14 @@ export const UsersList = () => {
                     <IconButton
                       size="small"
                       color="primary"
-                      onClick={() => {
-                        // TODO: Implement edit functionality
-                        console.log('Edit user:', user.id)
-                      }}
+                      onClick={() => handleOpenModal(user)}
                     >
                       <EditIcon />
                     </IconButton>
                     <IconButton
                       size="small"
                       color="error"
-                      onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => handleDeleteUser(user._id)}
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -147,6 +163,12 @@ export const UsersList = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <UserFormModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        user={selectedUser}
+      />
     </Box>
   )
 }
