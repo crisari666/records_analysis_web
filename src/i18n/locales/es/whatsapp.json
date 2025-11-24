@@ -21,10 +21,8 @@
   "status": "Estado",
   "lastSeen": "Última Vez",
   "createdAt": "Fecha de Creación",
-  "updatedAt": "Última Actualización"
-  ,
-  "readingSuccess": "¡Vinculación exitosa! La sesión se está inicializando."
-  ,
+  "updatedAt": "Última Actualización",
+  "readingSuccess": "¡Vinculación exitosa! La sesión se está inicializando.",
   "sessionChatsTitle": "Chats de la Sesión",
   "noChats": "No se encontraron chats",
   "noMessages": "Sin mensajes",
@@ -52,6 +50,12 @@
   "syncMessages": "Sincronizar Mensajes",
   "syncingMessages": "Sincronizando mensajes...",
   "syncMessagesSuccess": "Mensajes sincronizados exitosamente",
-  "chatDeleted": "Chat eliminado"
+  "chatDeleted": "Chat eliminado",
+  "viewChats": "Ver Chats",
+  "syncProgress": {
+    "syncing": "Sincronizando",
+    "of": "de",
+    "chats": "chats",
+    "messagesSynced": "Mensajes sincronizados"
+  }
 }
-

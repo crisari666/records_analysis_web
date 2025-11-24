@@ -14,7 +14,7 @@ export const WhatsAppPage = (): JSX.Element => {
   useEffect(() => {
     // Connect to WebSocket when component mounts
     const wsUrl = import.meta.env.VITE_WS_WEBSOCKET_URL.replace(/^http/, "ws")
-    
+
 
     if (wsUrl && !websocketService.isConnectedToServer()) {
       websocketService.connect(wsUrl)

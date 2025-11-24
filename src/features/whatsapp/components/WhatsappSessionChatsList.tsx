@@ -26,7 +26,7 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
     dispatch(setCurrentChat(chat))
     // Load messages for the selected chat
     dispatch(getStoredMessagesAsync({ id: sessionId, params: { chatId: chat.chatId, includeDeleted: true } }))
-  }, [dispatch, sessionId, setSearchParams])
+  }, [])
 
   // Load chats when sessionId changes
   useEffect(() => {
@@ -38,11 +38,11 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
   // Handle chatId from query params
   useEffect(() => {
     const chatIdFromQuery = searchParams.get("chatId")
-    
-    if (chatIdFromQuery && chats.length > 0) {
+
+    if (chatIdFromQuery) {
       // Find the chat by chatId
       const chat = chats.find((c) => c.chatId === chatIdFromQuery)
-      
+
       if (chat) {
         // Only update if it's different from current chat to avoid unnecessary re-renders
         if (!currentChat || currentChat.chatId !== chat.chatId) {
@@ -54,7 +54,7 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
       // Clear current chat if chatId is removed from query params
       dispatch(setCurrentChat(null))
     }
-  }, [searchParams, chats, currentChat, dispatch, sessionId])
+  }, [])
 
   return (
     <Card sx={{ height: "100%" }}>
@@ -66,99 +66,99 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
         ) : (
           <Box sx={{ flex: 1, overflowY: "auto" }}>
             <List>
-            {chats.map((chat) => {
-              const isSelected = currentChat?.chatId === chat.chatId
-              return (
-                <ListItem key={chat.chatId} divider disablePadding>
-                  <ListItemButton
-                    onClick={() => handleSelectChat(chat)}
-                    selected={isSelected}
-                    sx={{
-                      bgcolor: isSelected ? "primary.main" : "transparent",
-                      "&:hover": {
-                        bgcolor: isSelected ? "primary.dark" : "action.hover",
-                      },
-                      "&.Mui-selected": {
-                        bgcolor: "primary.main",
-                        color: "primary.contrastText",
+              {chats.map((chat) => {
+                const isSelected = currentChat?.chatId === chat.chatId
+                return (
+                  <ListItem key={chat.chatId} divider disablePadding>
+                    <ListItemButton
+                      onClick={() => handleSelectChat(chat)}
+                      selected={isSelected}
+                      sx={{
+                        bgcolor: isSelected ? "primary.main" : "transparent",
                         "&:hover": {
-                          bgcolor: "primary.dark",
+                          bgcolor: isSelected ? "primary.dark" : "action.hover",
                         },
-                      },
-                    }}
-                  >
-                    <ListItemText
-                      primary={
-                        <Box display="flex" alignItems="center" gap={1}>
-                          <Typography 
-                            variant="body1" 
-                            component="span"
-                            sx={{ 
-                              color: isSelected ? "primary.contrastText" : "text.primary",
-                              fontWeight: isSelected ? 600 : 400,
-                            }}
-                          >
-                            {chat.name || chat.chatId}
-                          </Typography>
-                          {chat.deleted && (
-                            <Chip 
-                              label={t("chatDeleted")} 
-                              size="small" 
-                              color="error"
-                              variant="filled"
-                            />
-                          )}
-                          {chat.archived && (
-                            <Chip 
-                              label={t("archived")} 
-                              size="small" 
-                              color="default"
-                              variant="outlined"
-                            />
-                          )}
-                        </Box>
-                      }
-                      secondary={
-                        <Box component="span">
-                          {chat.lastMessage && (
-                            <Typography 
-                              component="span" 
-                              variant="body2" 
-                              noWrap 
-                              sx={{ 
-                                mb: 0.5, 
-                                maxWidth: "200px", 
-                                display: "block",
-                                color: isSelected ? "primary.contrastText" : "text.secondary",
-                                opacity: isSelected ? 0.9 : 1,
+                        "&.Mui-selected": {
+                          bgcolor: "primary.main",
+                          color: "primary.contrastText",
+                          "&:hover": {
+                            bgcolor: "primary.dark",
+                          },
+                        },
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <Typography
+                              variant="body1"
+                              component="span"
+                              sx={{
+                                color: isSelected ? "primary.contrastText" : "text.primary",
+                                fontWeight: isSelected ? 600 : 400,
                               }}
                             >
-                              {chat.lastMessage.substring(0, 15)}
+                              {chat.name || chat.chatId}
                             </Typography>
-                          )}
-                          {chat.timestamp && (
-                            <Typography 
-                              component="span" 
-                              variant="caption" 
-                              sx={{ 
-                                display: "block",
-                                color: isSelected ? "primary.contrastText" : "text.secondary",
-                                opacity: isSelected ? 0.8 : 1,
-                              }}
-                            >
-                              {new Date(chat.timestamp * 1000).toLocaleString()}
-                            </Typography>
-                          )}
-                        </Box>
-                      }
-                    />
-                  </ListItemButton>
-                </ListItem>
-              )
-            })}
-            {chats.length === 0 && (
-              <Typography color="text.secondary">{t("noChats")}</Typography>
-            )}
+                            {chat.deleted && (
+                              <Chip
+                                label={t("chatDeleted")}
+                                size="small"
+                                color="error"
+                                variant="filled"
+                              />
+                            )}
+                            {chat.archived && (
+                              <Chip
+                                label={t("archived")}
+                                size="small"
+                                color="default"
+                                variant="outlined"
+                              />
+                            )}
+                          </Box>
+                        }
+                        secondary={
+                          <Box component="span">
+                            {chat.lastMessage && (
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                noWrap
+                                sx={{
+                                  mb: 0.5,
+                                  maxWidth: "200px",
+                                  display: "block",
+                                  color: isSelected ? "primary.contrastText" : "text.secondary",
+                                  opacity: isSelected ? 0.9 : 1,
+                                }}
+                              >
+                                {chat.lastMessage.substring(0, 15)}
+                              </Typography>
+                            )}
+                            {chat.timestamp && (
+                              <Typography
+                                component="span"
+                                variant="caption"
+                                sx={{
+                                  display: "block",
+                                  color: isSelected ? "primary.contrastText" : "text.secondary",
+                                  opacity: isSelected ? 0.8 : 1,
+                                }}
+                              >
+                                {new Date(chat.timestamp * 1000).toLocaleString()}
+                              </Typography>
+                            )}
+                          </Box>
+                        }
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                )
+              })}
+              {chats.length === 0 && (
+                <Typography color="text.secondary">{t("noChats")}</Typography>
+              )}
             </List>
           </Box>
         )}

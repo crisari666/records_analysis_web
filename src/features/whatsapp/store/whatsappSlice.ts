@@ -10,6 +10,7 @@ import type {
   UpdateSessionGroupRequest,
   DestroySessionResponse,
   SendMessageRequest,
+  SyncProgress,
 } from "../types"
 
 const initialState: WhatsappState = {
@@ -27,6 +28,7 @@ const initialState: WhatsappState = {
   // UI state
   isSyncDialogOpen: false,
   selectedSessionId: null,
+  syncProgress: null,
 }
 
 export const whatsappSlice = createAppSlice({
@@ -59,6 +61,12 @@ export const whatsappSlice = createAppSlice({
     }),
     clearSessions: create.reducer((state) => {
       state.sessions = []
+    }),
+    setSyncProgress: create.reducer((state, action: PayloadAction<SyncProgress | null>) => {
+      state.syncProgress = action.payload
+    }),
+    clearSyncProgress: create.reducer((state) => {
+      state.syncProgress = null
     }),
     // moved to whatsappSessionSlice: clearChats, clearMessages
     // Async Thunks - Session Management
@@ -232,6 +240,7 @@ export const whatsappSlice = createAppSlice({
     selectStatus: (whatsapp) => whatsapp.status,
     selectIsSyncDialogOpen: (whatsapp) => whatsapp.isSyncDialogOpen,
     selectSelectedSessionId: (whatsapp) => whatsapp.selectedSessionId,
+    selectSyncProgress: (whatsapp) => whatsapp.syncProgress,
   },
 })
 
@@ -244,6 +253,8 @@ export const {
   setSessionError,
   clearSessionError,
   clearSessions,
+  setSyncProgress,
+  clearSyncProgress,
   createSessionAsync,
   updateSessionGroupAsync,
   getActiveSessionsAsync,
@@ -267,4 +278,5 @@ export const {
   selectStatus,
   selectIsSyncDialogOpen,
   selectSelectedSessionId,
+  selectSyncProgress,
 } = whatsappSlice.selectors

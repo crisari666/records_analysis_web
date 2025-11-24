@@ -6,3 +6,5 @@ export { WhatsappSessionChatsList } from "./WhatsappSessionChatsList"
 export { WhatsappChatContent } from "./WhatsappChatContent"
 export { WhatsappChatHeader } from "./WhatsappChatHeader"
 export { WhatsappSocketListener } from "./WhatsappSocketListener"
+export { SyncProgressIndicator } from "./SyncProgressIndicator"
+

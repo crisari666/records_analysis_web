@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Box, Typography, Tooltip, Modal, Paper, IconButton, Grid, Divider } from "@mui/material"
 import CheckCircleIcon from "@mui/icons-material/CheckCircle"
 import CancelIcon from "@mui/icons-material/Cancel"
@@ -16,6 +16,12 @@ type ConversationAnalysisProps = {
 export const ConversationAnalysis = ({ analysis, config }: ConversationAnalysisProps) => {
   const { t } = useTranslation("whatsapp")
   const [open, setOpen] = useState(false)
+  const [analysisData, setAnalysisData] = useState<Record<string, any> | undefined>()
+
+  useEffect(() => {
+    const a = analysis != undefined && analysis.example != undefined ? analysis.example : analysis != undefined && analysis.example == undefined ? analysis : undefined
+    setAnalysisData(a)
+  }, [analysis])
 
   if (!analysis || !config || !config.fields) {
     return null
@@ -94,10 +100,10 @@ export const ConversationAnalysis = ({ analysis, config }: ConversationAnalysisP
   return (
     <>
       <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-        {Object.entries(fields).map(([key, description]) => {
+        {analysisData && Object.entries(fields).map(([key, description]) => {
           // Only show indicators for fields that are present in analysis or defined in fields
           // We use the value from analysis, defaulting to null if not present
-          const value = analysis[key]
+          const value = analysisData![key]
           return renderIndicator(key, value, description)
         })}
       </Box>
@@ -135,8 +141,9 @@ export const ConversationAnalysis = ({ analysis, config }: ConversationAnalysisP
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2}>
-            {Object.entries(fields).map(([key, description]) => {
-              const value = analysis[key]
+            {analysisData && Object.entries(fields).map(([key, description]) => {
+
+              const value = analysisData![key]
               return (
                 <Grid size={{ xs: 12 }} key={key}>
                   <Box sx={{ mb: 1 }}>

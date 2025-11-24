@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, type JSX } from "react"
+import { useNavigate } from "react-router-dom"
 import {
   Dialog,
   DialogTitle,
@@ -11,13 +12,15 @@ import {
   Typography,
   Alert,
   Autocomplete,
+  LinearProgress,
 } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { createSessionAsync, setQrCode, selectSelectedSessionId, selectQrCode, selectSessionError, getStoredSessionsAsync, setSessionError, clearSessionError } from "../store/whatsappSlice"
+import { createSessionAsync, setQrCode, selectSelectedSessionId, selectQrCode, selectSessionError, getStoredSessionsAsync, setSessionError, clearSessionError, setSyncProgress, clearSyncProgress, selectSyncProgress } from "../store/whatsappSlice"
 import { fetchGroups, selectGroups } from "@/features/groups/store/groupsSlice"
 import { websocketService } from "@/shared/services/websocket.service"
 import QRCode from "react-qr-code"
+import type { SyncProgress } from "../types"
 
 type SyncWhatsappDialogProps = {
   open: boolean
@@ -43,10 +46,12 @@ const parseWhatsAppQrCode = (qrString: string): string | null => {
 export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): JSX.Element => {
   const { t } = useTranslation("whatsapp")
   const dispatch = useAppDispatch()
+  const navigate = useNavigate()
   const preselectedSessionId = useAppSelector(selectSelectedSessionId)
   const globalQrCode = useAppSelector(selectQrCode)
   const sessionError = useAppSelector(selectSessionError)
   const groups = useAppSelector(selectGroups)
+  const syncProgress = useAppSelector(selectSyncProgress)
   const [sessionId, setSessionId] = useState("")
   const [groupId, setGroupId] = useState<string>("")
   const [qrCode, setQrCodeLocal] = useState<string | null>(null)
@@ -57,6 +62,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
   const unsubscribeQrRef = useRef<(() => void) | null>(null)
   const unsubscribeErrorRef = useRef<(() => void) | null>(null)
   const unsubscribeReadingRef = useRef<(() => void) | null>(null)
+  const unsubscribeSyncRef = useRef<(() => void) | null>(null)
 
   const groupOptions = useMemo(() => groups.map(g => ({ label: g.name, value: g._id })), [groups])
 
@@ -77,6 +83,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       setIsLoading(false)
       dispatch(setQrCode(null))
       dispatch(clearSessionError())
+      dispatch(clearSyncProgress())
 
       // Leave room if joined
       if (currentRoomName && websocketService.isConnectedToServer()) {
@@ -97,6 +104,10 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
         unsubscribeReadingRef.current()
         unsubscribeReadingRef.current = null
       }
+      if (unsubscribeSyncRef.current) {
+        unsubscribeSyncRef.current()
+        unsubscribeSyncRef.current = null
+      }
     }
 
     // Cleanup on unmount
@@ -109,6 +120,9 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       }
       if (unsubscribeReadingRef.current) {
         unsubscribeReadingRef.current()
+      }
+      if (unsubscribeSyncRef.current) {
+        unsubscribeSyncRef.current()
       }
     }
   }, [open, dispatch])
@@ -148,6 +162,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
     setIsLoading(false)
     dispatch(setQrCode(null))
     dispatch(clearSessionError())
+    dispatch(clearSyncProgress())
     onClose()
   }
 
@@ -194,6 +209,10 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       if (unsubscribeReadingRef.current) {
         unsubscribeReadingRef.current()
         unsubscribeReadingRef.current = null
+      }
+      if (unsubscribeSyncRef.current) {
+        unsubscribeSyncRef.current()
+        unsubscribeSyncRef.current = null
       }
 
       // Listen for QR code event
@@ -253,6 +272,17 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
               unsubscribeReadingRef.current()
               unsubscribeReadingRef.current = null
             }
+          }
+        },
+      )
+
+      // Listen for sync_chats event (synchronization progress)
+      unsubscribeSyncRef.current = websocketService.on<SyncProgress>(
+        "sync_chats",
+        (data) => {
+          if (data?.sessionId === sessionId.trim()) {
+            // Update sync progress in Redux
+            dispatch(setSyncProgress(data))
           }
         },
       )
@@ -359,6 +389,22 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
               {sessionError}
             </Alert>
           )}
+
+          {syncProgress && (
+            <Box sx={{ mt: 2, p: 2, border: "1px solid", borderColor: "divider", borderRadius: 1 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {t("syncProgress.syncing")} {syncProgress.currentChat} {t("syncProgress.of")} {syncProgress.nChats} {t("syncProgress.chats")}
+              </Typography>
+              <LinearProgress
+                variant="determinate"
+                value={syncProgress.nChats > 0 ? (syncProgress.currentChat / syncProgress.nChats) * 100 : 0}
+                sx={{ mb: 1, height: 8, borderRadius: 4 }}
+              />
+              <Typography variant="caption" color="text.secondary">
+                {t("syncProgress.messagesSynced")}: {syncProgress.messagesSynced}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>
@@ -372,6 +418,18 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
             disabled={!sessionId.trim() || !groupId || isLoading || groups.length === 0}
           >
             {t("sync")}
+          </Button>
+        )}
+        {success && sessionId && (
+          <Button
+            onClick={() => {
+              navigate(`/dashboard/whatsapp/sessions/${sessionId.trim()}/chats`)
+              handleClose()
+            }}
+            variant="contained"
+            color="primary"
+          >
+            {t("viewChats")}
           </Button>
         )}
       </DialogActions>

@@ -21,10 +21,8 @@
   "status": "Status",
   "lastSeen": "Last Seen",
   "createdAt": "Created At",
-  "updatedAt": "Updated At"
-  ,
-  "readingSuccess": "Linked successfully! Session is initializing."
-  ,
+  "updatedAt": "Updated At",
+  "readingSuccess": "Linked successfully! Session is initializing.",
   "sessionChatsTitle": "Session Chats",
   "noChats": "No chats found",
   "noMessages": "No messages yet",
@@ -52,6 +50,12 @@
   "syncMessages": "Sync Messages",
   "syncingMessages": "Syncing messages...",
   "syncMessagesSuccess": "Messages synced successfully",
-  "chatDeleted": "Chat deleted"
+  "chatDeleted": "Chat deleted",
+  "viewChats": "View Chats",
+  "syncProgress": {
+    "syncing": "Syncing",
+    "of": "of",
+    "chats": "chats",
+    "messagesSynced": "Messages synced"
+  }
 }
-

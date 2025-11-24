@@ -167,6 +167,15 @@ export type GetStoredChatsParams = {
   skip?: number
 }
 
+// Sync Progress Types
+export type SyncProgress = {
+  sessionId: string
+  nChats: number
+  currentChat: number
+  chatId: string
+  messagesSynced: number
+}
+
 // Redux State Types
 export type WhatsappState = {
   sessions: ActiveSession[]
@@ -181,6 +190,7 @@ export type WhatsappState = {
   status: "idle" | "loading" | "failed"
   isSyncDialogOpen: boolean
   selectedSessionId: string | null
+  syncProgress: SyncProgress | null
 }
 
 
