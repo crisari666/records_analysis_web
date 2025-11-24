@@ -2,6 +2,7 @@ export { ControlsProjects } from './ControlsProjects';
 export { ListProjects } from './ListProjects';
 export { ProjectFormModal } from './ProjectFormModal';
 export { ProjectDevicesModal } from './ProjectDevicesModal';
+export { ProjectUsersModal } from './ProjectUsersModal';
 export { MainPromptField } from './MainPromptField';
 export { IndicatorField } from './IndicatorField';
 export { IndicatorsList } from './IndicatorsList';

@@ -1,7 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { projectsService } from "../services/projectsService"
-import { Project, CreateProjectRequest, UpdateProjectRequest, UpdateProjectDevicesRequest } from "../types"
+import { Project, CreateProjectRequest, UpdateProjectRequest, UpdateProjectDevicesRequest, UpdateProjectUsersRequest } from "../types"
 
 export type ProjectsSliceState = {
   projects: Project[]
@@ -162,6 +162,29 @@ export const projectsSlice = createAppSlice({
         },
       },
     ),
+    updateProjectUsers: create.asyncThunk(
+      async (projectData: UpdateProjectUsersRequest) => {
+        const response = await projectsService.updateProjectUsers(projectData)
+        return response
+      },
+      {
+        pending: state => {
+          state.status = "loading"
+          state.error = null
+        },
+        fulfilled: (state, action) => {
+          state.status = "idle"
+          const index = state.projects.findIndex(project => project._id === action.payload._id)
+          if (index !== -1) {
+            state.projects[index] = action.payload
+          }
+        },
+        rejected: (state, action) => {
+          state.status = "failed"
+          state.error = action.error.message || "Failed to update project users"
+        },
+      },
+    ),
   }),
   selectors: {
     selectProjects: projects => projects.projects,
@@ -182,7 +205,8 @@ export const {
   createProject, 
   updateProject, 
   updateProjectDevices, 
-  deleteProject 
+  deleteProject,
+  updateProjectUsers
 } = projectsSlice.actions
 
 // Selectors returned by `slice.selectors` take the root state as their first argument.

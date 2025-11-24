@@ -1,10 +1,11 @@
 import Api from '../../../app/http'
-import { Project, CreateProjectRequest, UpdateProjectRequest, UpdateProjectDevicesRequest } from '../types'
+import { Project, CreateProjectRequest, UpdateProjectRequest, UpdateProjectDevicesRequest, UpdateProjectUsersRequest } from '../types'
 
 const API_ENDPOINTS = {
   PROJECTS: '/projects',
   PROJECT_BY_ID: (id: string) => `/projects/${id}`,
   PROJECT_DEVICES: (id: string) => `/projects/${id}/devices`,
+  PROJECT_USERS: (id: string) => `/projects/${id}/users`,
   PROJECT_BY_GROUP_ID: (id: string) => `/groups/${id}/project`,
 } as const
 
@@ -45,5 +46,11 @@ export const projectsService = {
 
   async deleteProject(id: string): Promise<void> {
     await api.delete({ path: API_ENDPOINTS.PROJECT_BY_ID(id) })
+  },
+
+  async updateProjectUsers(projectData: UpdateProjectUsersRequest): Promise<Project> {
+    const { id, users } = projectData
+    const response = await api.patch({ path: API_ENDPOINTS.PROJECT_USERS(id), data: { users } })
+    return response
   },
 }

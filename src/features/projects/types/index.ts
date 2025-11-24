@@ -30,6 +30,7 @@ export type Project = {
   title: string;
   config: ProjectConfig | any;
   devices: string[];
+  users?: string[];
   deleted: boolean;
   createdAt: string;
   updatedAt: string;
@@ -51,4 +52,9 @@ export type UpdateProjectRequest = {
 export type UpdateProjectDevicesRequest = {
   id: string;
   devices: string[];
+};
+
+export type UpdateProjectUsersRequest = {
+  id: string;
+  users: string[];
 };

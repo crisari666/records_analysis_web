@@ -17,6 +17,7 @@ import {
   Delete as DeleteIcon,
   Settings as SettingsIcon,
   Devices as DevicesIcon,
+  People as PeopleIcon,
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -26,6 +27,7 @@ import {
   deleteProject
 } from '../store/projectsSlice';
 import { ProjectDevicesModal } from './ProjectDevicesModal';
+import { ProjectUsersModal } from './ProjectUsersModal';
 import { Project } from '../types';
 
 export const ListProjects: React.FC = () => {
@@ -38,6 +40,8 @@ export const ListProjects: React.FC = () => {
 
   const [devicesModalOpen, setDevicesModalOpen] = useState(false);
   const [selectedProjectForDevices, setSelectedProjectForDevices] = useState<Project | null>(null);
+  const [usersModalOpen, setUsersModalOpen] = useState(false);
+  const [selectedProjectForUsers, setSelectedProjectForUsers] = useState<Project | null>(null);
 
   useEffect(() => {
     dispatch(fetchProjects());
@@ -61,6 +65,16 @@ export const ListProjects: React.FC = () => {
   const handleCloseDevicesModal = () => {
     setDevicesModalOpen(false);
     setSelectedProjectForDevices(null);
+  };
+
+  const handleManageUsers = (project: Project) => {
+    setSelectedProjectForUsers(project);
+    setUsersModalOpen(true);
+  };
+
+  const handleCloseUsersModal = () => {
+    setUsersModalOpen(false);
+    setSelectedProjectForUsers(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -154,6 +168,14 @@ export const ListProjects: React.FC = () => {
                 </Button>
                 <Button
                   size="small"
+                  startIcon={<PeopleIcon />}
+                  onClick={() => handleManageUsers(project)}
+                  color="secondary"
+                >
+                  {t('manage_users')}
+                </Button>
+                <Button
+                  size="small"
                   color="error"
                   startIcon={<DeleteIcon />}
                   onClick={() => handleDeleteProject(project._id)}
@@ -170,6 +192,12 @@ export const ListProjects: React.FC = () => {
         open={devicesModalOpen}
         onClose={handleCloseDevicesModal}
         project={selectedProjectForDevices}
+      />
+
+      <ProjectUsersModal
+        open={usersModalOpen}
+        onClose={handleCloseUsersModal}
+        project={selectedProjectForUsers}
       />
     </Box>
   );
