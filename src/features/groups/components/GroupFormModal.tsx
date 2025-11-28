@@ -57,7 +57,7 @@ export const GroupFormModal: React.FC<GroupFormModalProps> = ({ open, onClose, g
     }
   }, [group, open]);
 
-  const userOptions = useMemo(() => users.map(u => ({ label: u.name, value: u.id })), [users]);
+  const userOptions = useMemo(() => users.map(u => ({ label: u.name, value: u._id })), [users]);
   const projectOptions = useMemo(() => projects.map(p => ({ label: p.title, value: p._id })), [projects]);
 
   const handleSubmit = () => {

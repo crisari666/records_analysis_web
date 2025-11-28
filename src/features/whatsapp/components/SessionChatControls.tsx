@@ -10,7 +10,7 @@ type SessionChatControlsProps = {
   sessionId: string
 }
 
-export const SessionChatControls = ({ sessionId }: SessionChatControlsProps) => {
+export const SessionChatControls = ({}: SessionChatControlsProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [alertsAnchorEl, setAlertsAnchorEl] = useState<HTMLElement | null>(null)

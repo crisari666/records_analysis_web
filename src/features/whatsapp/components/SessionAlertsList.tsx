@@ -6,6 +6,7 @@ import {
   Typography,
   List,
   ListItem,
+  ListItemButton,
   ListItemText,
   CircularProgress,
   Chip,
@@ -44,7 +45,7 @@ export const SessionAlertsList = ({
 }: SessionAlertsListProps) => {
   const { t } = useTranslation('whatsapp')
   const dispatch = useAppDispatch()
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [, setSearchParams] = useSearchParams()
   const alerts = useAppSelector(selectSessionAlerts)
   const isLoading = useAppSelector(selectIsSessionAlertsLoading)
   const error = useAppSelector(selectError)
@@ -178,26 +179,26 @@ export const SessionAlertsList = ({
             <List sx={{ p: 0 }}>
               {alerts.map((alert, index) => (
                 <Box key={alert._id}>
-                  <ListItem
-                    button
-                    onClick={() => handleAlertClick(alert)}
-                    sx={{
-                      bgcolor: alert.isRead
-                        ? 'background.paper'
-                        : (theme) =>
-                            theme.palette.mode === 'light'
-                              ? 'rgba(25, 118, 210, 0.08)'
-                              : 'rgba(144, 202, 249, 0.16)',
-                      '&:hover': {
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      onClick={() => handleAlertClick(alert)}
+                      sx={{
                         bgcolor: alert.isRead
-                          ? 'action.hover'
+                          ? 'background.paper'
                           : (theme) =>
                               theme.palette.mode === 'light'
-                                ? 'rgba(25, 118, 210, 0.12)'
-                                : 'rgba(144, 202, 249, 0.24)',
-                      },
-                    }}
-                  >
+                                ? 'rgba(25, 118, 210, 0.08)'
+                                : 'rgba(144, 202, 249, 0.16)',
+                        '&:hover': {
+                          bgcolor: alert.isRead
+                            ? 'action.hover'
+                            : (theme) =>
+                                theme.palette.mode === 'light'
+                                  ? 'rgba(25, 118, 210, 0.12)'
+                                  : 'rgba(144, 202, 249, 0.24)',
+                        },
+                      }}
+                    >
                     <ListItemText
                       slotProps={{
                         primary: { component: 'div' },
@@ -243,6 +244,7 @@ export const SessionAlertsList = ({
                         </Box>
                       }
                     />
+                    </ListItemButton>
                   </ListItem>
                   {index < alerts.length - 1 && <Divider />}
                 </Box>

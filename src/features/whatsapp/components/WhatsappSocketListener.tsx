@@ -134,6 +134,7 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
           hasQuotedMsg: data.message.hasQuotedMsg,
           isForwarded: data.message.isForwarded,
           isStarred: data.message.isStarred,
+          rawData: {},
         }
 
         // Update the chats list: move chat with new message to first position
