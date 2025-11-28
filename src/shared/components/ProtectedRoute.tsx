@@ -1,8 +1,7 @@
 import { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAppSelector } from '../../app/hooks';
-
-type UserRole = 'root' | 'admin' | 'user';
+import { UserRole } from '../constants/routePermissions';
 
 type ProtectedRouteProps = {
   children: ReactNode;

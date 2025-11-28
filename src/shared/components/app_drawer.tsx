@@ -34,6 +34,7 @@ import {
 import { useAppDispatch, useAppSelector } from '../../app/hooks'
 import { authSlice } from '../../features/auth/store/authSlice'
 import { LanguageSwitcher } from './LanguageSwitcher'
+import { RolesPermission, UserRole } from '../../shared/constants/routePermissions'
 
 const drawerWidth = 240
 
@@ -119,8 +120,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 )
 
-type UserRole = 'root' | 'admin' | 'user'
-
 type NavigationItem = {
   text: string
   icon: React.ReactElement
@@ -148,49 +147,49 @@ export const AppDrawer = ({ children }: AppDrawerProps) => {
       icon: <HomeIcon />, 
       path: '/dashboard',
       translationKey: 'navigation.home',
-      allowedRoles: ['root', 'admin', 'user']
+      allowedRoles: RolesPermission.dashboard
     },
     { 
       text: t('navigation.users'), 
       icon: <GroupIcon />, 
       path: '/dashboard/users',
       translationKey: 'navigation.users',
-      allowedRoles: ['user']
+      allowedRoles: RolesPermission.users
     },
     { 
       text: t('navigation.devices'), 
       icon: <PhoneAndroidIcon />, 
       path: '/dashboard/devices',
       translationKey: 'navigation.devices',
-      allowedRoles: ['root']
+      allowedRoles: RolesPermission.devices
     },
     { 
       text: t('navigation.records'), 
       icon: <RecordVoiceOverIcon />, 
       path: '/dashboard/records',
       translationKey: 'navigation.records',
-      allowedRoles: ['root']
+      allowedRoles: RolesPermission.records
     },
     { 
       text: t('navigation.projects'), 
       icon: <FolderIcon />, 
       path: '/dashboard/projects',
       translationKey: 'navigation.projects',
-      allowedRoles: ['root', 'admin']
+      allowedRoles: RolesPermission.projects
     },
     { 
       text: t('navigation.groups'), 
       icon: <GroupsIcon />, 
       path: '/dashboard/groups',
       translationKey: 'navigation.groups',
-      allowedRoles: ['root', 'admin']
+      allowedRoles: RolesPermission.groups
     },
     { 
       text: t('navigation.whatsapp'), 
       icon: <ChatIcon />, 
       path: '/dashboard/whatsapp',
       translationKey: 'navigation.whatsapp',
-      allowedRoles: ['root', 'admin']
+      allowedRoles: RolesPermission.whatsapp
     },
   ]
 

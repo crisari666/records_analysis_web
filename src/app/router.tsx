@@ -11,6 +11,7 @@ import { GroupsPage } from '../features/groups/pages/GroupsPage';
 import { WhatsAppPage } from '../features/whatsapp/pages/WhatsAppPage';
 import { WhatsasppSessionChatsPage } from '../features/whatsapp/pages/WhatsasppSessionChatsPage';
 import { ProtectedRoute } from '../shared/components/ProtectedRoute';
+import { RolesPermission } from '../shared/constants/routePermissions';
 
 export const router = createBrowserRouter([
   {
@@ -32,7 +33,7 @@ export const router = createBrowserRouter([
       {
         path: 'users',
         element: (
-          <ProtectedRoute allowedRoles={['root']}>
+          <ProtectedRoute allowedRoles={RolesPermission.users}>
             <UsersListPage />
           </ProtectedRoute>
         ),
@@ -40,7 +41,7 @@ export const router = createBrowserRouter([
       {
         path: 'devices',
         element: (
-          <ProtectedRoute allowedRoles={['root']}>
+          <ProtectedRoute allowedRoles={RolesPermission.devices}>
             <DevicesPage />
           </ProtectedRoute>
         ),
@@ -48,7 +49,7 @@ export const router = createBrowserRouter([
       {
         path: 'records',
         element: (
-          <ProtectedRoute allowedRoles={['root']}>
+          <ProtectedRoute allowedRoles={RolesPermission.records}>
             <RecordsPage />
           </ProtectedRoute>
         ),
@@ -56,7 +57,7 @@ export const router = createBrowserRouter([
       {
         path: 'projects',
         element: (
-          <ProtectedRoute allowedRoles={['root', 'admin']}>
+          <ProtectedRoute allowedRoles={RolesPermission.projects}>
             <ProjectsPage />
           </ProtectedRoute>
         ),
@@ -64,7 +65,7 @@ export const router = createBrowserRouter([
       {
         path: 'project',
         element: (
-          <ProtectedRoute allowedRoles={['root', 'admin']}>
+          <ProtectedRoute allowedRoles={RolesPermission.project}>
             <ProjectPage />
           </ProtectedRoute>
         ),
@@ -72,7 +73,7 @@ export const router = createBrowserRouter([
       {
         path: 'project/:id',
         element: (
-          <ProtectedRoute allowedRoles={['root', 'admin']}>
+          <ProtectedRoute allowedRoles={RolesPermission.projectById}>
             <ProjectPage />
           </ProtectedRoute>
         ),
@@ -80,7 +81,7 @@ export const router = createBrowserRouter([
       {
         path: 'groups',
         element: (
-          <ProtectedRoute allowedRoles={['root', 'admin']}>
+          <ProtectedRoute allowedRoles={RolesPermission.groups}>
             <GroupsPage />
           </ProtectedRoute>
         ),
@@ -88,7 +89,7 @@ export const router = createBrowserRouter([
       {
         path: 'whatsapp',
         element: (
-          <ProtectedRoute allowedRoles={['root', 'admin']}>
+          <ProtectedRoute allowedRoles={RolesPermission.whatsapp}>
             <WhatsAppPage />
           </ProtectedRoute>
         ),
@@ -96,7 +97,7 @@ export const router = createBrowserRouter([
       {
         path: 'whatsapp/sessions/:id/chats',
         element: (
-          <ProtectedRoute allowedRoles={['root', 'admin']}>
+          <ProtectedRoute allowedRoles={RolesPermission.whatsappSessionChats}>
             <WhatsasppSessionChatsPage />
           </ProtectedRoute>
         ),

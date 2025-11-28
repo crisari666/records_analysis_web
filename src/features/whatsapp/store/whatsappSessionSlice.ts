@@ -122,6 +122,38 @@ export const whatsappSessionSlice = createAppSlice({
         state.chats.unshift(newChat)
       }
     }),
+    markChatAsDeleted: create.reducer((state, action: PayloadAction<{ chatId: string }>) => {
+      const chatIndex = state.chats.findIndex((c) => c.chatId === action.payload.chatId)
+      if (chatIndex !== -1) {
+        state.chats[chatIndex].deleted = true
+        state.chats[chatIndex].updatedAt = new Date().toISOString()
+      }
+      // Also update currentChat if it matches
+      if (state.currentChat?.chatId === action.payload.chatId) {
+        state.currentChat.deleted = true
+        state.currentChat.updatedAt = new Date().toISOString()
+      }
+    }),
+    markMessageAsDeleted: create.reducer((state, action: PayloadAction<{ messageId: string; deletedAt?: string }>) => {
+      const messageIndex = state.messages.findIndex((m) => m.messageId === action.payload.messageId)
+      if (messageIndex !== -1) {
+        state.messages[messageIndex].isDeleted = true
+        if (action.payload.deletedAt) {
+          state.messages[messageIndex].deletedAt = action.payload.deletedAt
+        } else {
+          state.messages[messageIndex].deletedAt = new Date().toISOString()
+        }
+      }
+      // Also update currentMessage if it matches
+      if (state.currentMessage?.messageId === action.payload.messageId) {
+        state.currentMessage.isDeleted = true
+        if (action.payload.deletedAt) {
+          state.currentMessage.deletedAt = action.payload.deletedAt
+        } else {
+          state.currentMessage.deletedAt = new Date().toISOString()
+        }
+      }
+    }),
     // Async Thunks - Per-session data
     fetchSessionAndProject: create.asyncThunk(
       async (sessionId: string) => {
@@ -371,6 +403,8 @@ export const {
   clearMessages,
   addMessage,
   updateChatWithNewMessage,
+  markChatAsDeleted,
+  markMessageAsDeleted,
   fetchSessionAndProject,
   getChatsAsync,
   getChatMessagesAsync,

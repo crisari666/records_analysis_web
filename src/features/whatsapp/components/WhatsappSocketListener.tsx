@@ -1,7 +1,7 @@
 import { useEffect, useRef, type JSX } from "react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { websocketService } from "@/shared/services/websocket.service"
-import { addMessage, updateChatWithNewMessage, selectCurrentChat, selectSessionId } from "../store/whatsappSessionSlice"
+import { addMessage, updateChatWithNewMessage, markChatAsDeleted, markMessageAsDeleted, selectCurrentChat, selectSessionId } from "../store/whatsappSessionSlice"
 import type { StoredMessage } from "../types"
 
 type NewMessageEventData = {
@@ -38,6 +38,8 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
   const currentChat = useAppSelector(selectCurrentChat)
   const currentSessionId = useAppSelector(selectSessionId)
   const unsubscribeMessageRef = useRef<(() => void) | null>(null)
+  const unsubscribeMessageDeletedRef = useRef<(() => void) | null>(null)
+  const unsubscribeChatRemovedRef = useRef<(() => void) | null>(null)
   const unsubscribeConnectRef = useRef<(() => void) | null>(null)
   const previousSessionIdRef = useRef<string | null>(null)
   const currentChatIdRef = useRef<string | null>(null)
@@ -93,6 +95,15 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
         unsubscribeMessageRef.current()
         unsubscribeMessageRef.current = null
       }
+      if (unsubscribeMessageDeletedRef.current) {
+        unsubscribeMessageDeletedRef.current()
+        unsubscribeMessageDeletedRef.current = null
+      }
+      if (unsubscribeChatRemovedRef.current) {
+        unsubscribeChatRemovedRef.current()
+        unsubscribeChatRemovedRef.current = null
+      }
+      
       // Listen for new_message event
       unsubscribeMessageRef.current = websocketService.on<{message: NewMessageEventData, sessionId: string}>("new_message", (data) => {
         // Verify the message has the required fields
@@ -134,6 +145,35 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
           dispatch(addMessage(message))
         }
       })
+
+      // Listen for message_deleted event
+      unsubscribeMessageDeletedRef.current = websocketService.on<{sessionId: string; chatId: string; messageId: string}>("message_deleted", (data) => {
+        console.log('message_deleted', {data});
+        
+        if (!data.messageId) {
+          console.warn("Received invalid message_deleted data:", data)
+          return
+        }
+
+        // Mark message as deleted
+        dispatch(markMessageAsDeleted({ 
+          messageId: data.messageId,
+          deletedAt: new Date().toISOString()
+        }))
+      })
+
+      // Listen for chat_removed event
+      unsubscribeChatRemovedRef.current = websocketService.on<{sessionId: string; chatId: string}>("chat_removed", (data) => {
+        console.log('chat_removed', {data});
+        
+        if (!data.chatId) {
+          console.warn("Received invalid chat_removed data:", data)
+          return
+        }
+
+        // Mark chat as deleted
+        dispatch(markChatAsDeleted({ chatId: data.chatId }))
+      })
     }
 
     const sessionIdToJoin = activeSessionId
@@ -164,6 +204,14 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
       if (unsubscribeMessageRef.current) {
         unsubscribeMessageRef.current()
         unsubscribeMessageRef.current = null
+      }
+      if (unsubscribeMessageDeletedRef.current) {
+        unsubscribeMessageDeletedRef.current()
+        unsubscribeMessageDeletedRef.current = null
+      }
+      if (unsubscribeChatRemovedRef.current) {
+        unsubscribeChatRemovedRef.current()
+        unsubscribeChatRemovedRef.current = null
       }
       if (unsubscribeConnectRef.current) {
         unsubscribeConnectRef.current()

@@ -2,6 +2,9 @@ import { useState, useMemo, useEffect, useRef } from "react"
 import { Card, CardContent, List, ListItem, ListItemText, Box, Typography, Chip, Tooltip } from "@mui/material"
 import DeleteIcon from "@mui/icons-material/Delete"
 import EditIcon from "@mui/icons-material/Edit"
+import CallMissedIcon from "@mui/icons-material/CallMissed"
+import CallReceivedIcon from "@mui/icons-material/CallReceived"
+import CallMadeIcon from "@mui/icons-material/CallMade"
 import { useTranslation } from "react-i18next"
 import { useAppSelector } from "@/app/hooks"
 import { selectCurrentChat, selectIsMessagesLoading, selectMessages } from "../store/whatsappSessionSlice"
@@ -12,6 +15,7 @@ import type { StoredMessage } from "../types"
 type ChatItem = 
   | { type: "message"; data: StoredMessage }
   | { type: "deletion"; timestamp: number; deletedAt: string }
+  | { type: "call_log"; data: StoredMessage }
 
 export const WhatsappChatContent = () => {
   const { t } = useTranslation("whatsapp")
@@ -34,9 +38,13 @@ export const WhatsappChatContent = () => {
   const chatItems = useMemo((): ChatItem[] => {
     const items: ChatItem[] = []
 
-    // Add all messages
+    // Add all messages (separate call_log from regular messages)
     messages.forEach((msg) => {
-      items.push({ type: "message", data: msg })
+      if (msg.type === "call_log") {
+        items.push({ type: "call_log", data: msg })
+      } else {
+        items.push({ type: "message", data: msg })
+      }
     })
     
     // Add deletion markers from storedChat.deletedAt
@@ -49,8 +57,8 @@ export const WhatsappChatContent = () => {
 
     // Sort by timestamp
     items.sort((a, b) => {
-      const timestampA = a.type === "message" ? a.data.timestamp : a.timestamp
-      const timestampB = b.type === "message" ? b.data.timestamp : b.timestamp
+      const timestampA = a.type === "deletion" ? a.timestamp : a.data.timestamp
+      const timestampB = b.type === "deletion" ? b.timestamp : b.data.timestamp
       return timestampA - timestampB
     })
 
@@ -60,7 +68,7 @@ export const WhatsappChatContent = () => {
   const filteredItems = useMemo(() => {
     if (!filterEnabled) return chatItems
     return chatItems.filter((item) => {
-      if (item.type === "deletion") return true
+      if (item.type === "deletion" || item.type === "call_log") return true
       const msg = item.data
       return msg.isDeleted || (msg.edition && msg.edition.length > 0)
     })
@@ -129,6 +137,59 @@ export const WhatsappChatContent = () => {
                         <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
                           {new Date(item.deletedAt).toLocaleString()}
                         </Typography>
+                      </Box>
+                    </ListItem>
+                  )
+                }
+
+                if (item.type === "call_log") {
+                  const callLog = item.data
+                  // Determine call status from body or rawData
+                  const callBody = callLog.body || ""
+                  const isMissed = callBody.toLowerCase().includes("missed") || callBody.toLowerCase().includes("perdida")
+                  const isOutgoing = callLog.fromMe
+                  
+                  // Get call icon based on status
+                  const CallIconComponent = isMissed 
+                    ? CallMissedIcon 
+                    : isOutgoing 
+                      ? CallMadeIcon 
+                      : CallReceivedIcon
+
+                  return (
+                    <ListItem 
+                      key={`call-${callLog.messageId}-${index}`} 
+                      sx={{ 
+                        justifyContent: callLog.fromMe ? "flex-end" : "flex-start",
+                        py: 1
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          bgcolor: callLog.fromMe
+                            ? "primary.main"
+                            : "grey.200",
+                          color: callLog.fromMe
+                            ? "primary.contrastText"
+                            : "text.primary",
+                          px: 2,
+                          py: 1,
+                          borderRadius: 2,
+                          maxWidth: "75%",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <CallIconComponent sx={{ fontSize: 20 }} />
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: "medium" }}>
+                            {callBody || t("callLog")}
+                          </Typography>
+                          <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
+                            {new Date(callLog.timestamp * 1000).toLocaleString()}
+                          </Typography>
+                        </Box>
                       </Box>
                     </ListItem>
                   )

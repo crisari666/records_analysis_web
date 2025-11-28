@@ -127,6 +127,8 @@ export type StoredMessage = {
   hasQuotedMsg: boolean
   isForwarded: boolean
   isStarred: boolean
+  rawData: Record<string, any>
+
 }
 
 export type DeletedMessage = StoredMessage & {

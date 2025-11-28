@@ -282,6 +282,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
         (data) => {
           if (data?.sessionId === sessionId.trim()) {
             // Update sync progress in Redux
+            console.log({data})
             dispatch(setSyncProgress(data))
           }
         },
