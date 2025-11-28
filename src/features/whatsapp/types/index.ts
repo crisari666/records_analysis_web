@@ -25,6 +25,7 @@ export type SessionStatusResponse = {
 
 export type CreateSessionRequest = {
   groupId: string
+  title?: string
 }
 
 export type CreateSessionResponse = {

@@ -197,7 +197,13 @@ export const WhatsappChatContent = () => {
 
                 const message = item.data
                 return (
-                  <ListItem key={message.messageId} sx={{ justifyContent: message.fromMe ? "flex-end" : "flex-start" }} >
+                  <ListItem
+                    key={message.messageId}
+                    data-message-id={message.messageId}
+                    sx={{
+                      justifyContent: message.fromMe ? "flex-end" : "flex-start",
+                    }}
+                  >
                     <Box
                       sx={{
                         bgcolor: message.isDeleted

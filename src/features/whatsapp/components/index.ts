@@ -8,4 +8,7 @@ export { WhatsappChatHeader } from "./WhatsappChatHeader"
 export { WhatsappSocketListener } from "./WhatsappSocketListener"
 export { SyncProgressIndicator } from "./SyncProgressIndicator"
 export { AlertsList } from "./AlertsList"
+export { SessionChatControls } from "./SessionChatControls"
+export { SessionAlertsList } from "./SessionAlertsList"
+export { ChatListItem } from "./ChatListItem"
 

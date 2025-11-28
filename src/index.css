@@ -11,3 +11,19 @@ code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+.highlight-message {
+  animation: highlight 2s ease-in-out;
+}
+
+@keyframes highlight {
+  0% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(255, 193, 7, 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}

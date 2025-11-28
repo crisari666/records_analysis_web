@@ -53,6 +53,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
   const groups = useAppSelector(selectGroups)
   const syncProgress = useAppSelector(selectSyncProgress)
   const [sessionId, setSessionId] = useState("")
+  const [sessionTitle, setSessionTitle] = useState("")
   const [groupId, setGroupId] = useState<string>("")
   const [qrCode, setQrCodeLocal] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -76,6 +77,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
     if (!open) {
       // Reset state when dialog closes
       setSessionId("")
+      setSessionTitle("")
       setGroupId("")
       setQrCodeLocal(null)
       setError(null)
@@ -155,6 +157,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
 
     // Cleanup
     setSessionId("")
+    setSessionTitle("")
     setGroupId("")
     setQrCodeLocal(null)
     setError(null)
@@ -289,7 +292,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
       )
 
       // Now create session (backend may send events before responding)
-      const result = await dispatch(createSessionAsync({ id: sessionId.trim(), data: { groupId } })).unwrap()
+      const result = await dispatch(createSessionAsync({ id: sessionId.trim(), data: { groupId, title: sessionTitle.trim() || undefined } })).unwrap()
 
       if (!result.success) {
         const errorMessage = result.message || t("errorCreatingSession")
@@ -327,6 +330,15 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
           {!qrCode && (
             <>
               <TextField
+                label={t("sessionTitle")}
+                value={sessionTitle}
+                onChange={e => setSessionTitle(e.target.value)}
+                fullWidth
+                placeholder={t("sessionTitlePlaceholder")}
+                disabled={isLoading}
+                helperText={t("sessionTitleHelper")}
+              />
+              <TextField
                 label={t("sessionId")}
                 value={sessionId}
                 onChange={e => setSessionId(e.target.value)}
@@ -334,6 +346,7 @@ export const SyncWhatsappDialog = ({ open, onClose }: SyncWhatsappDialogProps): 
                 required
                 placeholder={t("sessionIdPlaceholder")}
                 disabled={isLoading}
+                helperText={t("sessionIdHelper")}
               />
               <Autocomplete
                 options={groupOptions}

@@ -24,12 +24,14 @@ type WhatsappSessionState = {
   messages: StoredMessage[]
   deletedMessages: DeletedMessage[]
   alerts: Alert[]
+  sessionAlerts: Alert[]
   currentChat: StoredChat | null
   currentMessage: StoredMessage | null
   currentProject: Project | null
   isChatsLoading: boolean
   isMessagesLoading: boolean
   isAlertsLoading: boolean
+  isSessionAlertsLoading: boolean
   isSyncing: boolean
   isAnalyzing: boolean
   error: string | null
@@ -43,12 +45,14 @@ const initialState: WhatsappSessionState = {
   messages: [],
   deletedMessages: [],
   alerts: [],
+  sessionAlerts: [],
   currentChat: null,
   currentMessage: null,
   currentProject: null,
   isChatsLoading: false,
   isMessagesLoading: false,
   isAlertsLoading: false,
+  isSessionAlertsLoading: false,
   isSyncing: false,
   isAnalyzing: false,
   error: null,
@@ -79,6 +83,9 @@ export const whatsappSessionSlice = createAppSlice({
     }),
     clearAlerts: create.reducer((state) => {
       state.alerts = []
+    }),
+    clearSessionAlerts: create.reducer((state) => {
+      state.sessionAlerts = []
     }),
     addMessage: create.reducer((state, action: PayloadAction<StoredMessage>) => {
       // Check if message already exists
@@ -409,6 +416,26 @@ export const whatsappSessionSlice = createAppSlice({
         },
       },
     ),
+    getSessionAlertsAsync: create.asyncThunk(
+      async ({ sessionId, isRead }: { sessionId: string; isRead?: boolean }) => {
+        const alerts = await alertsService.getSessionAlerts(sessionId, isRead)
+        return alerts
+      },
+      {
+        pending: (state) => {
+          state.isSessionAlertsLoading = true
+          state.error = null
+        },
+        fulfilled: (state, action: PayloadAction<Alert[]>) => {
+          state.isSessionAlertsLoading = false
+          state.sessionAlerts = action.payload
+        },
+        rejected: (state, action) => {
+          state.isSessionAlertsLoading = false
+          state.error = action.error.message || "Failed to fetch session alerts"
+        },
+      },
+    ),
   }),
   selectors: {
     selectSessionId: (state) => state.currentSessionId,
@@ -417,12 +444,14 @@ export const whatsappSessionSlice = createAppSlice({
     selectMessages: (state) => state.messages,
     selectDeletedMessages: (state) => state.deletedMessages,
     selectAlerts: (state) => state.alerts,
+    selectSessionAlerts: (state) => state.sessionAlerts,
     selectCurrentChat: (state) => state.currentChat,
     selectCurrentMessage: (state) => state.currentMessage,
     selectCurrentProject: (state) => state.currentProject,
     selectIsChatsLoading: (state) => state.isChatsLoading,
     selectIsMessagesLoading: (state) => state.isMessagesLoading,
     selectIsAlertsLoading: (state) => state.isAlertsLoading,
+    selectIsSessionAlertsLoading: (state) => state.isSessionAlertsLoading,
     selectIsSyncing: (state) => state.isSyncing,
     selectIsAnalyzing: (state) => state.isAnalyzing,
     selectError: (state) => state.error,
@@ -438,6 +467,7 @@ export const {
   clearChats,
   clearMessages,
   clearAlerts,
+  clearSessionAlerts,
   addMessage,
   updateChatWithNewMessage,
   markChatAsDeleted,
@@ -452,6 +482,7 @@ export const {
   getStoredChatsAsync,
   analyzeChatAsync,
   getChatAlertsAsync,
+  getSessionAlertsAsync,
 } = whatsappSessionSlice.actions
 
 export const {
@@ -461,12 +492,14 @@ export const {
   selectMessages,
   selectDeletedMessages,
   selectAlerts,
+  selectSessionAlerts,
   selectCurrentChat,
   selectCurrentMessage,
   selectCurrentProject,
   selectIsChatsLoading,
   selectIsMessagesLoading,
   selectIsAlertsLoading,
+  selectIsSessionAlertsLoading,
   selectIsSyncing,
   selectIsAnalyzing,
   selectError,
