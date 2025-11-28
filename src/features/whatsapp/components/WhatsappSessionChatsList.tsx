@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { Card, CardContent, List, ListItem, ListItemText, ListItemButton, CircularProgress, Box, Typography, Chip } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { getStoredChatsAsync, selectChats, selectIsChatsLoading, selectCurrentChat, setCurrentSessionId, setCurrentChat, getStoredMessagesAsync } from "../store/whatsappSessionSlice"
+import { getStoredChatsAsync, selectChats, selectIsChatsLoading, selectCurrentChat, selectSessionDbId, setCurrentSessionId, setCurrentChat, getStoredMessagesAsync, getChatAlertsAsync } from "../store/whatsappSessionSlice"
 import type { StoredChat } from "../types"
 
 type WhatsappSessionChatsListProps = {
@@ -14,6 +14,7 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
   const dispatch = useAppDispatch()
   const chats = useAppSelector(selectChats)
   const currentChat = useAppSelector(selectCurrentChat)
+  const sessionDbId = useAppSelector(selectSessionDbId)
   const isChatsLoading = useAppSelector(selectIsChatsLoading)
   const { t } = useTranslation("whatsapp")
   const [searchParams, setSearchParams] = useSearchParams()
@@ -26,7 +27,11 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
     dispatch(setCurrentChat(chat))
     // Load messages for the selected chat
     dispatch(getStoredMessagesAsync({ id: sessionId, params: { chatId: chat.chatId, includeDeleted: true } }))
-  }, [])
+    // Fetch alerts for the selected chat (pre-fetch for when user opens alerts popup)
+    if (sessionDbId && chat.chatId) {
+      dispatch(getChatAlertsAsync({ sessionId: sessionDbId, chatId: chat.chatId }))
+    }
+  }, [sessionId, sessionDbId, dispatch])
 
   // Load chats when sessionId changes
   useEffect(() => {
@@ -48,13 +53,17 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
         if (!currentChat || currentChat.chatId !== chat.chatId) {
           dispatch(setCurrentChat(chat))
           dispatch(getStoredMessagesAsync({ id: sessionId, params: { chatId: chat.chatId, includeDeleted: true } }))
+          // Fetch alerts for the selected chat
+          if (sessionDbId && chat.chatId) {
+            dispatch(getChatAlertsAsync({ sessionId: sessionDbId, chatId: chat.chatId }))
+          }
         }
       }
     } else if (!chatIdFromQuery && currentChat) {
       // Clear current chat if chatId is removed from query params
       dispatch(setCurrentChat(null))
     }
-  }, [])
+  }, [chats, currentChat, dispatch, sessionId, sessionDbId, searchParams])
 
   return (
     <Card sx={{ height: "100%" }}>

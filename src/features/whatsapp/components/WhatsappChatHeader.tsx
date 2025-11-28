@@ -1,10 +1,12 @@
 import { useState } from "react"
-import { Box, Typography, Chip, FormControlLabel, Switch, Button, CircularProgress, Snackbar, Alert } from "@mui/material"
+import { Box, Typography, Chip, FormControlLabel, Switch, Button, CircularProgress, Snackbar, Alert, IconButton, Badge } from "@mui/material"
 import SyncIcon from "@mui/icons-material/Sync"
+import NotificationsIcon from "@mui/icons-material/Notifications"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { selectSessionId, selectIsSyncing, selectIsAnalyzing, selectCurrentChat, selectCurrentProject, getChatMessagesAsync, analyzeChatAsync } from "../store/whatsappSessionSlice"
+import { selectSessionId, selectSessionDbId, selectIsSyncing, selectIsAnalyzing, selectCurrentChat, selectCurrentProject, selectAlerts, getChatMessagesAsync, analyzeChatAsync } from "../store/whatsappSessionSlice"
 import { ConversationAnalysis } from "./ConversationAnalysis"
+import { AlertsList } from "./AlertsList"
 import type { StoredMessage } from "../types"
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
@@ -18,16 +20,21 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
   const { t } = useTranslation("whatsapp")
   const dispatch = useAppDispatch()
   const sessionId = useAppSelector(selectSessionId)
+  const sessionDbId = useAppSelector(selectSessionDbId)
   const currentChat = useAppSelector(selectCurrentChat)
   const currentProject = useAppSelector(selectCurrentProject)
   const isSyncing = useAppSelector(selectIsSyncing)
   const isAnalyzing = useAppSelector(selectIsAnalyzing)
+  const alerts = useAppSelector(selectAlerts)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState("")
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success")
+  const [alertsAnchorEl, setAlertsAnchorEl] = useState<HTMLElement | null>(null)
+  const alertsOpen = Boolean(alertsAnchorEl)
 
   const deletedCount = messages.filter((msg) => msg.isDeleted).length
   const editedCount = messages.filter((msg) => msg.edition && msg.edition.length > 0).length
+  const unreadAlertsCount = alerts.filter((alert) => !alert.isRead).length
 
   const handleSyncMessages = async () => {
     if (sessionId && currentChat && !isSyncing) {
@@ -65,6 +72,14 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
 
   const handleCloseSnackbar = () => {
     setSnackbarOpen(false)
+  }
+
+  const handleAlertsClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAlertsAnchorEl(event.currentTarget)
+  }
+
+  const handleAlertsClose = () => {
+    setAlertsAnchorEl(null)
   }
 
   return (
@@ -135,6 +150,17 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
             >
               {t("syncMessages")}
             </Button>
+            {sessionDbId && currentChat && (
+              <Badge badgeContent={unreadAlertsCount} color="error" max={99}>
+                <IconButton
+                  onClick={handleAlertsClick}
+                  size="small"
+                  color="inherit"
+                >
+                  <NotificationsIcon />
+                </IconButton>
+              </Badge>
+            )}
           </>
         )}
         <FormControlLabel
@@ -142,6 +168,15 @@ export const WhatsappChatHeader = ({ messages, filterEnabled, onFilterChange }: 
           label={t("showOnlyDeletedOrEdited")}
         />
       </Box>
+      {sessionDbId && currentChat && (
+        <AlertsList
+          anchorEl={alertsAnchorEl}
+          open={alertsOpen}
+          onClose={handleAlertsClose}
+          sessionId={sessionDbId}
+          chatId={currentChat.chatId}
+        />
+      )}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}

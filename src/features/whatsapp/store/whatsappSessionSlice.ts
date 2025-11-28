@@ -9,22 +9,27 @@ import type {
   Message,
   DeletedMessage,
   StoredChat,
+  Alert,
   GetChatMessagesParams,
   GetStoredMessagesParams,
   GetDeletedMessagesParams,
   GetStoredChatsParams,
 } from "../types"
+import { alertsService } from "../services/alertsService"
 
 type WhatsappSessionState = {
   currentSessionId: string | null
+  currentSessionDbId: string | null // Database _id for the session
   chats: StoredChat[]
   messages: StoredMessage[]
   deletedMessages: DeletedMessage[]
+  alerts: Alert[]
   currentChat: StoredChat | null
   currentMessage: StoredMessage | null
   currentProject: Project | null
   isChatsLoading: boolean
   isMessagesLoading: boolean
+  isAlertsLoading: boolean
   isSyncing: boolean
   isAnalyzing: boolean
   error: string | null
@@ -33,14 +38,17 @@ type WhatsappSessionState = {
 
 const initialState: WhatsappSessionState = {
   currentSessionId: null,
+  currentSessionDbId: null,
   chats: [],
   messages: [],
   deletedMessages: [],
+  alerts: [],
   currentChat: null,
   currentMessage: null,
   currentProject: null,
   isChatsLoading: false,
   isMessagesLoading: false,
+  isAlertsLoading: false,
   isSyncing: false,
   isAnalyzing: false,
   error: null,
@@ -68,6 +76,9 @@ export const whatsappSessionSlice = createAppSlice({
     }),
     clearMessages: create.reducer((state) => {
       state.messages = []
+    }),
+    clearAlerts: create.reducer((state) => {
+      state.alerts = []
     }),
     addMessage: create.reducer((state, action: PayloadAction<StoredMessage>) => {
       // Check if message already exists
@@ -157,7 +168,7 @@ export const whatsappSessionSlice = createAppSlice({
     // Async Thunks - Per-session data
     fetchSessionAndProject: create.asyncThunk(
       async (sessionId: string) => {
-        // 1. Get Session
+        // 1. Get Session (sessionId here is the database _id)
         const session = await whatsappService.getSession(sessionId)
 
         // 2. If session has refId, get Project using the new service method
@@ -180,6 +191,7 @@ export const whatsappSessionSlice = createAppSlice({
         fulfilled: (state, action) => {
           state.status = "idle"
           state.currentSessionId = action.payload.session.sessionId
+          state.currentSessionDbId = action.payload.session._id // Store database _id
           state.currentProject = action.payload.project
         },
         rejected: (state, action) => {
@@ -240,6 +252,7 @@ export const whatsappSessionSlice = createAppSlice({
             hasQuotedMsg: msg.hasQuotedMsg,
             isForwarded: msg.isForwarded,
             isStarred: msg.isStarred,
+            rawData: {},
           }))
           state.messages = storedMessages
         },
@@ -376,17 +389,40 @@ export const whatsappSessionSlice = createAppSlice({
         },
       },
     ),
+    getChatAlertsAsync: create.asyncThunk(
+      async ({ sessionId, chatId }: { sessionId: string; chatId: string }) => {
+        const alerts = await alertsService.getChatAlerts(sessionId, chatId)
+        return alerts
+      },
+      {
+        pending: (state) => {
+          state.isAlertsLoading = true
+          state.error = null
+        },
+        fulfilled: (state, action: PayloadAction<Alert[]>) => {
+          state.isAlertsLoading = false
+          state.alerts = action.payload
+        },
+        rejected: (state, action) => {
+          state.isAlertsLoading = false
+          state.error = action.error.message || "Failed to fetch alerts"
+        },
+      },
+    ),
   }),
   selectors: {
     selectSessionId: (state) => state.currentSessionId,
+    selectSessionDbId: (state) => state.currentSessionDbId,
     selectChats: (state) => state.chats,
     selectMessages: (state) => state.messages,
     selectDeletedMessages: (state) => state.deletedMessages,
+    selectAlerts: (state) => state.alerts,
     selectCurrentChat: (state) => state.currentChat,
     selectCurrentMessage: (state) => state.currentMessage,
     selectCurrentProject: (state) => state.currentProject,
     selectIsChatsLoading: (state) => state.isChatsLoading,
     selectIsMessagesLoading: (state) => state.isMessagesLoading,
+    selectIsAlertsLoading: (state) => state.isAlertsLoading,
     selectIsSyncing: (state) => state.isSyncing,
     selectIsAnalyzing: (state) => state.isAnalyzing,
     selectError: (state) => state.error,
@@ -401,6 +437,7 @@ export const {
   clearError,
   clearChats,
   clearMessages,
+  clearAlerts,
   addMessage,
   updateChatWithNewMessage,
   markChatAsDeleted,
@@ -414,18 +451,22 @@ export const {
   getMessageEditHistoryAsync,
   getStoredChatsAsync,
   analyzeChatAsync,
+  getChatAlertsAsync,
 } = whatsappSessionSlice.actions
 
 export const {
   selectSessionId,
+  selectSessionDbId,
   selectChats,
   selectMessages,
   selectDeletedMessages,
+  selectAlerts,
   selectCurrentChat,
   selectCurrentMessage,
   selectCurrentProject,
   selectIsChatsLoading,
   selectIsMessagesLoading,
+  selectIsAlertsLoading,
   selectIsSyncing,
   selectIsAnalyzing,
   selectError,

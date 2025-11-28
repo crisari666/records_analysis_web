@@ -8,6 +8,7 @@ export type ActiveSession = {
 }
 
 export type StoredSession = {
+  _id: string
   sessionId: string
   status: SessionStatus
   lastSeen: string
@@ -176,6 +177,41 @@ export type SyncProgress = {
   currentChat: number
   chatId: string
   messagesSynced: number
+}
+
+// Alert Types
+export type AlertType = 'disconnected' | 'message_deleted' | 'message_edited' | 'chat_removed'
+
+export type Alert = {
+  _id: string
+  session: string
+  sessionId: string
+  type: AlertType
+  message?: string
+  isRead: boolean
+  readAt?: string | Date
+  createdAt?: string | Date
+  updatedAt?: string | Date
+  messageId?: string
+  chatId?: string
+  timestamp?: number
+  callData?: {
+    callId?: string
+    from?: string
+    to?: string
+    duration?: number
+    isVideo?: boolean
+    isGroup?: boolean
+  }
+}
+
+export type BulkMarkReadResponse = {
+  message: string
+  modifiedCount: number
+}
+
+export type UnreadCountResponse = {
+  count: number
 }
 
 // Redux State Types

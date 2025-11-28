@@ -58,5 +58,17 @@
     "chats": "chats",
     "messagesSynced": "Mensajes sincronizados"
   },
-  "callLog": "Llamada"
+  "callLog": "Llamada",
+  "alerts": {
+    "title": "Alertas",
+    "noAlerts": "No se encontraron alertas",
+    "unread": "No leído",
+    "fetchError": "Error al obtener alertas",
+    "types": {
+      "disconnected": "Desconectado",
+      "messageDeleted": "Mensaje Eliminado",
+      "messageEdited": "Mensaje Editado",
+      "chatRemoved": "Chat Eliminado"
+    }
+  }
 }
