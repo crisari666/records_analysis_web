@@ -120,6 +120,7 @@ export const StoredSessionsList = (): JSX.Element => {
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell>{t("sessionTitle")}</TableCell>
             <TableCell>{t("sessionId")}</TableCell>
             <TableCell>{t("status")}</TableCell>
             <TableCell>{t("group")}</TableCell>
@@ -145,6 +146,11 @@ export const StoredSessionsList = (): JSX.Element => {
               }}
               sx={{ cursor: "pointer" }}
             >
+              <TableCell>
+                <Typography variant="body2" fontFamily="monospace">
+                  {session.title}
+                </Typography>
+              </TableCell>
               <TableCell>
                 <Typography variant="body2" fontFamily="monospace">
                   {session.sessionId}

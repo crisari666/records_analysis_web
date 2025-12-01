@@ -18,6 +18,9 @@ type NewMessageEventData = {
   deletedAt: string | null
   deletedBy: "everyone" | "me" | null
   edition: string[]
+  mediaPath: string | null
+  mediaSize: number | null
+  mediaFilename: string | null
   hasMedia: boolean
   mediaType: string | null
   hasQuotedMsg: boolean
@@ -131,6 +134,9 @@ export const WhatsappSocketListener = ({ sessionId }: WhatsappSocketListenerProp
           edition: data.message.edition || [],
           hasMedia: data.message.hasMedia,
           mediaType: data.message.mediaType,
+          mediaPath: data.message.mediaPath,
+          mediaSize: data.message.mediaSize,
+          mediaFilename: data.message.mediaFilename,
           hasQuotedMsg: data.message.hasQuotedMsg,
           isForwarded: data.message.isForwarded,
           isStarred: data.message.isStarred,

@@ -10,6 +10,7 @@ export type ActiveSession = {
 export type StoredSession = {
   _id: string
   sessionId: string
+  title?: string
   status: SessionStatus
   lastSeen: string
   updatedAt: string
@@ -126,6 +127,9 @@ export type StoredMessage = {
   edition: string[]
   hasMedia: boolean
   mediaType: string | null
+  mediaPath: string | null
+  mediaSize: number | null
+  mediaFilename: string | null
   hasQuotedMsg: boolean
   isForwarded: boolean
   isStarred: boolean

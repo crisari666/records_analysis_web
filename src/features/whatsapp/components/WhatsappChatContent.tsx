@@ -1,15 +1,11 @@
 import { useState, useMemo, useEffect, useRef } from "react"
-import { Card, CardContent, List, ListItem, ListItemText, Box, Typography, Chip, Tooltip } from "@mui/material"
-import DeleteIcon from "@mui/icons-material/Delete"
-import EditIcon from "@mui/icons-material/Edit"
-import CallMissedIcon from "@mui/icons-material/CallMissed"
-import CallReceivedIcon from "@mui/icons-material/CallReceived"
-import CallMadeIcon from "@mui/icons-material/CallMade"
+import { Card, CardContent, List, Box, Typography } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppSelector } from "@/app/hooks"
 import { selectCurrentChat, selectIsMessagesLoading, selectMessages } from "../store/whatsappSessionSlice"
 import { selectStoredChats } from "../store/whatsappSlice"
 import { WhatsappChatHeader } from "./WhatsappChatHeader"
+import { DeletionMarker, CallLogMessage, TextMessage, MediaMessage } from "./message-type"
 import type { StoredMessage } from "../types"
 
 type ChatItem = 
@@ -109,181 +105,49 @@ export const WhatsappChatContent = () => {
             />
             <Box ref={scrollContainerRef} sx={{ flex: 1, overflowY: "auto" }}>
               <List>
-              {filteredItems.map((item, index) => {
-                if (item.type === "deletion") {
-                  return (
-                    <ListItem 
-                      key={`deletion-${item.timestamp}-${index}`} 
-                      sx={{ 
-                        width: "100%",
-                        justifyContent: "center",
-                        py: 1
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          bgcolor: "error.main",
-                          color: "error.contrastText",
-                          px: 2,
-                          py: 1,
-                          borderRadius: 2,
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ fontWeight: "medium" }}>
-                          {t("chatDeleted")}
-                        </Typography>
-                        <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
-                          {new Date(item.deletedAt).toLocaleString()}
-                        </Typography>
-                      </Box>
-                    </ListItem>
-                  )
-                }
-
-                if (item.type === "call_log") {
-                  const callLog = item.data
-                  // Determine call status from body or rawData
-                  const callBody = callLog.body || ""
-                  const isMissed = callBody.toLowerCase().includes("missed") || callBody.toLowerCase().includes("perdida")
-                  const isOutgoing = callLog.fromMe
-                  
-                  // Get call icon based on status
-                  const CallIconComponent = isMissed 
-                    ? CallMissedIcon 
-                    : isOutgoing 
-                      ? CallMadeIcon 
-                      : CallReceivedIcon
-
-                  return (
-                    <ListItem 
-                      key={`call-${callLog.messageId}-${index}`} 
-                      sx={{ 
-                        justifyContent: callLog.fromMe ? "flex-end" : "flex-start",
-                        py: 1
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          bgcolor: callLog.fromMe
-                            ? "primary.main"
-                            : "grey.200",
-                          color: callLog.fromMe
-                            ? "primary.contrastText"
-                            : "text.primary",
-                          px: 2,
-                          py: 1,
-                          borderRadius: 2,
-                          maxWidth: "75%",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                        }}
-                      >
-                        <CallIconComponent sx={{ fontSize: 20 }} />
-                        <Box>
-                          <Typography variant="body2" sx={{ fontWeight: "medium" }}>
-                            {callBody || t("callLog")}
-                          </Typography>
-                          <Typography variant="caption" sx={{ display: "block", mt: 0.5 }}>
-                            {new Date(callLog.timestamp * 1000).toLocaleString()}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </ListItem>
-                  )
-                }
-
-                const message = item.data
-                return (
-                  <ListItem
-                    key={message.messageId}
-                    data-message-id={message.messageId}
-                    sx={{
-                      justifyContent: message.fromMe ? "flex-end" : "flex-start",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        bgcolor: message.isDeleted
-                          ? "error.main"
-                          : message.fromMe
-                            ? "primary.main"
-                            : "grey.200",
-                        color: message.isDeleted
-                          ? "error.contrastText"
-                          : message.fromMe
-                            ? "primary.contrastText"
-                            : "text.primary",
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 2,
-                        maxWidth: "75%",
-                      }}
-                    >
-                      <ListItemText
-                        primary={message.body}
-                        secondary={
-                          <Box component="span">
-                            <Typography variant="caption" component="span" sx={{ display: "block" }}>
-                              {new Date(message.timestamp * 1000).toLocaleString()}
-                            </Typography>
-                            <Box component="span" sx={{ display: "flex", gap: 0.5, mt: 0.5, flexWrap: "wrap" }}>
-                              {message.edition && message.edition.length > 0 && (
-                                <Tooltip
-                                  title={
-                                    <Box component="span">
-                                      <Typography component="span" variant="caption" sx={{ display: "block", fontWeight: "bold", mb: 0.5 }}>
-                                        {t("messageEditions")}:
-                                      </Typography>
-                                      {message.edition.map((edition, editionIndex) => (
-                                        <Typography component="span" key={editionIndex} variant="caption" sx={{ display: "block" }}>
-                                          {editionIndex + 1}. {edition}
-                                        </Typography>
-                                      ))}
-                                    </Box>
-                                  }
-                                >
-                                  <Chip
-                                    component="span"
-                                    icon={<EditIcon />}
-                                    label={t("messageEdited")}
-                                    size="small"
-                                    sx={{ fontSize: "0.7rem", height: "20px" }}
-                                  />
-                                </Tooltip>
-                              )}
-                              {message.isDeleted && message.deletedAt && (
-                                <Tooltip title={`${t("messageDeleted")} - ${new Date(message.deletedAt).toLocaleString()}`}>
-                                  <Chip
-                                    component="span"
-                                    icon={<DeleteIcon />}
-                                    label={t("messageDeleted")}
-                                    size="small"
-                                    sx={{ fontSize: "0.7rem", height: "20px" }}
-                                  />
-                                </Tooltip>
-                              )}
-                            </Box>
-                          </Box>
-                        }
-                        secondaryTypographyProps={{
-                          color: message.isDeleted
-                            ? "error.contrastText"
-                            : message.fromMe
-                              ? "primary.contrastText"
-                              : "text.secondary",
-                        }}
+                {filteredItems.map((item, index) => {
+                  if (item.type === "deletion") {
+                    return (
+                      <DeletionMarker
+                        key={`deletion-${item.timestamp}-${index}`}
+                        timestamp={item.timestamp}
+                        deletedAt={item.deletedAt}
+                        index={index}
                       />
-                    </Box>
-                  </ListItem>
-                )
-              })}
-              {filteredItems.length === 0 && (
-                <Typography color="text.secondary">{t("noMessages")}</Typography>
-              )}
-              <div ref={messagesEndRef} />
+                    )
+                  }
+
+                  if (item.type === "call_log") {
+                    return (
+                      <CallLogMessage
+                        key={`call-${item.data.messageId}-${index}`}
+                        callLog={item.data}
+                        index={index}
+                      />
+                    )
+                  }
+
+                  // Check if message has media
+                  if (item.data.mediaType) {
+                    return (
+                      <MediaMessage
+                        key={item.data.messageId}
+                        message={item.data}
+                      />
+                    )
+                  }
+
+                  return (
+                    <TextMessage
+                      key={item.data.messageId}
+                      message={item.data}
+                    />
+                  )
+                })}
+                {filteredItems.length === 0 && (
+                  <Typography color="text.secondary">{t("noMessages")}</Typography>
+                )}
+                <div ref={messagesEndRef} />
               </List>
             </Box>
           </>

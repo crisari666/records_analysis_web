@@ -63,6 +63,12 @@
     "messagesSynced": "Mensajes sincronizados"
   },
   "callLog": "Llamada",
+  "image": "Imagen",
+  "video": "Video",
+  "audio": "Audio",
+  "document": "Documento",
+  "sticker": "Sticker",
+  "download": "Descargar",
   "alerts": {
     "title": "Alertas",
     "sessionAlerts": "Alertas de Sesión",
