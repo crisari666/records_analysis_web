@@ -20,6 +20,7 @@ import { alertsService } from "../services/alertsService"
 type WhatsappSessionState = {
   currentSessionId: string | null
   currentSessionDbId: string | null // Database _id for the session
+  currentSessionTitle: string | null // Session title/name
   chats: StoredChat[]
   messages: StoredMessage[]
   deletedMessages: DeletedMessage[]
@@ -41,6 +42,7 @@ type WhatsappSessionState = {
 const initialState: WhatsappSessionState = {
   currentSessionId: null,
   currentSessionDbId: null,
+  currentSessionTitle: null,
   chats: [],
   messages: [],
   deletedMessages: [],
@@ -199,6 +201,7 @@ export const whatsappSessionSlice = createAppSlice({
           state.status = "idle"
           state.currentSessionId = action.payload.session.sessionId
           state.currentSessionDbId = action.payload.session._id // Store database _id
+          state.currentSessionTitle = action.payload.session.title || null // Store session title
           state.currentProject = action.payload.project
         },
         rejected: (state, action) => {
@@ -443,6 +446,7 @@ export const whatsappSessionSlice = createAppSlice({
   selectors: {
     selectSessionId: (state) => state.currentSessionId,
     selectSessionDbId: (state) => state.currentSessionDbId,
+    selectSessionTitle: (state) => state.currentSessionTitle,
     selectChats: (state) => state.chats,
     selectMessages: (state) => state.messages,
     selectDeletedMessages: (state) => state.deletedMessages,
@@ -459,6 +463,8 @@ export const whatsappSessionSlice = createAppSlice({
     selectIsAnalyzing: (state) => state.isAnalyzing,
     selectError: (state) => state.error,
     selectStatus: (state) => state.status,
+    selectUnreadSessionAlertsCount: (state) => 
+      state.sessionAlerts.filter((alert) => !alert.isRead).length,
   },
 })
 
@@ -491,6 +497,7 @@ export const {
 export const {
   selectSessionId,
   selectSessionDbId,
+  selectSessionTitle,
   selectChats,
   selectMessages,
   selectDeletedMessages,
@@ -507,6 +514,7 @@ export const {
   selectIsAnalyzing,
   selectError,
   selectStatus,
+  selectUnreadSessionAlertsCount,
 } = whatsappSessionSlice.selectors
 
 

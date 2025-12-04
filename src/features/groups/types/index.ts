@@ -13,6 +13,7 @@ export type GroupsSliceState = {
   status: "idle" | "loading" | "failed"
   error: string | null
   filterProjectId: string | null
+  lastLoadedProjectId: string | null
 }
 
 export type CreateGroupRequest = {

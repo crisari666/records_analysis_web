@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Box, IconButton, Badge, useMediaQuery, useTheme } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import NotificationsIcon from '@mui/icons-material/Notifications'
 import { SessionAlertsList } from './SessionAlertsList'
-import { useAppSelector } from '@/app/hooks'
-import { selectSessionAlerts, selectSessionDbId } from '../store/whatsappSessionSlice'
+import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import { 
+  selectSessionDbId,
+  selectUnreadSessionAlertsCount,
+  getSessionAlertsAsync 
+} from '../store/whatsappSessionSlice'
 
 type SessionChatControlsProps = {
   sessionId: string
@@ -13,12 +17,18 @@ type SessionChatControlsProps = {
 export const SessionChatControls = ({}: SessionChatControlsProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const dispatch = useAppDispatch()
   const [alertsAnchorEl, setAlertsAnchorEl] = useState<HTMLElement | null>(null)
   const alertsOpen = Boolean(alertsAnchorEl)
-  const sessionAlerts = useAppSelector(selectSessionAlerts)
   const sessionDbId = useAppSelector(selectSessionDbId)
+  const unreadAlertsCount = useAppSelector(selectUnreadSessionAlertsCount)
 
-  const unreadAlertsCount = sessionAlerts.filter((alert) => !alert.isRead).length
+  // Automatically fetch alerts when sessionDbId is available
+  useEffect(() => {
+    if (sessionDbId) {
+      dispatch(getSessionAlertsAsync({ sessionId: sessionDbId }))
+    }
+  }, [sessionDbId, dispatch])
 
   const handleAlertsClick = (event: React.MouseEvent<HTMLElement>) => {
     setAlertsAnchorEl(event.currentTarget)

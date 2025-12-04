@@ -1,6 +1,7 @@
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, useState, useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
-import { Card, CardContent, List, CircularProgress, Box, Typography } from "@mui/material"
+import { Card, CardContent, List, CircularProgress, Box, Typography, TextField, InputAdornment } from "@mui/material"
+import { Search as SearchIcon } from "@mui/icons-material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { getStoredChatsAsync, selectChats, selectIsChatsLoading, selectCurrentChat, selectSessionDbId, setCurrentSessionId, setCurrentChat, getStoredMessagesAsync, getChatAlertsAsync } from "../store/whatsappSessionSlice"
@@ -19,6 +20,7 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
   const isChatsLoading = useAppSelector(selectIsChatsLoading)
   const { t } = useTranslation("whatsapp")
   const [searchParams, setSearchParams] = useSearchParams()
+  const [searchText, setSearchText] = useState("")
 
   // Reusable method to handle chat selection
   const handleSelectChat = useCallback((chat: StoredChat) => {
@@ -66,6 +68,22 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
     }
   }, [chats, currentChat, dispatch, sessionId, sessionDbId, searchParams])
 
+  // Filter chats based on search text
+  const filteredChats = useMemo(() => {
+    if (!searchText.trim()) {
+      return chats
+    }
+
+    const lowerSearchText = searchText.toLowerCase().trim()
+    return chats.filter((chat) => {
+      const nameMatch = chat.name?.toLowerCase().includes(lowerSearchText)
+      const chatIdMatch = chat.chatId?.toLowerCase().includes(lowerSearchText)
+      const lastMessageMatch = chat.lastMessage?.toLowerCase().includes(lowerSearchText)
+      
+      return nameMatch || chatIdMatch || lastMessageMatch
+    })
+  }, [chats, searchText])
+
   return (
     <Card sx={{ height: "100%" }}>
       <CardContent sx={{ height: "100%", p: 0, display: "flex", flexDirection: "column" }}>
@@ -74,24 +92,49 @@ export const WhatsappSessionChatsList = ({ sessionId }: WhatsappSessionChatsList
             <CircularProgress />
           </Box>
         ) : (
-          <Box sx={{ flex: 1, overflowY: "auto" }}>
-            <List>
-              {chats.map((chat) => {
-                const isSelected = currentChat?.chatId === chat.chatId
-                return (
-                  <ChatListItem
-                    key={chat.chatId}
-                    chat={chat}
-                    isSelected={isSelected}
-                    onSelect={handleSelectChat}
-                  />
-                )
-              })}
-              {chats.length === 0 && (
-                <Typography color="text.secondary">{t("noChats")}</Typography>
-              )}
-            </List>
-          </Box>
+          <>
+            <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder={t("searchChatsPlaceholder")}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
+            <Box sx={{ flex: 1, overflowY: "auto" }}>
+              <List>
+                {filteredChats.map((chat) => {
+                  const isSelected = currentChat?.chatId === chat.chatId
+                  return (
+                    <ChatListItem
+                      key={chat.chatId}
+                      chat={chat}
+                      isSelected={isSelected}
+                      onSelect={handleSelectChat}
+                    />
+                  )
+                })}
+                {filteredChats.length === 0 && chats.length > 0 && (
+                  <Box sx={{ p: 2, textAlign: "center" }}>
+                    <Typography color="text.secondary">{t("noChatsFound")}</Typography>
+                  </Box>
+                )}
+                {chats.length === 0 && (
+                  <Box sx={{ p: 2, textAlign: "center" }}>
+                    <Typography color="text.secondary">{t("noChats")}</Typography>
+                  </Box>
+                )}
+              </List>
+            </Box>
+          </>
         )}
       </CardContent>
     </Card>

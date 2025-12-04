@@ -8,6 +8,7 @@ const initialState: GroupsSliceState = {
   status: "idle",
   error: null,
   filterProjectId: null,
+  lastLoadedProjectId: null,
 }
 
 export const groupsSlice = createAppSlice({
@@ -26,7 +27,7 @@ export const groupsSlice = createAppSlice({
     fetchGroups: create.asyncThunk(
       async (projectId?: string) => {
         const response = await groupsService.getGroups(projectId)
-        return response
+        return { groups: response, projectId: projectId || null }
       },
       {
         pending: state => {
@@ -35,7 +36,8 @@ export const groupsSlice = createAppSlice({
         },
         fulfilled: (state, action) => {
           state.status = "idle"
-          state.groups = action.payload
+          state.groups = action.payload.groups
+          state.lastLoadedProjectId = action.payload.projectId
         },
         rejected: (state, action) => {
           state.status = "failed"
@@ -135,6 +137,7 @@ export const groupsSlice = createAppSlice({
     selectStatus: groups => groups.status,
     selectError: groups => groups.error,
     selectFilterProjectId: groups => groups.filterProjectId,
+    selectLastLoadedProjectId: groups => groups.lastLoadedProjectId,
   },
 })
 
@@ -154,6 +157,7 @@ export const {
   selectStatus,
   selectError,
   selectFilterProjectId,
+  selectLastLoadedProjectId,
 } = groupsSlice.selectors
 
 export default groupsSlice

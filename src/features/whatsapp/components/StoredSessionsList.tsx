@@ -1,4 +1,4 @@
-import { useEffect, useState, type JSX } from "react"
+import { useEffect, useState, useMemo, type JSX } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Table,
@@ -26,7 +26,12 @@ import {
   selectError,
   openSyncDialog,
 } from "../store/whatsappSlice"
-import { fetchGroups, selectGroups } from "@/features/groups/store/groupsSlice"
+import {
+  fetchGroups,
+  selectGroups,
+  selectFilterProjectId,
+  selectLastLoadedProjectId,
+} from "@/features/groups/store/groupsSlice"
 import { UpdateSessionGroupModal } from "./UpdateSessionGroupModal"
 import type { StoredSession } from "../types"
 
@@ -38,13 +43,37 @@ export const StoredSessionsList = (): JSX.Element => {
   const isLoading = useAppSelector(selectIsLoading)
   const error = useAppSelector(selectError)
   const groups = useAppSelector(selectGroups)
+  const filterProjectId = useAppSelector(selectFilterProjectId)
+  const lastLoadedProjectId = useAppSelector(selectLastLoadedProjectId)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState<StoredSession | null>(null)
 
   useEffect(() => {
     dispatch(getStoredSessionsAsync())
-    dispatch(fetchGroups())
   }, [dispatch])
+
+  useEffect(() => {
+    const currentProjectId = filterProjectId || undefined
+    const shouldFetch = lastLoadedProjectId !== filterProjectId || (groups.length === 0 && lastLoadedProjectId === null)
+    
+    if (shouldFetch) {
+      dispatch(fetchGroups(currentProjectId))
+    }
+  }, [dispatch, filterProjectId, lastLoadedProjectId, groups.length])
+
+  const filteredSessions = useMemo(() => {
+    if (!filterProjectId) {
+      return storedSessions
+    }
+    
+    const projectGroupIds = groups
+      .filter(group => group.projectId === filterProjectId)
+      .map(group => group._id)
+    
+    return storedSessions.filter(session => 
+      !session.refId || projectGroupIds.includes(session.refId)
+    )
+  }, [storedSessions, groups, filterProjectId])
 
   const getGroupName = (refId: string | undefined): string => {
     if (!refId) return t("noGroup") || "No Group"
@@ -104,7 +133,7 @@ export const StoredSessionsList = (): JSX.Element => {
     )
   }
 
-  if (storedSessions.length === 0) {
+  if (filteredSessions.length === 0) {
     return (
       <Box textAlign="center" py={4}>
         <Typography variant="h6" color="text.secondary">
@@ -131,7 +160,7 @@ export const StoredSessionsList = (): JSX.Element => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {storedSessions.map((session) => (
+          {filteredSessions.map((session) => (
             <TableRow
               key={session.sessionId}
               hover
