@@ -29,6 +29,7 @@ export const GroupsControls: React.FC = () => {
   const handleFilterChange = (_: any, val: { label: string; value: string } | null) => {
     const newProjectId = val ? val.value : null;
     dispatch(setFilterProjectId(newProjectId));
+    console.log("fetching groups in groups controls")
     dispatch(fetchGroups(newProjectId || undefined));
   };
 

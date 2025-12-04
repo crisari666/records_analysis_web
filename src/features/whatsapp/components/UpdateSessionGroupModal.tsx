@@ -35,9 +35,10 @@ export const UpdateSessionGroupModal = ({ open, onClose, session }: UpdateSessio
 
   useEffect(() => {
     if (open && groups.length === 0) {
+      console.log("fetching groups in update session group modal")
       dispatch(fetchGroups())
     }
-  }, [open, dispatch, groups.length])
+  }, [open, dispatch])
 
   useEffect(() => {
     if (open && session) {

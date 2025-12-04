@@ -6,6 +6,7 @@ import { User } from '../../auth/types'
 
 export const UserValidation = () => {
   const dispatch = useAppDispatch()
+
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
 
   useEffect(() => {

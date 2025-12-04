@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Container,
@@ -9,12 +8,6 @@ import { useAppSelector } from '../../../app/hooks'
 export const DashboardContent = () => {
   const { t } = useTranslation('dashboard')
   const { user, isLoading } = useAppSelector((state) => state.auth)
-
-  useEffect(() => {
-    if (!user) {
-      // TODO: Implement getCurrentUser logic when auth service is ready
-    }
-  }, [user])
 
   if (isLoading) {
     return (

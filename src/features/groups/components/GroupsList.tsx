@@ -14,15 +14,15 @@ export const GroupsList: React.FC = () => {
   const groups = useAppSelector((state) => state.groups.groups);
   const status = useAppSelector((state) => state.groups.status);
   const error = useAppSelector((state) => state.groups.error);
-  const filterProjectId = useAppSelector((state) => state.groups.filterProjectId);
   const projects = useAppSelector((state) => state.projects.projects);
 
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchGroups(filterProjectId || undefined));
-  }, [dispatch, filterProjectId]);
+    console.log("fetching groups in groups list")
+    dispatch(fetchGroups());
+  }, []);
 
   const projectNameById = useMemo(() => {
     const map: Record<string, string> = {};

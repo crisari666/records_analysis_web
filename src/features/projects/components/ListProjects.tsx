@@ -22,10 +22,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
-import { 
-  fetchProjects, 
-  deleteProject
-} from '../store/projectsSlice';
+import { deleteProject} from '../store/projectsSlice';
 import { ProjectDevicesModal } from './ProjectDevicesModal';
 import { ProjectUsersModal } from './ProjectUsersModal';
 import { Project } from '../types';
@@ -42,10 +39,6 @@ export const ListProjects: React.FC = () => {
   const [selectedProjectForDevices, setSelectedProjectForDevices] = useState<Project | null>(null);
   const [usersModalOpen, setUsersModalOpen] = useState(false);
   const [selectedProjectForUsers, setSelectedProjectForUsers] = useState<Project | null>(null);
-
-  useEffect(() => {
-    dispatch(fetchProjects());
-  }, [dispatch]);
 
   const handleEditProject = (project: Project) => {
     navigate(`/dashboard/project/${project._id}`);

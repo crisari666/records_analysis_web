@@ -5,7 +5,7 @@ import { GroupsControls, GroupsList } from '../components';
 
 export const GroupsPage: React.FC = () => {
   const { t } = useTranslation('groups');
-
+  console.log("groups page")
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
