@@ -1,6 +1,7 @@
 import type { PayloadAction } from "@reduxjs/toolkit"
 import { createAppSlice } from "../../../app/createAppSlice"
 import { whatsappService } from "../services/whatsappService"
+import { conversationService } from "../services/conversationService"
 import type {
   WhatsappState,
   ActiveSession,
@@ -95,27 +96,33 @@ export const whatsappSlice = createAppSlice({
         },
       },
     ),
-    updateSessionGroupAsync: create.asyncThunk(
-      async ({ id, data }: { id: string; data: UpdateSessionGroupRequest }) => {
-        const response = await whatsappService.updateSessionGroup(id, data)
-        return { id, groupId: data.groupId, response }
+    updateSessionAsync: create.asyncThunk(
+      async ({ id, data }: { id: string; data: UpdateSessionGroupRequest & { title?: string } }) => {
+        const response = await conversationService.updateSession(id, { 
+          groupId: data.groupId, 
+          title: data.title 
+        })
+        return { id, groupId: data.groupId, title: data.title, response }
       },
       {
         pending: (state) => {
           state.isLoading = true
           state.error = null
         },
-        fulfilled: (state, action: PayloadAction<{ id: string; groupId: string; response: { success: boolean } }>) => {
+        fulfilled: (state, action: PayloadAction<{ id: string; groupId: string; title?: string; response: { message: string; sessionId: string } }>) => {
           state.isLoading = false
-          // Update the stored session's refId
+          // Update the stored session's refId and title
           const session = state.storedSessions.find((s) => s.sessionId === action.payload.id)
-          if (session && action.payload.response.success) {
+          if (session) {
             session.refId = action.payload.groupId
+            if (action.payload.title !== undefined) {
+              session.title = action.payload.title
+            }
           }
         },
         rejected: (state, action) => {
           state.isLoading = false
-          state.error = action.error.message || "Failed to update session group"
+          state.error = action.error.message || "Failed to update session"
         },
       },
     ),
@@ -256,7 +263,7 @@ export const {
   setSyncProgress,
   clearSyncProgress,
   createSessionAsync,
-  updateSessionGroupAsync,
+  updateSessionAsync,
   getActiveSessionsAsync,
   getStoredSessionsAsync,
   getSessionStatusAsync,

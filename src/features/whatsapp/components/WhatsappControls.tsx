@@ -46,7 +46,7 @@ export const WhatsappControls = (): JSX.Element => {
           options={projectOptions}
           value={projectOptions.find(o => o.value === filterProjectId) || null}
           onChange={handleFilterChange}
-          renderInput={(params) => <TextField {...params} label={t("filterByProject") || "Filter by Project"} />}
+          renderInput={(params) => <TextField {...params} label={t("filterByGroup") || "undefined"} />}
           clearOnEscape
         />
         <Button

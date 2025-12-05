@@ -12,7 +12,7 @@ import {
 } from "@mui/material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { updateSessionGroupAsync, selectIsLoading, selectError, clearError } from "../store/whatsappSlice"
+import { updateSessionAsync, selectIsLoading, selectError, clearError } from "../store/whatsappSlice"
 import { fetchGroups, selectGroups } from "@/features/groups/store/groupsSlice"
 import type { StoredSession } from "../types"
 
@@ -30,25 +30,27 @@ export const UpdateSessionGroupModal = ({ open, onClose, session }: UpdateSessio
   const groups = useAppSelector(selectGroups)
   
   const [groupId, setGroupId] = useState<string>("")
+  const [title, setTitle] = useState<string>("")
 
   const groupOptions = useMemo(() => groups.map(g => ({ label: g.name, value: g._id })), [groups])
 
   useEffect(() => {
     if (open && groups.length === 0) {
-      console.log("fetching groups in update session group modal")
       dispatch(fetchGroups())
     }
-  }, [open, dispatch])
+  }, [open, groups.length, dispatch])
 
   useEffect(() => {
     if (open && session) {
       setGroupId(session.refId || "")
+      setTitle(session.title || "")
     }
   }, [open, session])
 
   useEffect(() => {
     if (!open) {
       setGroupId("")
+      setTitle("")
       dispatch(clearError())
     }
   }, [open, dispatch])
@@ -66,9 +68,14 @@ export const UpdateSessionGroupModal = ({ open, onClose, session }: UpdateSessio
     }
 
     try {
-      await dispatch(updateSessionGroupAsync({ id: session.sessionId, data: { groupId } })).unwrap()
+      await dispatch(updateSessionAsync({ 
+        id: session.sessionId, 
+        data: { 
+          groupId, 
+          title: title.trim() || undefined 
+        } 
+      })).unwrap()
       onClose()
-      // Optionally refresh stored sessions to show updated refId
     } catch (err) {
       // Error is handled by Redux state
     }
@@ -94,6 +101,17 @@ export const UpdateSessionGroupModal = ({ open, onClose, session }: UpdateSessio
               variant="outlined"
             />
           )}
+
+          <TextField
+            label={t("sessionTitle")}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            fullWidth
+            variant="outlined"
+            placeholder={t("sessionTitlePlaceholder")}
+            helperText={t("sessionTitleHelper")}
+            disabled={isLoading}
+          />
 
           <Autocomplete
             options={groupOptions}

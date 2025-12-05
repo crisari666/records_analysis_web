@@ -99,8 +99,16 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
     }
 
     // Admin must assign projects when creating users
-    if (isAdmin && !isEditing && formData.projects.length === 0) {
-      errors.projects = t('form.projectsRequired')
+    if (isAdmin && !isEditing) {
+      console.log('Validating projects:', { 
+        projects: formData.projects, 
+        length: formData.projects?.length,
+        isAdmin,
+        isEditing 
+      })
+      if (!formData.projects || formData.projects.length === 0) {
+        errors.projects = t('form.projectsRequired')
+      }
     }
 
     // Admin can only create users with role 'user'

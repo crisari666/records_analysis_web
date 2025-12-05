@@ -7,6 +7,8 @@ import type {
   GetStoredMessagesParams,
   GetDeletedMessagesParams,
   GetStoredChatsParams,
+  UpdateSessionTitleRequest,
+  UpdateSessionTitleResponse,
 } from '../types'
 
 const API_BASE = 'conversations'
@@ -103,6 +105,11 @@ export const conversationService = {
 
   async analyzeChat(sessionId: string, chatId: string): Promise<{ success: boolean; chatId: string; analysis: Record<string, any> }> {
     const response = await conversationApi.post({ path: API_ENDPOINTS.ANALYZE_CHAT(sessionId, chatId) })
+    return response
+  },
+
+  async updateSession(id: string, data: UpdateSessionTitleRequest & { groupId?: string }): Promise<UpdateSessionTitleResponse> {
+    const response = await conversationApi.put({ path: `${API_BASE}/sessions/${id}`, data })
     return response
   },
 }

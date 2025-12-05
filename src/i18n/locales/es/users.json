@@ -13,7 +13,7 @@
     "status": "Estado",
     "createdAt": "Fecha de Creación",
     "actions": "Acciones",
-    "filterByProject": "Filtrar por Proyecto",
+    "filterByGroup": "Filtrar por Grupo",
     "noProjects": "Sin proyectos asignados"
   },
   "status": {
@@ -49,7 +49,7 @@
     "projects": "Proyectos",
     "selectProjects": "Seleccionar proyectos...",
     "projectsRequired": "Debe seleccionar al menos un proyecto",
-    "projectsRequiredForAdmin": "Los administradores deben asignar al menos un proyecto",
+    "projectsRequiredForAdmin": "Al crear un usuario, debe asignar al menos un proyecto",
     "adminCanOnlyCreateUsers": "El administrador solo puede crear usuarios con rol 'usuario'",
     "adminProjectsNote": "Solo puede asignar usuarios a proyectos a los que pertenece",
     "cancel": "Cancelar",

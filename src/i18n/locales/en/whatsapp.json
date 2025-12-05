@@ -47,7 +47,7 @@
   "group": "Group",
   "noGroup": "No Group",
   "updateGroup": "Update Group",
-  "filterByProject": "Filter by Project",
+  "filterByGroup": "Filter by Group",
   "updateSessionGroup": "Update Session Group",
   "actions": "Actions",
   "sessionIdRequired": "Session ID is required",

@@ -43,6 +43,15 @@ export type UpdateSessionGroupResponse = {
   success: boolean
 }
 
+export type UpdateSessionTitleRequest = {
+  title?: string
+}
+
+export type UpdateSessionTitleResponse = {
+  message: string
+  sessionId: string
+}
+
 export type DestroySessionResponse = {
   success: boolean
   message: string

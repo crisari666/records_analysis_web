@@ -74,10 +74,15 @@ export const UserProjectSelector: React.FC<UserProjectSelectorProps> = ({
     [availableProjects]
   )
 
-  const selectedProjectOptions = useMemo(() => 
-    projectOptions.filter(opt => selectedProjects.includes(opt.value)),
-    [projectOptions, selectedProjects]
-  )
+  const selectedProjectOptions = useMemo(() => {
+    // Filter project options that match selected project IDs
+    const matched = projectOptions.filter(opt => selectedProjects.includes(opt.value))
+    
+    // If we have selected projects but they're not in available options yet,
+    // we still want to show them (they might be loading or filtered)
+    // But for Autocomplete to work, we can only use options that exist
+    return matched
+  }, [projectOptions, selectedProjects])
 
   const handleChange = (_: any, newValue: typeof projectOptions) => {
     const newProjectIds = newValue.map(opt => opt.value)
@@ -103,9 +108,14 @@ export const UserProjectSelector: React.FC<UserProjectSelectorProps> = ({
             label={t('form.projects')}
             placeholder={t('form.selectProjects')}
             error={Boolean(error)}
-            helperText={error || (isAdmin && !isEditing ? t('form.projectsRequiredForAdmin') : '')}
-            required={required}
+            helperText={error || (isAdmin && !isEditing && (!selectedProjects || selectedProjects.length === 0) ? t('form.projectsRequiredForAdmin') : '')}
             disabled={disabled}
+            slotProps={{
+              htmlInput: {
+                ...(params.inputProps || {}),
+                required: false, // Disable native HTML5 validation for Autocomplete
+              },
+            }}
           />
         )}
         renderTags={(value, getTagProps) =>

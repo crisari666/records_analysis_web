@@ -49,7 +49,7 @@
     "projects": "Projects",
     "selectProjects": "Select projects...",
     "projectsRequired": "At least one project must be selected",
-    "projectsRequiredForAdmin": "Admin users must assign at least one project",
+    "projectsRequiredForAdmin": "When creating a user, you must assign at least one project",
     "adminCanOnlyCreateUsers": "Admin can only create users with role 'user'",
     "adminProjectsNote": "You can only assign users to projects you belong to",
     "cancel": "Cancel",
