@@ -9,9 +9,12 @@
     "username": "Username",
     "email": "Email",
     "role": "Role",
+    "projects": "Projects",
     "status": "Status",
     "createdAt": "Created At",
-    "actions": "Actions"
+    "actions": "Actions",
+    "filterByProject": "Filter by Project",
+    "noProjects": "No projects assigned"
   },
   "status": {
     "active": "Active",
@@ -43,6 +46,12 @@
     "passwordRequired": "Password is required",
     "passwordMinLength": "Password must be at least 6 characters",
     "passwordOptional": "Leave blank to keep current password",
+    "projects": "Projects",
+    "selectProjects": "Select projects...",
+    "projectsRequired": "At least one project must be selected",
+    "projectsRequiredForAdmin": "Admin users must assign at least one project",
+    "adminCanOnlyCreateUsers": "Admin can only create users with role 'user'",
+    "adminProjectsNote": "You can only assign users to projects you belong to",
     "cancel": "Cancel",
     "create": "Create",
     "save": "Save",

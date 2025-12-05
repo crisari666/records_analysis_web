@@ -14,6 +14,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { useAppDispatch, useAppSelector } from '../../../app/hooks'
 import { createUserAsync, updateUserAsync, clearError } from '../store/usersSlice'
+import { UserProjectSelector } from './UserProjectSelector'
 import type { User, CreateUserRequest, UpdateUserRequest } from '../types'
 
 type UserFormModalProps = {
@@ -26,6 +27,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
   const { t } = useTranslation('users')
   const dispatch = useAppDispatch()
   const { isLoading, error } = useAppSelector((state) => state.users)
+  const currentUser = useAppSelector((state) => state.auth.user)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -34,11 +36,14 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
     email: '',
     password: '',
     role: 'user' as 'root' | 'admin' | 'user',
+    projects: [] as string[],
   })
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
 
   const isEditing = Boolean(user)
+  const isRoot = currentUser?.role === 'root'
+  const isAdmin = currentUser?.role === 'admin'
 
   useEffect(() => {
     if (user) {
@@ -49,6 +54,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
         email: user.email,
         password: '',
         role: user.role,
+        projects: user.projects || [],
       })
     } else {
       setFormData({
@@ -58,6 +64,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
         email: '',
         password: '',
         role: 'user',
+        projects: [],
       })
     }
     setFormErrors({})
@@ -89,6 +96,16 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
       errors.password = t('form.passwordRequired')
     } else if (formData.password.trim() && formData.password.length < 6) {
       errors.password = t('form.passwordMinLength')
+    }
+
+    // Admin must assign projects when creating users
+    if (isAdmin && !isEditing && formData.projects.length === 0) {
+      errors.projects = t('form.projectsRequired')
+    }
+
+    // Admin can only create users with role 'user'
+    if (isAdmin && !isEditing && formData.role !== 'user') {
+      errors.role = t('form.adminCanOnlyCreateUsers')
     }
 
     setFormErrors(errors)
@@ -127,6 +144,7 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
       email: formData.email.trim().toLowerCase(),
       ...(formData.password.trim() && { password: formData.password.trim() }),
       role: formData.role,
+      ...(formData.projects.length > 0 && { projects: formData.projects }),
     }
 
     try {
@@ -234,12 +252,34 @@ export const UserFormModal: React.FC<UserFormModalProps> = ({ open, onClose, use
               value={formData.role}
               onChange={handleInputChange('role')}
               fullWidth
-              disabled={isLoading}
+              disabled={isLoading || (isAdmin && !isEditing)}
+              error={Boolean(formErrors.role)}
+              helperText={formErrors.role}
             >
               <MenuItem value="user">{t('form.roleUser')}</MenuItem>
-              <MenuItem value="admin">{t('form.roleAdmin')}</MenuItem>
-              <MenuItem value="root">{t('form.roleRoot')}</MenuItem>
+              {isRoot && <MenuItem value="admin">{t('form.roleAdmin')}</MenuItem>}
+              {isRoot && <MenuItem value="root">{t('form.roleRoot')}</MenuItem>}
             </TextField>
+
+            <UserProjectSelector
+              selectedProjects={formData.projects}
+              onChange={(projectIds) => {
+                setFormData(prev => ({
+                  ...prev,
+                  projects: projectIds,
+                }))
+                if (formErrors.projects) {
+                  setFormErrors(prev => ({
+                    ...prev,
+                    projects: '',
+                  }))
+                }
+              }}
+              error={formErrors.projects}
+              disabled={isLoading}
+              required={isAdmin && !isEditing}
+              isEditing={isEditing}
+            />
           </Box>
         </DialogContent>
 

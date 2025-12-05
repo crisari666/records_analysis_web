@@ -8,16 +8,20 @@ import {
   Paper,
   Typography,
   Grid,
+  Chip,
+  Divider,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { createProject, updateProject, clearError, fetchProjects } from '../store/projectsSlice';
+import { getUsersAsync } from '../../users/store/usersSlice';
 import { Project, ProjectConfig, Indicator, ExampleAnalysis } from '../types';
 import { MainPromptField } from './MainPromptField';
 import { IndicatorsList } from './IndicatorsList';
 import { TrainingDataDialog } from './TrainingDataDialog';
 import { TrainingDataDisplay } from './TrainingDataDisplay';
 import { ExampleAnalysesList } from './ExampleAnalysesList';
+import { ProjectUsersModal } from './ProjectUsersModal';
 
 type ProjectFormContentProps = {
   project?: Project | null;
@@ -32,6 +36,7 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
   const dispatch = useAppDispatch();
   const status = useAppSelector((state) => state.projects.status);
   const error = useAppSelector((state) => state.projects.error);
+  const users = useAppSelector((state) => state.users.users);
 
   const [title, setTitle] = useState('');
   const [configName, setConfigName] = useState('');
@@ -47,6 +52,13 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
   const [trainingDataDialogType, setTrainingDataDialogType] = useState<'success' | 'fail'>('success');
   const [editingTrainingDataIndex, setEditingTrainingDataIndex] = useState<number | null>(null);
   const [editingExampleKey, setEditingExampleKey] = useState<string | null>(null);
+  const [usersModalOpen, setUsersModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (project && users.length === 0) {
+      dispatch(getUsersAsync());
+    }
+  }, [project, users.length, dispatch]);
 
   useEffect(() => {
     if (project) {
@@ -550,6 +562,46 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
                   size="small"
                 />
 
+                {project && (
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        {t('assigned_users')}
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => setUsersModalOpen(true)}
+                        disabled={isLoading}
+                      >
+                        {t('manage_users')}
+                      </Button>
+                    </Box>
+                    {project.users && project.users.length > 0 ? (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {project.users.map((userId) => {
+                          const user = users.find(u => u._id === userId);
+                          if (!user) return null;
+                          return (
+                            <Chip
+                              key={userId}
+                              label={`${user.name} ${user.lastName} (${user.email})`}
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                            />
+                          );
+                        })}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        {t('no_users_assigned')}
+                      </Typography>
+                    )}
+                    <Divider sx={{ mt: 2 }} />
+                  </Box>
+                )}
+
                 <TextField
                   label={t('config_name')}
                   value={configName}
@@ -746,6 +798,12 @@ export const ProjectFormContent: React.FC<ProjectFormContentProps> = ({
         }
         indicators={indicators}
         disabled={isLoading}
+      />
+
+      <ProjectUsersModal
+        open={usersModalOpen}
+        onClose={() => setUsersModalOpen(false)}
+        project={project || null}
       />
     </Box>
   );

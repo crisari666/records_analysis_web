@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Card, CardActions, CardContent, Typography, Button, Grid, Alert, CircularProgress, Chip } from '@mui/material';
+import { Box, Card, CardActions, CardContent, Typography, Button, Grid, Alert, CircularProgress, Chip, Divider } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '../../../app/hooks';
 import { fetchGroups, deleteGroup } from '../store/groupsSlice';
+import { getUsersAsync } from '../../users/store/usersSlice';
 import { Group } from '../types';
 import { GroupFormModal } from './GroupFormModal';
 
@@ -15,6 +16,7 @@ export const GroupsList: React.FC = () => {
   const status = useAppSelector((state) => state.groups.status);
   const error = useAppSelector((state) => state.groups.error);
   const projects = useAppSelector((state) => state.projects.projects);
+  const users = useAppSelector((state) => state.users.users);
 
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -22,13 +24,47 @@ export const GroupsList: React.FC = () => {
   useEffect(() => {
     console.log("fetching groups in groups list")
     dispatch(fetchGroups());
-  }, []);
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (users.length === 0) {
+      dispatch(getUsersAsync());
+    }
+  }, [dispatch, users.length]);
 
   const projectNameById = useMemo(() => {
     const map: Record<string, string> = {};
     projects.forEach(p => { map[p._id] = p.title; });
     return map;
   }, [projects]);
+
+  const userById = useMemo(() => {
+    const map: Record<string, typeof users[0]> = {};
+    users.forEach(u => { map[u._id] = u; });
+    return map;
+  }, [users]);
+
+  const getUsersByProjectInGroup = (group: Group) => {
+    const usersByProject: Record<string, string[]> = {};
+    group.users.forEach(userId => {
+      const user = userById[userId];
+      if (user && user.projects) {
+        user.projects.forEach(projectId => {
+          if (!usersByProject[projectId]) {
+            usersByProject[projectId] = [];
+          }
+          usersByProject[projectId].push(userId);
+        });
+      } else if (user) {
+        // User with no projects
+        if (!usersByProject['no-project']) {
+          usersByProject['no-project'] = [];
+        }
+        usersByProject['no-project'].push(userId);
+      }
+    });
+    return usersByProject;
+  };
 
   const handleEdit = (group: Group) => {
     setEditingGroup(group);
@@ -87,6 +123,27 @@ export const GroupsList: React.FC = () => {
                   <Chip label={t('project_chip', { name: projectNameById[group.projectId] || group.projectId })} size="small" color="primary" variant="outlined" />
                   <Chip label={t('users_count', { count: group.users.length })} size="small" color="secondary" variant="outlined" />
                 </Box>
+
+                {group.users.length > 0 && (
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                      {t('users_by_project')}:
+                    </Typography>
+                    {Object.entries(getUsersByProjectInGroup(group)).map(([projectId, userIds]) => (
+                      <Box key={projectId} sx={{ mb: 1 }}>
+                        <Chip
+                          label={`${projectId === 'no-project' ? t('no_project_assigned') : projectNameById[projectId] || projectId}: ${userIds.length}`}
+                          size="small"
+                          variant="outlined"
+                          color={projectId === 'no-project' ? 'default' : 'primary'}
+                          sx={{ mb: 0.5 }}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                )}
+
+                <Divider sx={{ my: 1 }} />
 
                 <Typography variant="body2" color="text.secondary">
                   {t('created_at', { date: new Date(group.createdAt).toLocaleDateString() })}

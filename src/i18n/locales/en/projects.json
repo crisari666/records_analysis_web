@@ -94,5 +94,7 @@
   "training_data_name_placeholder": "e.g., Successful Sale Example 1",
   "no_training_data": "No training data added. Click the + button to add one.",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "assigned_users": "Assigned Users",
+  "no_users_assigned": "No users assigned to this project"
 }

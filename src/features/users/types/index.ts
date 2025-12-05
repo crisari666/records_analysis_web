@@ -5,6 +5,7 @@ export type User = {
   user: string
   email: string
   role: 'root' | 'admin' | 'user'
+  projects?: string[]
   removed: boolean
   createdAt: string
   updatedAt: string
@@ -23,6 +24,7 @@ export type CreateUserRequest = {
   email: string
   password: string
   role?: 'root' | 'admin' | 'user'
+  projects?: string[]
 }
 
 export type UpdateUserRequest = {
@@ -33,4 +35,5 @@ export type UpdateUserRequest = {
   email?: string
   password?: string
   role?: 'root' | 'admin' | 'user'
+  projects?: string[]
 }

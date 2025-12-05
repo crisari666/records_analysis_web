@@ -16,7 +16,9 @@
   "cancel": "Cancelar",
   "loading": "Cargando...",
   "confirm_delete": "¿Seguro que deseas eliminar este grupo?",
-  "no_groups": "No se encontraron grupos"
+  "no_groups": "No se encontraron grupos",
+  "users_by_project": "Usuarios por Proyecto",
+  "no_project_assigned": "Sin Proyecto Asignado"
 }
 
 

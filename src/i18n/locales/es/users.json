@@ -9,9 +9,12 @@
     "username": "Nombre de Usuario",
     "email": "Correo",
     "role": "Rol",
+    "projects": "Proyectos",
     "status": "Estado",
     "createdAt": "Fecha de Creación",
-    "actions": "Acciones"
+    "actions": "Acciones",
+    "filterByProject": "Filtrar por Proyecto",
+    "noProjects": "Sin proyectos asignados"
   },
   "status": {
     "active": "Activo",
@@ -43,6 +46,12 @@
     "passwordRequired": "La contraseña es requerida",
     "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
     "passwordOptional": "Deje en blanco para mantener la contraseña actual",
+    "projects": "Proyectos",
+    "selectProjects": "Seleccionar proyectos...",
+    "projectsRequired": "Debe seleccionar al menos un proyecto",
+    "projectsRequiredForAdmin": "Los administradores deben asignar al menos un proyecto",
+    "adminCanOnlyCreateUsers": "El administrador solo puede crear usuarios con rol 'usuario'",
+    "adminProjectsNote": "Solo puede asignar usuarios a proyectos a los que pertenece",
     "cancel": "Cancelar",
     "create": "Crear",
     "save": "Guardar",

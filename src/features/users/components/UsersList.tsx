@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Typography,
@@ -15,6 +15,8 @@ import {
   Alert,
   Button,
   IconButton,
+  Autocomplete,
+  TextField,
 } from '@mui/material'
 import {
   Add as AddIcon,
@@ -24,18 +26,45 @@ import {
 import { useAppDispatch, useAppSelector } from '../../../app/hooks'
 import { getUsersAsync, deleteUserAsync } from '../store/usersSlice'
 import { UserFormModal } from './UserFormModal'
+import { fetchProjects, selectProjects } from '../../projects/store/projectsSlice'
 import type { User } from '../types'
 
 export const UsersList = () => {
   const { t } = useTranslation('users')
   const dispatch = useAppDispatch()
   const { users, isLoading, error } = useAppSelector((state) => state.users)
+  const projects = useAppSelector(selectProjects)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [filterProjectId, setFilterProjectId] = useState<string | null>(null)
 
   useEffect(() => {
     dispatch(getUsersAsync())
   }, [dispatch])
+
+  useEffect(() => {
+    if (projects.length === 0) {
+      dispatch(fetchProjects())
+    }
+  }, [dispatch, projects.length])
+
+  const projectNameById = useMemo(() => {
+    const map: Record<string, string> = {}
+    projects.forEach(p => { map[p._id] = p.title })
+    return map
+  }, [projects])
+
+  const projectOptions = useMemo(() => 
+    projects.map(p => ({ label: p.title, value: p._id })),
+    [projects]
+  )
+
+  const filteredUsers = useMemo(() => {
+    if (!filterProjectId) return users
+    return users.filter(user => 
+      user.projects && user.projects.includes(filterProjectId)
+    )
+  }, [users, filterProjectId])
 
   const handleDeleteUser = async (id: string) => {
     if (window.confirm(t('confirmDelete'))) {
@@ -81,14 +110,23 @@ export const UsersList = () => {
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
           {t('subtitle')}
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          sx={{ mb: 2 }}
-          onClick={() => handleOpenModal()}
-        >
-          {t('addUser')}
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Autocomplete
+            sx={{ minWidth: 280 }}
+            options={projectOptions}
+            value={projectOptions.find(o => o.value === filterProjectId) || null}
+            onChange={(_, val) => setFilterProjectId(val ? val.value : null)}
+            renderInput={(params) => <TextField {...params} label={t('table.filterByProject')} />}
+            clearOnEscape
+          />
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenModal()}
+          >
+            {t('addUser')}
+          </Button>
+        </Box>
       </Box>
 
       {error && (
@@ -106,21 +144,22 @@ export const UsersList = () => {
               <TableCell>{t('table.username')}</TableCell>
               <TableCell>{t('table.email')}</TableCell>
               <TableCell>{t('table.role')}</TableCell>
+              <TableCell>{t('table.projects')}</TableCell>
               <TableCell>{t('table.createdAt')}</TableCell>
               <TableCell align="right">{t('table.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.length === 0 ? (
+            {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center">
+                <TableCell colSpan={8} align="center">
                   <Typography variant="body2" color="text.secondary">
                     {t('noUsers')}
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              users.map((user) => (
+              filteredUsers.map((user) => (
                 <TableRow key={user._id} hover>
                   <TableCell>
                     <Typography variant="body2" fontWeight="medium">
@@ -137,6 +176,25 @@ export const UsersList = () => {
                       color={getRoleColor(user.role)}
                       variant="outlined"
                     />
+                  </TableCell>
+                  <TableCell>
+                    {user.projects && user.projects.length > 0 ? (
+                      <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                        {user.projects.map((projectId) => (
+                          <Chip
+                            key={projectId}
+                            label={projectNameById[projectId] || projectId}
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        {t('table.noProjects')}
+                      </Typography>
+                    )}
                   </TableCell>
                   <TableCell>
                     {new Date(user.createdAt).toLocaleDateString()}
