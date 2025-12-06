@@ -25,7 +25,6 @@ export const UserProjectSelector: React.FC<UserProjectSelectorProps> = ({
   onChange,
   error,
   disabled = false,
-  required = false,
   isEditing = false,
 }) => {
   const { t } = useTranslation('users')
