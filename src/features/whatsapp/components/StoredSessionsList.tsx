@@ -29,9 +29,10 @@ import {
 import {
   fetchGroups,
   selectGroups,
-  selectFilterProjectId,
-  selectLastLoadedProjectId,
 } from "@/features/groups/store/groupsSlice"
+import {
+  selectFilterGroupId,
+} from "../store/whatsappSlice"
 import { UpdateSessionGroupModal } from "./UpdateSessionGroupModal"
 import type { StoredSession } from "../types"
 
@@ -43,8 +44,7 @@ export const StoredSessionsList = (): JSX.Element => {
   const isLoading = useAppSelector(selectIsLoading)
   const error = useAppSelector(selectError)
   const groups = useAppSelector(selectGroups)
-  const filterProjectId = useAppSelector(selectFilterProjectId)
-  const lastLoadedProjectId = useAppSelector(selectLastLoadedProjectId)
+  const filterGroupId = useAppSelector(selectFilterGroupId)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState<StoredSession | null>(null)
 
@@ -53,27 +53,20 @@ export const StoredSessionsList = (): JSX.Element => {
   }, [dispatch])
 
   useEffect(() => {
-    const currentProjectId = filterProjectId || undefined
-    const shouldFetch = lastLoadedProjectId !== filterProjectId || (groups.length === 0 && lastLoadedProjectId === null)
-    
-    if (shouldFetch) {
-      dispatch(fetchGroups(currentProjectId))
+    if (groups.length === 0) {
+      dispatch(fetchGroups())
     }
-  }, [dispatch, filterProjectId, lastLoadedProjectId, groups.length])
+  }, [dispatch, groups.length])
 
   const filteredSessions = useMemo(() => {
-    if (!filterProjectId) {
+    if (!filterGroupId) {
       return storedSessions
     }
     
-    const projectGroupIds = groups
-      .filter(group => group.projectId === filterProjectId)
-      .map(group => group._id)
-    
     return storedSessions.filter(session => 
-      !session.refId || projectGroupIds.includes(session.refId)
+      session.refId === filterGroupId
     )
-  }, [storedSessions, groups, filterProjectId])
+  }, [storedSessions, filterGroupId])
 
   const getGroupName = (refId: string | undefined): string => {
     if (!refId) return t("noGroup") || "No Group"

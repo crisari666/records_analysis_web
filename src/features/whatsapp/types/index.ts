@@ -243,6 +243,7 @@ export type WhatsappState = {
   isSyncDialogOpen: boolean
   selectedSessionId: string | null
   syncProgress: SyncProgress | null
+  filterGroupId: string | null
 }
 
 

@@ -30,6 +30,7 @@ const initialState: WhatsappState = {
   isSyncDialogOpen: false,
   selectedSessionId: null,
   syncProgress: null,
+  filterGroupId: null,
 }
 
 export const whatsappSlice = createAppSlice({
@@ -68,6 +69,9 @@ export const whatsappSlice = createAppSlice({
     }),
     clearSyncProgress: create.reducer((state) => {
       state.syncProgress = null
+    }),
+    setFilterGroupId: create.reducer((state, action: PayloadAction<string | null>) => {
+      state.filterGroupId = action.payload
     }),
     // moved to whatsappSessionSlice: clearChats, clearMessages
     // Async Thunks - Session Management
@@ -248,6 +252,7 @@ export const whatsappSlice = createAppSlice({
     selectIsSyncDialogOpen: (whatsapp) => whatsapp.isSyncDialogOpen,
     selectSelectedSessionId: (whatsapp) => whatsapp.selectedSessionId,
     selectSyncProgress: (whatsapp) => whatsapp.syncProgress,
+    selectFilterGroupId: (whatsapp) => whatsapp.filterGroupId,
   },
 })
 
@@ -262,6 +267,7 @@ export const {
   clearSessions,
   setSyncProgress,
   clearSyncProgress,
+  setFilterGroupId,
   createSessionAsync,
   updateSessionAsync,
   getActiveSessionsAsync,
@@ -286,4 +292,5 @@ export const {
   selectIsSyncDialogOpen,
   selectSelectedSessionId,
   selectSyncProgress,
+  selectFilterGroupId,
 } = whatsappSlice.selectors

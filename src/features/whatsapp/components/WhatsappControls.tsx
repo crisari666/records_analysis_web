@@ -3,26 +3,26 @@ import { Button, Box, Autocomplete, TextField } from "@mui/material"
 import { Sync as SyncIcon } from "@mui/icons-material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { fetchProjects, selectProjects } from "@/features/projects/store/projectsSlice"
-import { setFilterProjectId, selectFilterProjectId } from "@/features/groups/store/groupsSlice"
+import { fetchGroups, selectGroups } from "@/features/groups/store/groupsSlice"
+import { setFilterGroupId, selectFilterGroupId } from "@/features/whatsapp/store/whatsappSlice"
 import { SyncWhatsappDialog } from "./SyncWhatsappDialog"
 
 export const WhatsappControls = (): JSX.Element => {
   const { t } = useTranslation("whatsapp")
   const dispatch = useAppDispatch()
   const [modalOpen, setModalOpen] = useState(false)
-  const projects = useAppSelector(selectProjects)
-  const filterProjectId = useAppSelector(selectFilterProjectId)
+  const groups = useAppSelector(selectGroups)
+  const filterGroupId = useAppSelector(selectFilterGroupId)
 
   useEffect(() => {
-    if (projects.length === 0) {
-      dispatch(fetchProjects())
+    if (groups.length === 0) {
+      dispatch(fetchGroups())
     }
-  }, [dispatch, projects.length])
+  }, [dispatch, groups.length])
 
-  const projectOptions = useMemo(
-    () => projects.map(p => ({ label: p.title, value: p._id })),
-    [projects]
+  const groupOptions = useMemo(
+    () => groups.map(g => ({ label: g.name, value: g._id })),
+    [groups]
   )
 
   const handleSyncWhatsapp = () => {
@@ -34,8 +34,8 @@ export const WhatsappControls = (): JSX.Element => {
   }
 
   const handleFilterChange = (_: any, val: { label: string; value: string } | null) => {
-    const newProjectId = val ? val.value : null
-    dispatch(setFilterProjectId(newProjectId))
+    const newGroupId = val ? val.value : null
+    dispatch(setFilterGroupId(newGroupId))
   }
 
   return (
@@ -43,8 +43,8 @@ export const WhatsappControls = (): JSX.Element => {
       <Box sx={{ mb: 3, display: "flex", gap: 2, justifyContent: "space-between", flexWrap: "wrap" }}>
         <Autocomplete
           sx={{ minWidth: 280 }}
-          options={projectOptions}
-          value={projectOptions.find(o => o.value === filterProjectId) || null}
+          options={groupOptions}
+          value={groupOptions.find(o => o.value === filterGroupId) || null}
           onChange={handleFilterChange}
           renderInput={(params) => <TextField {...params} label={t("filterByGroup") || "undefined"} />}
           clearOnEscape
