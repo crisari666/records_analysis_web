@@ -35,6 +35,7 @@ import {
 } from "../store/whatsappSlice"
 import { UpdateSessionGroupModal } from "./UpdateSessionGroupModal"
 import { DestroySessionModal } from "./DestroySessionModal"
+import { selectUser } from "@/features/auth/store/authSlice"
 import type { StoredSession } from "../types"
 
 export const StoredSessionsList = (): JSX.Element => {
@@ -46,6 +47,11 @@ export const StoredSessionsList = (): JSX.Element => {
   const error = useAppSelector(selectError)
   const groups = useAppSelector(selectGroups)
   const filterGroupId = useAppSelector(selectFilterGroupId)
+  const currentUser = useAppSelector(selectUser)
+  
+  const canDestroySession = useMemo(() => {
+    return currentUser?.role === 'root' || currentUser?.role === 'admin'
+  }, [currentUser?.role])
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
   const [destroyModalOpen, setDestroyModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState<StoredSession | null>(null)
@@ -229,14 +235,16 @@ export const StoredSessionsList = (): JSX.Element => {
                   >
                     <EditIcon fontSize="small" />
                   </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={(e) => handleDestroySession(e, session)}
-                    aria-label={t("destroySession") || "Destroy Session"}
-                    color="error"
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
+                  {canDestroySession && (
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleDestroySession(e, session)}
+                      aria-label={t("destroySession") || "Destroy Session"}
+                      color="error"
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
                 </Box>
               </TableCell>
             </TableRow>

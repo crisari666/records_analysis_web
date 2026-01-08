@@ -91,5 +91,6 @@
   "destroySessionMessage": "Esta acción no se puede deshacer. Esto eliminará permanentemente la sesión de WhatsApp y todos los datos asociados. Para confirmar, escriba REMOVE en el campo a continuación.",
   "destroySessionConfirmationLabel": "Escriba REMOVE para confirmar",
   "destroySessionConfirmationHelper": "Debe escribir REMOVE exactamente para confirmar la eliminación",
-  "destroySessionSuccess": "Sesión eliminada exitosamente"
+  "destroySessionSuccess": "Sesión eliminada exitosamente",
+  "destroySessionUnauthorized": "No tiene permiso para eliminar sesiones. Solo los administradores pueden realizar esta acción."
 }

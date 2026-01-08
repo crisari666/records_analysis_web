@@ -91,5 +91,6 @@
   "destroySessionMessage": "This action cannot be undone. This will permanently destroy the WhatsApp session and all associated data. To confirm, please type REMOVE in the field below.",
   "destroySessionConfirmationLabel": "Type REMOVE to confirm",
   "destroySessionConfirmationHelper": "You must type REMOVE exactly to confirm deletion",
-  "destroySessionSuccess": "Session destroyed successfully"
+  "destroySessionSuccess": "Session destroyed successfully",
+  "destroySessionUnauthorized": "You don't have permission to destroy sessions. Only administrators can perform this action."
 }

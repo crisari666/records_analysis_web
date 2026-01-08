@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next"
 import { useSnackbar } from "notistack"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { destroySessionAsync, selectIsLoading, selectError, clearError } from "../store/whatsappSlice"
+import { selectUser } from "@/features/auth/store/authSlice"
 import type { StoredSession } from "../types"
 
 type DestroySessionModalProps = {
@@ -31,7 +32,10 @@ export const DestroySessionModal = ({ open, onClose, session }: DestroySessionMo
   const dispatch = useAppDispatch()
   const isLoading = useAppSelector(selectIsLoading)
   const error = useAppSelector(selectError)
+  const currentUser = useAppSelector(selectUser)
   const [confirmationText, setConfirmationText] = useState("")
+  
+  const canDestroySession = currentUser?.role === 'root' || currentUser?.role === 'admin'
 
   useEffect(() => {
     if (!open) {
@@ -49,6 +53,18 @@ export const DestroySessionModal = ({ open, onClose, session }: DestroySessionMo
 
   const handleDestroy = async () => {
     if (!session || confirmationText !== CONFIRMATION_TEXT) {
+      return
+    }
+
+    if (!canDestroySession) {
+      enqueueSnackbar(t("destroySessionUnauthorized") || "You don't have permission to destroy sessions", {
+        variant: "error",
+        autoHideDuration: 5000,
+        anchorOrigin: {
+          vertical: "bottom",
+          horizontal: "right",
+        },
+      })
       return
     }
 
@@ -77,7 +93,27 @@ export const DestroySessionModal = ({ open, onClose, session }: DestroySessionMo
     }
   }
 
-  const isConfirmValid = confirmationText === CONFIRMATION_TEXT
+  const isConfirmValid = confirmationText === CONFIRMATION_TEXT && canDestroySession
+
+  // If user doesn't have permission, show error and close modal
+  useEffect(() => {
+    if (open && !canDestroySession) {
+      enqueueSnackbar(t("destroySessionUnauthorized") || "You don't have permission to destroy sessions", {
+        variant: "error",
+        autoHideDuration: 5000,
+        anchorOrigin: {
+          vertical: "bottom",
+          horizontal: "right",
+        },
+      })
+      onClose()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, canDestroySession])
+
+  if (!canDestroySession) {
+    return <></>
+  }
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
