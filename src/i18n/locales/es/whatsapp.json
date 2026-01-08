@@ -84,5 +84,12 @@
       "messageEdited": "Mensaje Editado",
       "chatRemoved": "Chat Eliminado"
     }
-  }
+  },
+  "destroy": "Eliminar",
+  "destroySession": "Eliminar Sesión",
+  "destroySessionTitle": "Eliminar Sesión",
+  "destroySessionMessage": "Esta acción no se puede deshacer. Esto eliminará permanentemente la sesión de WhatsApp y todos los datos asociados. Para confirmar, escriba REMOVE en el campo a continuación.",
+  "destroySessionConfirmationLabel": "Escriba REMOVE para confirmar",
+  "destroySessionConfirmationHelper": "Debe escribir REMOVE exactamente para confirmar la eliminación",
+  "destroySessionSuccess": "Sesión eliminada exitosamente"
 }

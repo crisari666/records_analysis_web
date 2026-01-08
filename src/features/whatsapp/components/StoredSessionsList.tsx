@@ -16,7 +16,7 @@ import {
   IconButton,
   type ChipProps,
 } from "@mui/material"
-import { Edit as EditIcon } from "@mui/icons-material"
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material"
 import { useTranslation } from "react-i18next"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import {
@@ -34,6 +34,7 @@ import {
   selectFilterGroupId,
 } from "../store/whatsappSlice"
 import { UpdateSessionGroupModal } from "./UpdateSessionGroupModal"
+import { DestroySessionModal } from "./DestroySessionModal"
 import type { StoredSession } from "../types"
 
 export const StoredSessionsList = (): JSX.Element => {
@@ -46,6 +47,7 @@ export const StoredSessionsList = (): JSX.Element => {
   const groups = useAppSelector(selectGroups)
   const filterGroupId = useAppSelector(selectFilterGroupId)
   const [updateModalOpen, setUpdateModalOpen] = useState(false)
+  const [destroyModalOpen, setDestroyModalOpen] = useState(false)
   const [selectedSession, setSelectedSession] = useState<StoredSession | null>(null)
 
   useEffect(() => {
@@ -80,8 +82,20 @@ export const StoredSessionsList = (): JSX.Element => {
     setUpdateModalOpen(true)
   }
 
-  const handleCloseModal = () => {
+  const handleDestroySession = (e: React.MouseEvent, session: StoredSession) => {
+    e.stopPropagation()
+    setSelectedSession(session)
+    setDestroyModalOpen(true)
+  }
+
+  const handleCloseUpdateModal = () => {
     setUpdateModalOpen(false)
+    setSelectedSession(null)
+    dispatch(getStoredSessionsAsync())
+  }
+
+  const handleCloseDestroyModal = () => {
+    setDestroyModalOpen(false)
     setSelectedSession(null)
     dispatch(getStoredSessionsAsync())
   }
@@ -207,13 +221,23 @@ export const StoredSessionsList = (): JSX.Element => {
                 </Typography>
               </TableCell>
               <TableCell>
-                <IconButton
-                  size="small"
-                  onClick={(e) => handleUpdateGroup(e, session)}
-                  aria-label={t("updateGroup") || "Update Group"}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleUpdateGroup(e, session)}
+                    aria-label={t("updateGroup") || "Update Group"}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => handleDestroySession(e, session)}
+                    aria-label={t("destroySession") || "Destroy Session"}
+                    color="error"
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Box>
               </TableCell>
             </TableRow>
           ))}
@@ -222,7 +246,12 @@ export const StoredSessionsList = (): JSX.Element => {
       </TableContainer>
       <UpdateSessionGroupModal
         open={updateModalOpen}
-        onClose={handleCloseModal}
+        onClose={handleCloseUpdateModal}
+        session={selectedSession}
+      />
+      <DestroySessionModal
+        open={destroyModalOpen}
+        onClose={handleCloseDestroyModal}
         session={selectedSession}
       />
     </>

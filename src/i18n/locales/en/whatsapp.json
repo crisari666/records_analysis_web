@@ -84,5 +84,12 @@
       "messageEdited": "Message Edited",
       "chatRemoved": "Chat Removed"
     }
-  }
+  },
+  "destroy": "Destroy",
+  "destroySession": "Destroy Session",
+  "destroySessionTitle": "Destroy Session",
+  "destroySessionMessage": "This action cannot be undone. This will permanently destroy the WhatsApp session and all associated data. To confirm, please type REMOVE in the field below.",
+  "destroySessionConfirmationLabel": "Type REMOVE to confirm",
+  "destroySessionConfirmationHelper": "You must type REMOVE exactly to confirm deletion",
+  "destroySessionSuccess": "Session destroyed successfully"
 }

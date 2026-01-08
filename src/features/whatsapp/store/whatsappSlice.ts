@@ -206,6 +206,7 @@ export const whatsappSlice = createAppSlice({
         fulfilled: (state, action: PayloadAction<{ id: string; response: DestroySessionResponse }>) => {
           state.isLoading = false
           state.sessions = state.sessions.filter((s) => s.sessionId !== action.payload.id)
+          state.storedSessions = state.storedSessions.filter((s) => s.sessionId !== action.payload.id)
           if (state.currentSession?.sessionId === action.payload.id) {
             state.currentSession = null
           }
